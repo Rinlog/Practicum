@@ -1,0 +1,37 @@
+.test{
+    background-color: black;
+}
+@keyframes fadein {
+    0%{
+        opacity: 0;
+    }
+    100%{
+        opacity: 0.75;
+    }
+}
+@keyframes fadein-full {
+    0%{
+        opacity: 0;
+    }
+    100%{
+        opacity: 1;
+    }
+}
+@keyframes fadeout {
+    0%{
+        opacity: 0.75;
+    }
+    100%{
+        opacity: 0;
+    }
+}
+.fadein{
+    animation: fadein 300ms forwards;
+
+}
+.fadein-full{
+    animation: fadein-full 400ms forwards;
+}
+.fadeout{
+    animation: fadeout 200ms forwards;
+}

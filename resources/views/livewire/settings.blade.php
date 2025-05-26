@@ -1,0 +1,18 @@
+<?php session_start();?>
+<div class="bg-[#f2f2f2] flex flex-row overflow-x-hidden block">
+    @if (empty($_SESSION["UserName"]))
+        <script>window.location = "/";</script>
+    @endif
+    <livewire:navigation></livewire:navigation>
+    {{-- main section --}}
+    <div class="w-screen flex flex-col flex-wrap">
+        <livewire:usercontrols.usercontrolnav></livewire:usercontrols.usercontrolnav>
+        <div class="lg:pb-10 lg:pl-10 md:pb-10 md:pl-10 pb-15 pt-4 lg:h-[857px] w-full overflow-y-hidden">
+            <h1 class="text-[#7e7e7e] pb-5">Settings</h1>
+            {{-- main info --}}
+            @if ($settingToDisplay == "deviceInfo")
+                <livewire:settings.deviceinfo></livewire:settings.deviceinfo>
+            @endif
+        </div>
+    </div>
+</div>

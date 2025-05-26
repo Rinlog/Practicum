@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+
+@source "../views";
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+.hide{
+    display:none;
+}
+html, body{
+    overflow-x:  hidden;
+}
+
+.open-sans-soft-regular {
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight:auto;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+@media (min-width: 900px) {
+    .wrapper{
+        width:60%;
+    }
+    h1{
+        font-size:2.4em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    h2{
+        font-size:1.5em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    h3{
+        font-size:1.25em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    hr{
+        text-align: center;
+        width:100%;
+        background-color: #e1e1e1;
+        color: #e1e1e1;
+    }
+    li{
+        font-size:1.1em;
+        font-family: sans-serif;
+    }
+}
+@media (max-width: 1160px) {
+    .wrapper{
+        width:50%;
+    }
+    h1{
+        font-size:2em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    h2{
+        font-size:1.25em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    h3{
+        font-size:1.1em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    hr{
+        text-align: center;
+        width:100%;
+        background-color: #e1e1e1;
+        color: #e1e1e1;
+    }
+    li{
+        font-size:1.1em;
+        font-family: sans-serif;
+    }
+}
+@media (max-width: 600px) {
+    .wrapper{
+        width:40%;
+    }
+    h1{
+        font-size:1.5em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    h2{
+        font-size:1.1em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    h3{
+        font-size:1em;
+        font-family:'Open Sans',sans-serif;
+        font-style: normal;
+    }
+    hr{
+        text-align: center;
+        width:100%;
+        background-color: #e1e1e1;
+        color: #e1e1e1;
+    }
+    li{
+        font-size:1.1em;
+        font-family: sans-serif;
+    }
+}
+.selectWrapperLG{
+    position: relative;
+}
+.selectWrapperLG select{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.selectWrapperLG:after{
+    content:"\2B9F";
+    position: absolute;
+    font-size: 1.5em;
+    right:25px;
+    top:22px;
+    color:white;
+}
+.export:hover .svg{
+    fill:#3c8fb0;
+}
+.save:hover .svg{
+    stroke:#3c8fb0;
+}
+table{
+   height:80%;
+}
+th,td{
+    padding:1em;
+    color:#707070;
+    text-align:left;
+    white-space: nowrap;
+}
+thead th:last-child{
+    width:1%;
+    white-space: nowrap;
+}

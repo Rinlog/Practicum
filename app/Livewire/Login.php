@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Livewire;
+
+use Livewire\Component;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Title;
+use \Illuminate\Database\RecordNotFoundException;
+use \Exception;
+
+#[Title("Login | IDL")]
+class Login extends Component
+{
+    public function render()
+    {
+        return view('livewire.login');
+    }
+    public $Username = "";
+
+    public $Password = "";
+
+    #variables required to display a modal
+    #public $open = "hide";
+    #public $message = "Placeholder";
+    #public $title = "Title";
+    #public $ButtonText = "OK";
+
+    #three vars for one error
+    private $errStyle = "border-2 border-red-500";
+    public $usrCustomStyle = "";
+    public $usrShowErr = "hide";
+    public $usrErrMsg = "";
+
+    public $passCustomStyle = "";
+    public $passShowErr = "hide";
+    public $passErrMsg = "";
+    public function setOpen($open){
+        
+    }
+    private function clear(){
+            $this->clearusr();
+            $this->clearpass();
+    }
+    private function clearusr(){
+        $this->usrCustomStyle = "";
+        $this->usrShowErr = "hide";
+        $this->usrErrMsg = "";
+    }
+    private function clearpass(){
+        $this->passCustomStyle = "";
+        $this->passShowErr = "hide";
+        $this->passErrMsg = "";
+    }
+    public function login(){
+        try{
+            #check if blank
+            if ($this->Username == "") {
+                $this->usrCustomStyle = $this->errStyle;
+                $this->usrShowErr = "show";
+                $this->usrErrMsg = "Username can not be blank";
+            }
+            else{
+                $this->clearusr();
+            }
+
+            if ($this->Password == ""){
+                $this->passCustomStyle = $this->errStyle;
+                $this->passShowErr = "show";
+                $this->passErrMsg = "Password can not be blank";
+            }
+            else{
+                $this->clearpass();
+            }
+            if ($this->Username != "" and $this->Password != "") {
+                $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
+                
+                $userNameValid = false;
+                $passwordValid = false;
+
+                #check to make sure login info is correct
+                if (strcasecmp($this->Username,$user->user_username) == 0) {
+                    $userNameValid = true;
+                    $this->clearusr();
+                }   
+                else{
+                    $this->usrCustomStyle = $this->errStyle;
+                    $this->usrShowErr = "show";
+                    $this->usrErrMsg = "Incorrect username";
+                }
+                if (password_verify($this->Password , $user->user_password)){
+                    $passwordValid = true;
+                    $this->clearpass();
+                }
+                else{
+                    $this->passCustomStyle = $this->errStyle;
+                    $this->passShowErr = "show";
+                    $this->passErrMsg = "Incorrect password";
+                }
+                if ($userNameValid and $passwordValid) {
+                    $this->clear();
+                    session_start();
+                    $_SESSION["UserName"] = ucfirst(strtolower($this->Username));
+                    $_SESSION["User"] = $user;
+                    return redirect("/home");
+                }
+            }
+        }
+        catch (RecordNotFoundException $e) {
+            $this->usrCustomStyle = $this->errStyle;
+            $this->usrShowErr = "show";
+            $this->usrErrMsg = "User does not exist";
+        }
+        catch(Exception $e){
+
+        }
+    }
+}

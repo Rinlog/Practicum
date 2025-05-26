@@ -1,0 +1,32 @@
+.slider{
+    position:relative;
+    overflow: hidden;
+    color: white;
+}
+.slider a{
+    color: white;
+    z-index: 2;
+    position: relative; /*z-index only works if position is specified*/
+}
+.slider span{
+    color: white;
+    z-index: 2;
+    position: relative; /*z-index only works if position is specified*/
+}
+.slider::before {
+	content: '';
+	position: absolute;
+	width: 1.5em;
+	height: inherit;
+    z-index: 1;
+	background-color: #01445f;
+	top: 10px;
+	left: -0.8em;
+    padding: 1em; /*this lets it work without any content*/
+	transition: 0.3s ease-out;
+    opacity: 0;
+}
+.slider:hover::before {
+	transform: scale(20);
+    opacity: 1;
+}
