@@ -219,6 +219,18 @@ class Deviceinfo extends Component
         }
         return $Results;
     }
+    public function LogExport(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!(isset($_SESSION["User"]))) { return null; }
+        DB::table("log")->insert([
+            "log_activity_time"=>now(),
+            "log_activity_type"=>"REPORT",
+            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_desc"=>"Downloaded CSV of Device Info"
+        ]);
+    }
     public function render()
     {
         return view('livewire.settings.deviceinfo');

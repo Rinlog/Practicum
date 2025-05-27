@@ -35,7 +35,7 @@
                 </button>
             </span>
             {{-- export button --}}
-            <button id="Export" class="export flex text-[#4fbce7] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center hover:text-[#3c8fb0] cursor-pointer">
+            <button id="Export" wire:click="$js.DownloadCSV" class="export flex text-[#4fbce7] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center hover:text-[#3c8fb0] cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" width="24px" height="24px" class="svg" fill="#46c0e5">
                     <path id="Export" class="cls-1" d="M16.71,13.62c.39.39.39,1.02,0,1.41-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-1.29-1.29v3.93c0,.55-.45,1-1,1s-1-.45-1-1v-3.93l-1.29,1.29c-.39.39-1.02.39-1.41,0s-.39-1.02,0-1.41l3-3c.38-.38,1.04-.38,1.41,0l3,3ZM23,8v12.81c-.03,2.31-1.94,4.19-4.29,4.19H7.31s-.05,0-.06,0c-2.31,0-4.22-1.88-4.25-4.22V5.19c.03-2.31,1.94-4.19,4.25-4.19h.03s8.71,0,8.71,0c.53,0,1.04.21,1.41.59l5,5c.38.38.59.88.59,1.41ZM17,7h3l-3-3v3ZM21,9h-4c-1.1,0-2-.9-2-2v-4h-7.71s-.02,0-.03,0c-1.23,0-2.24.99-2.25,2.22v15.56c.02,1.23,1.02,2.22,2.25,2.22.01,0,.02,0,.03,0h11.43s.02,0,.03,0c1.23,0,2.24-.99,2.25-2.22v-11.78Z"/>
                 </svg>
@@ -202,6 +202,7 @@
             let headers = $wire.headers;
             let organization = $wire.organization;
             let ActionsDone = [];
+            let TableObjects = [];
             function EnableDisableEditDelete(){
                 if (ItemsSelected.length == 1){
                     //enable
@@ -302,14 +303,20 @@
             });
 
             //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(key){
-                let result = 0
-                    $("#InfoTable").children().each(function(index){
-                        let id = $(this).children()[2].textContent;
-                        if (id.toString() == key.toString()){
-                            result += 1;
-                        }
-                    })
+            function ValidateIfUnique(EUI,EUIName){
+                let result = "";
+                $("#InfoTable").children().each(function(index){
+                    let id = $(this).children()[2].textContent;
+                    if (id.toString() == EUI.toString()){
+                        result = "Device EUI must be unique";
+                    }
+                });
+                $("#InfoTable").children().each(function(index){
+                    let name = $(this).children()[3].textContent;
+                    if (name.toString() == EUIName.toString()){
+                        result = "Device name must be unique";
+                    }
+                });
                 return result;
             }
             //used for adding items
@@ -319,9 +326,10 @@
                 }
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("AddDevice");
-                let result = ValidateIfUnique(FormVals[0]);
-                if (result == 1){
-                    alert("Device EUI must be unique");
+                let result = ValidateIfUnique(FormVals[0],FormVals[1]);
+                if (result != ""){
+                    setAlertText(result);
+                    displayAlert();
                     return;
                 }
                 
@@ -393,7 +401,7 @@
                             $(this).text(FormVals[index-2]);
                         }
                     }
-                })
+                });
                 ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
                 setTimeout(function(){
                     $("#"+EditItem).children().first().children().click(); //clicks the checkbox
@@ -530,7 +538,7 @@
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[1].textContent = index+1;
                 })
-
+                PrepFileForExport();
                 //re-set confirm delete listener
                 $("#ConfirmDelete").click(function(e){
                     let ItemsToDelete = []; //need seperate array to remove all items from array once they are removed from table
@@ -601,9 +609,11 @@
                 await refresh();
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
-            $wire.call("LoadUsersOrganization");
-            refresh();
-            EnableDisableEditDelete();
+            $(document).ready(async function(){
+                await $wire.call("LoadUsersOrganization");
+                await refresh();
+                EnableDisableEditDelete();
+            })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
             function TRToObject(tr){
                 let Values = [];
@@ -627,6 +637,73 @@
                 });
                 return Tr;
             }
+            function PrepFileForExport(){
+                TableObjects = [];
+                $("#InfoTable").children().each(function(index){
+                    let OBJ = TRToObject($(this))
+                    TableObjects.push(OBJ);
+                });
+                
+            }
+            function exportToCsv(filename, rows) {
+                try{
+                    const processRow = function (obj) {
+                        let finalVal = '';
+                        $.each(obj,function(key,value){
+                            console.log(value)
+                            finalVal+=value + ",";
+                        })
+                        finalVal = finalVal.substr(0,finalVal.length-1);
+                        return finalVal + '\n';
+                    };
+
+                    //puts in headers
+                    let csvFile = '';
+                    $.each(headers,function(key,value){
+                        csvFile+=value+","
+                    })
+                    csvFile = csvFile.substr(0,csvFile.length-1);
+                    csvFile+='\n';
+
+                    //puts in rows
+                    for (let i = 0; i < rows.length; i++) {
+                        csvFile += processRow(rows[i]);
+                    }
+                    //generates download
+                    const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    return true;
+                }
+                catch(ex){
+                    return false;
+                }
+                
+            }
+            $js("DownloadCSV",async function(){
+                if (TableObjects.length != 0){
+                    let result = exportToCsv("DeviceInfo.csv",TableObjects);
+                    await $wire.call("LogExport");
+                    await refresh();
+                    if (result == true){
+                        setAlertText("Exported to CSV");
+                        displayAlert();
+                    }
+                    else{
+                        setAlertText("Failed to export to CSV");
+                        displayAlert();
+                    }
+                }
+                else{
+                    setAlertText("Please wait a moment...");
+                    displayAlert();
+                }
+            });
             
     </script>
     @endscript
