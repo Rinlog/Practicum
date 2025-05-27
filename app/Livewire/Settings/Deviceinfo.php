@@ -31,25 +31,50 @@ class Deviceinfo extends Component
         "IS DEPLOYED"
     ];
     public $organization = "";
-    private $userOrgInfo;
-
+    public $Organizations = [];
+    public $OrgInfo;
     public $devices = "";
     public function LoadUsersOrganization(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
         if (isset($_SESSION["User"])) {
             try{
                 $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
                 $this->organization = $organizationInfo->organization_name;
-                $this->userOrgInfo = $organizationInfo;
+                $this->OrgInfo = $organizationInfo;
             }
             catch(Exception $e){
                 $this->organization = "";
             }
         }
     }
+    public function LoadOrganizations(){
+        try{
+            $organizations = DB::table("organization")->get();
+            $this->Organizations = $organizations->toArray();
+        }
+        catch(Exception $e){
+
+        }
+    }
+    public function SetOrg($NewOrgID){
+        $NewOrg = [];
+        foreach ($this->Organizations as $org){
+            if ($org->organization_id == $NewOrgID) {
+                $NewOrg = $org;
+            }
+        }
+        $this->OrgInfo = $NewOrg;
+        $this->organization = $NewOrg->organization_name;
+    }
     public function LoadDeviceInfo(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
         if (isset($_SESSION["User"])) {
             try{
-                $deviceInfo = DB::table("device")->where("organization_id", $this->userOrgInfo->organization_id)->get();
+                $deviceInfo = DB::table("device")->where("organization_id", $this->OrgInfo->organization_id)->get();
                 $this->devices = "";
                 foreach ($deviceInfo as $key => $device) {
                     $deviceDeployed = $device->device_is_deployed ? 'true' : 'false';
@@ -86,10 +111,116 @@ class Deviceinfo extends Component
             }
         }
     }
+    public function SaveToDb($actions){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!(isset($_SESSION["User"]))) { return null; }
+        $ArrayOfActions = json_decode($actions, true);
+        $Results = [];
+        foreach ($ArrayOfActions as $action){
+            $ActionSplit = explode("~!~", $action);
+            $Query = $ActionSplit[0];
+            $Value = $ActionSplit[1];
+            $organizationID = $this->OrgInfo->organization_id;
+            if (str_contains(strtolower($Query),"insert")) {
+                $Object = json_decode($Value);
+                try{
+                    $result = DB::table("device")->insert([
+                        "device_eui"=>$Object->{"DEVICE EUI"},
+                        "organization_id"=> $organizationID,
+                        "device_name" => $Object->{"DEVICE NAME EUI"},
+                        "device_type"=>$Object->{"TYPE"},
+                        "device_model"=> $Object->{"MODEL"},
+                        "device_serial_no"=> $Object->{"SERIAL NO."},
+                        "device_manufacturer"=> $Object->{"MANUFACTURER"},
+                        "device_manufacture_date"=> $Object->{"MANUFACTURE DATE"},
+                        "device_min_sampling_rate"=> $Object->{"MIN SAMPLING RATE"},
+                        "device_max_sampling_rate"=> $Object->{"MAX SAMPLING RATE"},
+                        "device_memory_size"=> $Object->{"MEMORY SIZE"},
+                        "device_communication_protocol"=> $Object->{"COMMUNICATION PROTOCOL"},
+                        "device_interaction_type"=> $Object->{"INTERACTION TYPE"},
+                        "device_detection_type" => $Object->{"DETECTION TYPE"},
+                        "device_output_type"=> $Object->{"OUTPUT TYPE"},
+                        "device_encoding_method"=> $Object->{"ENCODING METHOD"},
+                        "device_request_method"=> $Object->{"REQUEST METHOD"},
+                        "device_is_deployed"=> $Object->{"IS DEPLOYED"},
+                        "device_desc"=> $Object->{"DESCRIPTION"}
+                    ]);
+                    DB::table("log")->insert([
+                        "log_activity_time"=>now(),
+                        "log_activity_type"=>"INSERT",
+                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_desc"=>"Inserted device ". $Object->{"DEVICE EUI"}
+                    ]);
+                    array_push($Results, $result);
+                }
+                catch(Exception $e){
+                    array_push($Results, false);
+                }
+            }
+            else if (str_contains(strtolower($Query),"delete")){
+                $ItemsToDelete = explode(",",$Value);
+                try{
+                    $result = DB::table("device")->whereIn("device_eui", $ItemsToDelete)->delete();
+
+                    DB::table("log")->insert([
+                        "log_activity_time"=>now(),
+                        "log_activity_type"=>"DELETE",
+                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_desc"=>"Deleted device(s): ". $Value
+                    ]);
+                    array_push($Results, $result);
+                }
+                catch(Exception $e){
+                    array_push($Results, 0);
+                }
+            }
+            else if (str_contains(strtolower($Query),"update")){
+                try{
+                    $Object = json_decode($Value);
+                    $bracketloc = strpos($Query,"[");
+                    //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
+                    $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
+
+                    $result = DB::table("device")->where("device_eui", $idToUpdate)->update([
+                        "device_eui"=>$Object->{"DEVICE EUI"},
+                        "organization_id"=> $organizationID,
+                        "device_name" => $Object->{"DEVICE NAME EUI"},
+                        "device_type"=>$Object->{"TYPE"},
+                        "device_model"=> $Object->{"MODEL"},
+                        "device_serial_no"=> $Object->{"SERIAL NO."},
+                        "device_manufacturer"=> $Object->{"MANUFACTURER"},
+                        "device_manufacture_date"=> $Object->{"MANUFACTURE DATE"},
+                        "device_min_sampling_rate"=> $Object->{"MIN SAMPLING RATE"},
+                        "device_max_sampling_rate"=> $Object->{"MAX SAMPLING RATE"},
+                        "device_memory_size"=> $Object->{"MEMORY SIZE"},
+                        "device_communication_protocol"=> $Object->{"COMMUNICATION PROTOCOL"},
+                        "device_interaction_type"=> $Object->{"INTERACTION TYPE"},
+                        "device_detection_type" => $Object->{"DETECTION TYPE"},
+                        "device_output_type"=> $Object->{"OUTPUT TYPE"},
+                        "device_encoding_method"=> $Object->{"ENCODING METHOD"},
+                        "device_request_method"=> $Object->{"REQUEST METHOD"},
+                        "device_is_deployed"=> $Object->{"IS DEPLOYED"},
+                        "device_desc"=> $Object->{"DESCRIPTION"}
+                    ]);
+                    DB::table("log")->insert([
+                        "log_activity_time"=>now(),
+                        "log_activity_type"=>"UPDATE",
+                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_desc"=>"Updated device ". $Object->{"DEVICE EUI"}
+                    ]);
+                    array_push($Results, $result);
+                }
+                catch(Exception $e){
+                    array_push($Results, 0);
+                }
+            }
+        }
+        return $Results;
+    }
     public function render()
     {
-        $this->LoadUsersOrganization();
-        $this->LoadDeviceInfo();
         return view('livewire.settings.deviceinfo');
     }
 }

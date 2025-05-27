@@ -1,26 +1,37 @@
 import $ from 'jquery';
-$(document).ready(function(e){
-    setInterval(function(){
-        try{
-            const animated = document.getElementById("AlertModalMain");
-            
-            function AddEvent(ev){
-                console.log(ev);
-                if(ev.animationName == "fadeout"){
-                    $("#AlertModal").addClass("hide");
-                }
-                else{
-                    $("#AlertModal").removeClass("hide");
-                }
-            }
 
-            if (animated.getAttribute("haseventlistener") == "false"){
-                animated.addEventListener("animationend",AddEvent);
-                animated.setAttribute("haseventlistener","true");
-            }
-        }
-        catch(exception){
 
-        }
-    },200)
-});
+export function OpenAlert(){
+    $("#AlertBox").removeClass("hide");
+    setTimeout(function(){
+        $("#AlertBox").addClass("w-[350px] md:w-[400px] lg:w-[400px] opacity-100")
+        $("#AlertBox").removeClass("opacity-0 w-0")
+    },25)
+}
+export function CloseAlert(){
+    $("#AlertText").text("");
+    $("#AlertBox").removeClass("w-[350px] md:w-[400px] lg:w-[400px] opacity-100")
+    $("#AlertBox").addClass("opacity-0 w-0")
+    setTimeout(function(){
+        $("#AlertBox").addClass("hide");
+    },300)
+}
+let Counter = 0;
+let OldTimeout = "";
+export function DisplayAlert(){
+    //debounce
+    OpenAlert();
+    Counter+=1;
+    let timeout = setTimeout(function(){
+        CloseAlert();
+        Counter-=1;
+    },2000);
+    if (Counter > 1){
+        clearTimeout(OldTimeout);
+        Counter-=1;
+    }
+    OldTimeout = timeout;
+}
+export function SetAlertText(text){
+    $("#AlertText").html(text);
+}

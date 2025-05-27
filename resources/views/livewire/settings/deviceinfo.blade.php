@@ -8,7 +8,15 @@
                 <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
                 <div class="selectWrapperLG w-full">
                     <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        <option>{{$organization}}</option>
+                        @foreach($Organizations as $org)
+                            @if (isset($_SESSION["User"]))
+                                @if ($org->organization_id == $OrgInfo->organization_id)
+                                    <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                @else
+                                    <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                @endif
+                            @endif
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -74,7 +82,7 @@
                         +
                     </div>
                 </button>
-                <button id="save" class="save flex text-[#4fbce7] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center hover:text-[#3c8fb0] cursor-pointer">
+                <button wire:click="$js.saveToDB" id="save" class="save flex text-[#4fbce7] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center hover:text-[#3c8fb0] cursor-pointer">
                     <svg class="svg" stroke="#4fbce7" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                         <polyline data-name="Right" fill="none" id="Right-2" points="7.9 12.3 12 16.3 16.1 12.3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -152,7 +160,9 @@
         {{-- form --}}  
         <form>
             <div id="EditDevice" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.req-underline-input id="deviceEUI" placeholder="Device EUI" type="text"></livewire:components.req-underline-input>
+                    <div class="border-b-2 border-[#32a3cf] pl-2 mt-4 w-[90%]">
+                        <input type="text" id="deviceEUI" placeholder="Device EUI" value="" required disabled class="w-full outline-none text-lg text-white">
+                    </div>
                     <livewire:components.req-underline-input id="deviceName" placeholder="Device Name EUI" type="text"></livewire:components.req-underline-input>
                     <livewire:components.underline-input id="type" placeholder="Type" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="model" placeholder="Model" type="text"></livewire:components.underline-input>
@@ -178,6 +188,7 @@
         </form>
     </div>
     <livewire:modals.confirm-delete-modal key="{{ Str::random() }}"></livewire:modals.confirm-delete-modal>
+    <livewire:alert.notification key="{{ Str::random() }}"></livewire:alert.notification>
 </div>
         @script
         <script>
@@ -233,12 +244,6 @@
                     $("#DeleteFrame").removeClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
                 }
             }
-            //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
-            $("#InfoTable").children().each(function(index){
-                $(this).children()[1].textContent = index+1;
-            })
-            EnableDisableEditDelete();
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
             //select box stuff 
             $js('DeviceChecked',function(e,id){
                 if (e.target.type == "checkbox"){
@@ -273,6 +278,8 @@
                         CheckBoxes[i].checked = true
                         $(CheckBoxes[i].parentNode.parentNode).addClass("bg-[#f8c200]");
                     }
+                    closeEditMenu();
+                    closeAddMenu();
                     EnableDisableEditDelete();
                 }
                 else{
@@ -288,6 +295,8 @@
                         CheckBoxes[i].checked = false
                         $(CheckBoxes[i].parentNode.parentNode).removeClass("bg-[#f8c200]");
                     }
+                    closeEditMenu();
+                    closeAddMenu();
                     EnableDisableEditDelete();
                 }
             });
@@ -336,8 +345,9 @@
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
-                console.log(ActionsDone);
                 $("#InfoTable").append(tr);
+                setAlertText("Successfully added device");
+                displayAlert();
                 closeAddMenu()
             });
             function PopulateArrayWithVals(EditAdd){
@@ -384,22 +394,14 @@
                         }
                     }
                 })
-                let result = ValidateIfUnique(FormVals[0]);
-                if (result == 2){
-                    $(OGCopy[0]).insertAfter($("#"+EditItem));
-                    $("#"+EditItem).remove() //removing old copy with error
-                    alert("Device EUI must be unique");
-                }
-                else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
-                    console.log(ActionsDone);
-                    setTimeout(function(){
-                        $("#"+EditItem).children().first().children().click(); //clicks the checkbox
-                    },100);
-                    //now we close the menu
-                    closeEditMenu();
-                }
-                
+                ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
+                setTimeout(function(){
+                    $("#"+EditItem).children().first().children().click(); //clicks the checkbox
+                },100);
+                //now we close the menu
+                setAlertText("Successfully updated device");
+                displayAlert();
+                closeEditMenu();
             });
             function closeEditMenu(){
                 EditMenuStatus = false;
@@ -483,16 +485,16 @@
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
                     $("#DeleteModal").removeClass("hide");
-                    OpenModal();
+                    OpenDeleteModal();
                 }
                 else{
                     $("#DeleteMessage").text("Are you sure you want to delete the " + ItemsSelected.length + " items selected?");
                     $("#ItemToDelete").text("");
                     $("#DeleteModal").removeClass("hide");
-                    OpenModal();
+                    OpenDeleteModal();
                 }
             });
-            function OpenModal(){
+            function OpenDeleteModal(){
                 setTimeout(function(){
                     $("#DeleteModalFrame").removeClass("opacity-0 ease-in duration-200");
                     $("#DeleteModalFrame").addClass("opacity-100 ease-out duration-300");
@@ -500,35 +502,14 @@
                     $("#DeleteModalMain").addClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95 duration-300");
                 },50)
             }
-            function CloseModal(){
+            function CloseDeleteModal(){
                 $("#DeleteModalFrame").addClass("opacity-0 ease-in duration-200");
                 $("#DeleteModalFrame").removeClass("opacity-100 ease-out duration-300");
                 $("#DeleteModalMain").addClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
                 $("#DeleteModalMain").removeClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
             }
-            $("#ConfirmDelete").click(function(e){
-                console.log("running")
-                let ItemsToDelete = []; //need seperate array to remove all items from array once they are removed from table
-                ItemsSelected.forEach(function(item){
-                    ItemsToDelete.push(item);
-                });
-                ItemsToDelete.forEach(function(item){
-                    $("#"+item).children().first().children().click();
-                    $("#"+item).remove();
-                })
-                ActionsDone.push("DELETE~!~"+ItemsToDelete);
-                console.log(ActionsDone);
-                CloseModal();
-                setTimeout(function(){
-                    $("#DeleteModal").addClass("hide");
-                },200);
-            });
-            $js("refresh",async function(){
-                await $wire.call("LoadDeviceInfo");
-                //re-gen sequence nums
-                $("#InfoTable").children().each(function(index){
-                    $(this).children()[1].textContent = index+1;
-                })
+            $js("refresh",refresh)
+            async function refresh(){
                 //reset actions done
                 ActionsDone = [];
                 //uncheck everything
@@ -542,6 +523,14 @@
                 //update buttons
                 EnableDisableEditDelete();
 
+                //now that everything is unchecked we re-load the table and org
+                await $wire.call("LoadOrganizations");
+                await $wire.call("LoadDeviceInfo");
+                //re-gen sequence nums
+                $("#InfoTable").children().each(function(index){
+                    $(this).children()[1].textContent = index+1;
+                })
+
                 //re-set confirm delete listener
                 $("#ConfirmDelete").click(function(e){
                     let ItemsToDelete = []; //need seperate array to remove all items from array once they are removed from table
@@ -553,13 +542,69 @@
                         $("#"+item).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
-                    console.log(ActionsDone);
-                    CloseModal();
+                    CloseDeleteModal();
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
+                    setAlertText("Successfully deleted devices");
+                    displayAlert();
                 });
+            }
+            $js("saveToDB",async function(ev){
+                let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
+                let Errors = false;
+                let ErrorMsg = "";
+                ActionsDone.forEach(function(item,index){
+                    let InfoArray = item.split("~!~");
+                    let Type = InfoArray[0];
+                    let ItemInfo = InfoArray[1];
+
+                    try{
+                        if (Type.includes("UPDATE")){
+                            if (Result[index] == 0){
+                                Errors = true;
+                                let Obj = JSON.parse(ItemInfo);
+                                ErrorMsg += "Failed to update device " + Obj["DEVICE EUI"] + "<br>";
+                            }
+                        }
+                        else if (Type.includes("INSERT")){
+                            if (Result[index] != true){
+                                Errors = true;
+                                let Obj = JSON.parse(ItemInfo);
+                                ErrorMsg += "Failed to insert device " + Obj["DEVICE EUI"] + "<br>";
+                            }
+                        }
+                        else if (Type.includes("DELETE")){
+                            if (Result[index] == 0){
+                                Errors = true;
+                                ErrorMsg += "Failed to delete device(s) " + ItemInfo + "<br>";
+                            }
+                        }
+                    }
+                    catch(ex){
+                        Errors = true;
+                        ErrorMsg += "Failed to save to database";
+                    }
+                });
+                await refresh();
+                if (Errors == true){
+                    setAlertText(ErrorMsg);
+                    displayAlert();
+                }
+                else{
+                    setAlertText("Saved to database");
+                    displayAlert();
+                }
             })
+            $js("ChangeOrg",async function(ev,Org){
+                await $wire.call("SetOrg",Org)
+                await refresh();
+            })
+            //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
+            $wire.call("LoadUsersOrganization");
+            refresh();
+            EnableDisableEditDelete();
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
             function TRToObject(tr){
                 let Values = [];
                 tr.children().each(function(){
@@ -582,6 +627,7 @@
                 });
                 return Tr;
             }
+            
     </script>
     @endscript
 
