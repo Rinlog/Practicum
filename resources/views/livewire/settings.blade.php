@@ -12,6 +12,8 @@
             {{-- main info --}}
             @if ($settingToDisplay == "deviceInfo")
                 <livewire:settings.deviceinfo></livewire:settings.deviceinfo>
+            @elseif ($settingToDisplay == "organizationInfo")
+                <livewire:settings.organization-info></livewire:settings.organization-info>
             @endif
         </div>
     </div>

@@ -126,11 +126,11 @@ html, body{
     appearance: none;
 }
 .selectWrapperLG:after{
-    content:"\2B9F";
+    content:url("/public/images/ArrowDown.svg");
     position: absolute;
-    font-size: 1.5em;
-    right:25px;
-    top:22px;
+    pointer-events: none;
+    right:27px;
+    top:26px;
     color:white;
 }
 .export:hover .svg{

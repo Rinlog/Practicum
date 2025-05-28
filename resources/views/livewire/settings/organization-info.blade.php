@@ -4,22 +4,6 @@
     {{-- info selection --}}
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
-            <div id="OrganizationSelector" class="w-full flex items-center">
-                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
-                <div class="selectWrapperLG w-full">
-                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach($Organizations as $org)
-                            @if (isset($_SESSION["User"]))
-                                @if ($org->organization_id == $OrgInfo->organization_id)
-                                    <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
-                                @else
-                                    <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
-                                @endif
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-            </div>
         </div>
     </div>
     <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-[645px]">
@@ -27,7 +11,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Device Information </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Organization Information</label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -53,7 +37,7 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $devices !!}
+                    {!! $DisplayOrgs !!}
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -100,41 +84,30 @@
         {{-- top of add --}}
         <button id="Add">
             <div class="absolute">
-                <div class="absolute left-[-25px] top-37 lg:z-3 md:z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl">
+                <div class="absolute left-[-25px] top-17 lg:z-3 md:z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl">
                     +
                 </div>
             </div>
         </button>
-        <div class="text-white bg-[#00719d] z-2 top-27 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
+        <div class="text-white bg-[#00719d] z-2 top-8 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
             <h1 class="absolute top-14">Add Row</h1>       
         </div>
-        <div class="absolute text-white lg:right-18 left-85 top-30">
+        <div class="absolute text-white lg:right-18 left-85 top-10">
             <button type="button" wire:click="$js.CloseOpenAdd" class="absolute z-2 hover:bg-[#015c80] p-2 rounded-lg cursor-pointer text-2xl">✕</button>
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddDevice" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.req-underline-input id="deviceEUI" placeholder="Device EUI" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.req-underline-input id="deviceName" placeholder="Device Name EUI" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="type" placeholder="Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="model" placeholder="Model" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="serialNumber" placeholder="Serial Number" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="manufacturer" placeholder="Manufacturer" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="manufactureDate" placeholder="Manufacture Date" type="date"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="minSampling" placeholder="Min. Sampling Rate" type="number"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="maxSampling" placeholder="Max. Sampling Rate" type="number"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="memorySize" placeholder="Memory Size" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="communicationProtocol" placeholder="Communication Protocol" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="interactionType" placeholder="Interaction Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="detectionType" placeholder="Detection Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="outputType" placeholder="Output Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="encodingType" placeholder="Encoding Method" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="requestMethod" placeholder="Request Method" type="text"></livewire:components.underline-input>
+            <div id="Addorganization" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                    <livewire:components.req-underline-input id="organizationID" placeholder="Organization ID" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.req-underline-input id="organizationName" placeholder="Organization Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="civicAddress" placeholder="Civic Address" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="phone" placeholder="Phone Num" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="email" placeholder="Email" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="website" placeholder="Website" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
-                    <livewire:components.form-chkbox id="isDeployed" text="Is Deployed"></livewire:components.form-chkbox>
             </div>
             {{-- Confirm Section --}}
-            <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
+            <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
                     <button id="AddConfirm" type="submit" wire:click="$js.AddConfirm($event)" class="absolute left-22 top-8 bg-white text-[#74bec9] p-4 rounded-full font-semibold pl-20 pr-20 cursor-pointer hover:bg-neutral-100">CONFIRM</button>
             </div>
         </form>
@@ -144,45 +117,34 @@
         {{-- top of edit --}}
         <button id="Edit">
             <div class="absolute">
-                <div class="absolute left-[-25px] top-37 z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-4 pr-4 pl-4 pt-4 text-5xl">
+                <div class="absolute left-[-25px] top-17 z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-4 pr-4 pl-4 pt-4 text-5xl">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" width="24px" height="24px" fill="#FFFFFF" viewBox="0 0 26 26">
                         <path id="Edit" class="cls-1" d="M24,23c0,.55-.45,1-1,1H3c-.55,0-1-.45-1-1s.45-1,1-1h20c.55,0,1,.45,1,1ZM6.61,19.79l-.21-3.44c-.02-.28.06-.55.21-.79L15.06,2.59c.37-.58,1.16-.77,1.76-.41.01,0,.03.02.04.02l3.45,2.23c.29.19.49.48.56.82.07.34,0,.7-.19.99l-8.44,12.96c-.15.23-.38.42-.65.51l-3.23,1.21c-.16.06-.31.08-.46.08h0c-.68,0-1.25-.54-1.29-1.21ZM8.41,16.45l.14,2.26,2.14-.8,7.94-12.18-2.27-1.47-7.94,12.19Z"/>
                     </svg>
                 </div>
             </div>
         </button>
-        <div class="text-white bg-[#00719d] z-2 top-27 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
+        <div class="text-white bg-[#00719d] z-2 top-8 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
             <h1 class="absolute top-14">Edit Row</h1>       
         </div>
-        <div class="absolute text-white right-18 top-30">
+        <div class="absolute text-white right-18 top-10">
             <button type="button" wire:click="$js.CloseOpenEdit" class="absolute z-2 hover:bg-[#015c80] p-2 rounded-lg cursor-pointer text-2xl">✕</button>
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditDevice" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+            <div id="Editorganization" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <div class="border-b-2 border-[#32a3cf] pl-2 mt-4 w-[90%]">
-                        <input type="text" id="deviceEUI" placeholder="Device EUI" value="" required disabled class="w-full outline-none text-lg text-white">
+                        <input type="text" id="organizationID" placeholder="Organization ID" value="" required disabled class="w-full outline-none text-lg text-white">
                     </div>
-                    <livewire:components.req-underline-input id="deviceName" placeholder="Device Name EUI" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="type" placeholder="Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="model" placeholder="Model" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="serialNumber" placeholder="Serial Number" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="manufacturer" placeholder="Manufacturer" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="manufactureDate" placeholder="Manufacture Date" type="date"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="minSampling" placeholder="Min. Sampling Rate" type="number"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="maxSampling" placeholder="Max. Sampling Rate" type="number"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="memorySize" placeholder="Memory Size" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="communicationProtocol" placeholder="Communication Protocol" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="interactionType" placeholder="Interaction Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="detectionType" placeholder="Detection Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="outputType" placeholder="Output Type" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="encodingType" placeholder="Encoding Method" type="text"></livewire:components.underline-input>
-                    <livewire:components.underline-input id="requestMethod" placeholder="Request Method" type="text"></livewire:components.underline-input>
+                    <livewire:components.req-underline-input id="organizationName" placeholder="Organization Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="civicAddress" placeholder="Civic Address" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="phone" placeholder="Phone Num" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="email" placeholder="Email" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="website" placeholder="Website" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
-                    <livewire:components.form-chkbox id="isDeployed" text="Is Deployed"></livewire:components.form-chkbox>
             </div>
             {{-- Confirm Section --}}
-            <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
+            <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
                 <button type="submit" wire:click="$js.EditConfirm($event)" id="EditConfirm" class="absolute left-22 top-8 bg-white text-[#74bec9] p-4 rounded-full font-semibold pl-20 pr-20 cursor-pointer hover:bg-neutral-100">CONFIRM</button>
             </div>
         </form>
@@ -200,7 +162,6 @@
             let DeleteMenuStatus = false;
             let EditItem = ""; //used to pre-populate an edit
             let headers = $wire.headers;
-            let organization = $wire.organization;
             let ActionsDone = [];
             let TableObjects = [];
             function EnableDisableEditDelete(){
@@ -211,7 +172,6 @@
                     $("#EditFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
                     EditItem = ItemsSelected[0];
                     
-
                     //enable
                     $("#DeleteFrame").removeClass("bg-[#f2f2f2]");
                     $("#Delete").prop("disabled",false);
@@ -246,7 +206,7 @@
                 }
             }
             //select box stuff 
-            $js('DeviceChecked',function(e,id){
+            $js('OrgChecked',function(e,id){
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
@@ -303,47 +263,47 @@
             });
 
             //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(EUI,EUIName, Mode){
+            function ValidateIfUnique(ID,IDName, Mode){
                 let result = "";
-                let EUIDupeCount = 0;
+                let IDDupeCount = 0;
                 let NameDupeCount = 0;
                 $("#InfoTable").children().each(function(index){
                     let id = $(this).children()[2].textContent;
-                    if (id.toString() == EUI.toString()){
-                        EUIDupeCount+=1
+                    if (id.toString() == ID.toString()){
+                        IDDupeCount+=1
                     }
                 });
                 $("#InfoTable").children().each(function(index){
                     let name = $(this).children()[3].textContent;
-                    if (name.toString() == EUIName.toString()){
+                    if (name.toString() == IDName.toString()){
                         NameDupeCount+=1
                     }
                 });
                 if (Mode == "add"){
-                    if (EUIDupeCount == 1){
-                        return "Device EUI must be unique";
+                    if (IDDupeCount == 1){
+                        return "Organization ID must be unique";
                     }
                     else if (NameDupeCount == 1){
-                        return "Device Name must be unique";
+                        return "Organization Name must be unique";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (EUIDupeCount > 1){
-                        return "Device EUI must be unique";
+                    if (IDDupeCount > 1){
+                        return "Organization ID must be unique";
                     }
                     else if (NameDupeCount > 1){
-                        return "Device Name must be unique";
+                        return "Organization Name must be unique";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddDevice #deviceEUI").val() == "" || $("#AddDevice #deviceName").val() == ""){
+                if ($("#Addorganization #organizationID").val() == "" || $("#Addorganization #organizationName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddDevice");
+                let FormVals = PopulateArrayWithVals("Addorganization");
                 let result = ValidateIfUnique(FormVals[0],FormVals[1],"add");
                 if (result != ""){
                     setAlertText(result);
@@ -351,73 +311,53 @@
                     return;
                 }
                 
+                //adding checkbox
                 let tr = document.createElement("tr");
                 tr.id=FormVals[0];
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.DeviceChecked($event,'"+FormVals[0]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.OrgChecked($event,'"+FormVals[0]+"')\">"
                 tr.appendChild(checkboxTD);
 
+                //adding sequence
                 let SequenceTD = document.createElement("td");
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
+                //adding regular values
                 FormVals.forEach(function(value,index){
-                    if (index == 3){
-                        let td2 = document.createElement("td");
-                        td2.textContent = organization;
-                        tr.appendChild(td2);
-                    }
                     let td = document.createElement("td");
                     td.textContent = value;
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
+                console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added device");
+                setAlertText("Successfully added organization");
                 displayAlert();
                 closeAddMenu()
             });
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #deviceEUI`).val());
-                FormVals.push($(`#${EditAdd} #deviceName`).val());
-                FormVals.push($(`#${EditAdd} #type`).val());
-                FormVals.push($(`#${EditAdd} #model`).val());
-                FormVals.push($(`#${EditAdd} #serialNumber`).val());
-                FormVals.push($(`#${EditAdd} #manufacturer`).val());
-                FormVals.push($(`#${EditAdd} #manufactureDate`).val());
-                FormVals.push($(`#${EditAdd} #minSampling`).val());
-                FormVals.push($(`#${EditAdd} #maxSampling`).val());
-                FormVals.push($(`#${EditAdd} #memorySize`).val());
-                FormVals.push($(`#${EditAdd} #communicationProtocol`).val());
-                FormVals.push($(`#${EditAdd} #interactionType`).val());
-                FormVals.push($(`#${EditAdd} #detectionType`).val());
-                FormVals.push($(`#${EditAdd} #outputType`).val());
-                FormVals.push($(`#${EditAdd} #encodingType`).val());
-                FormVals.push($(`#${EditAdd} #requestMethod`).val());
+                FormVals.push($(`#${EditAdd} #organizationID`).val());
+                FormVals.push($(`#${EditAdd} #organizationName`).val());
+                FormVals.push($(`#${EditAdd} #civicAddress`).val());
+                FormVals.push($(`#${EditAdd} #phone`).val());
+                FormVals.push($(`#${EditAdd} #email`).val());
+                FormVals.push($(`#${EditAdd} #website`).val());
                 FormVals.push($(`#${EditAdd} #description`).val());
-                FormVals.push($(`#${EditAdd} #isDeployed`).prop("checked"));
                 return FormVals;
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditDevice #deviceEUI").val() == "" || $("#EditDevice #deviceName").val() == ""){
+                if ($("#Editorganization #organizationID").val() == "" || $("#Editorganization #organizationName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditDevice");
+                let FormVals = PopulateArrayWithVals("Editorganization");
                 let OGCopy = $("#"+EditItem).clone(false);
                 $("#"+EditItem).children().each(function(index){
                     //we exclude the checkbox, sequence num
                     if (index >=2){
-                        if (index >5){ //new offset after skipping organization
-                            $(this).text(FormVals[index-3]);
-                        }
-                        else if (index == 5){ //skipping index 5 since thats the organization index
-                            return;
-                        }
-                        else{
-                            $(this).text(FormVals[index-2]);
-                        }
+                        $(this).text(FormVals[index-2]);
                     }
                 });
                 let Result = ValidateIfUnique(FormVals[0],FormVals[1],"edit");
@@ -429,11 +369,12 @@
                 }
                 else{
                     ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
+                    console.log(ActionsDone);
                     setTimeout(function(){
                         $("#"+EditItem).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated device");
+                    setAlertText("Successfully updated organization");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -461,13 +402,6 @@
                     AddMenuStatus = true;
                     $("#AddMenu").removeClass("hide");
                     $("#AddMenu").removeClass("opacity-0");
-                    let Month = ((new Date().getMonth()+1).length == 2) ? (new Date().getMonth()+1) : "0" + (new Date().getMonth()+1)
-                    let Day =   (new Date().getDate().toString().length == 2) ? new Date().getDate() : "0" + (new Date().getDate())
-                    let Year = new Date().getFullYear()
-                    let date = Year + "-" + Month + "-" + Day;
-                    $("#AddDevice #manufactureDate").prop("defaultValue",date);
-                    $("#AddDevice #minSampling").attr("value",0);
-                    $("#AddDevice #maxSampling").attr("value",0);
                 }
                 else{
                     closeAddMenu();     
@@ -483,29 +417,13 @@
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+EditItem));
-                    $("#EditDevice #deviceEUI").val(Obj["DEVICE EUI"]);
-                    $("#EditDevice #deviceName").val(Obj["DEVICE NAME EUI"]);
-                    $("#EditDevice #type").val(Obj["TYPE"]);
-                    $("#EditDevice #model").val(Obj["MODEL"]);
-                    $("#EditDevice #serialNumber").val(Obj["SERIAL NO."]);
-                    $("#EditDevice #manufacturer").val(Obj["MANUFACTURER"]);
-                    $("#EditDevice #manufactureDate").val(Obj["MANUFACTURE DATE"]);
-                    $("#EditDevice #minSampling").val(Obj["MIN SAMPLING RATE"]);
-                    $("#EditDevice #maxSampling").val(Obj["MAX SAMPLING RATE"]);
-                    $("#EditDevice #memorySize").val(Obj["MEMORY SIZE"]);
-                    $("#EditDevice #communicationProtocol").val(Obj["COMMUNICATION PROTOCOL"]);
-                    $("#EditDevice #interactionType").val(Obj["INTERACTION TYPE"]);
-                    $("#EditDevice #detectionType").val(Obj["DETECTION TYPE"]);
-                    $("#EditDevice #outputType").val(Obj["OUTPUT TYPE"]);
-                    $("#EditDevice #encodingType").val(Obj["ENCODING METHOD"]);
-                    $("#EditDevice #requestMethod").val(Obj["REQUEST METHOD"]);
-                    $("#EditDevice #description").val(Obj["DESCRIPTION"]);
-                    if (Obj["IS DEPLOYED"] === "false"){
-                        $("#EditDevice #isDeployed").attr("checked", false);
-                    }
-                    else{
-                        $("#EditDevice #isDeployed").attr("checked", true);
-                    }
+                    $("#Editorganization #organizationID").val(Obj["ORGANIZATION ID"]);
+                    $("#Editorganization #organizationName").val(Obj["ORGANIZATION NAME"]);
+                    $("#Editorganization #civicAddress").val(Obj["CIVIC ADDRESS"]);
+                    $("#Editorganization #phone").val(Obj["PHONE"]);
+                    $("#Editorganization #email").val(Obj["EMAIL"]);
+                    $("#Editorganization #website").val(Obj["WEBSITE"]);
+                    $("#Editorganization #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
                     closeEditMenu();
@@ -559,8 +477,7 @@
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadOrganizations");
-                await $wire.call("LoadDeviceInfo");
+                await $wire.call("LoadOrgInfo");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[1].textContent = index+1;
@@ -577,11 +494,12 @@
                         $("#"+item).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
+                    console.log(ActionsDone);
                     CloseDeleteModal();
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted devices");
+                    setAlertText("Successfully deleted organization(s)");
                     displayAlert();
                 });
             }
@@ -599,20 +517,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update device " + Obj["DEVICE EUI"] + "<br>";
+                                ErrorMsg += "Failed to update organization " + Obj["ORGANIZATION ID"] + "<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert device " + Obj["DEVICE EUI"] + "<br>";
+                                ErrorMsg += "Failed to insert organization " + Obj["ORGANIZATION ID"] + "<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete device(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete organization(s) " + ItemInfo + "<br>";
                             }
                         }
                     }
@@ -631,13 +549,8 @@
                     displayAlert();
                 }
             })
-            $js("ChangeOrg",async function(ev,Org){
-                await $wire.call("SetOrg",Org)
-                await refresh();
-            })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
-                await $wire.call("LoadUsersOrganization");
                 await refresh();
                 EnableDisableEditDelete();
             })
@@ -656,7 +569,7 @@
             }
             function ObjectToTR(obj){
                 let Tr = document.createElement("tr");
-                Tr.id = obj["DEVICE EUI"];
+                Tr.id = obj["organization ID"];
                 $.each(obj, function(key,value){
                     let td = document.createElement("td");
                     td.textContent = value;
@@ -714,7 +627,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("DeviceInfo.csv",TableObjects);
+                    let result = exportToCsv("organizationInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
@@ -734,5 +647,3 @@
             
     </script>
     @endscript
-
-
