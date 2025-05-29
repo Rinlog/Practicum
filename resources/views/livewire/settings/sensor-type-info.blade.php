@@ -128,7 +128,7 @@
         {{-- form --}}  
         <form>
             <div id="EditSensorType" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.req-underline-input id="SensorTypeName" placeholder="SensorType Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.req-underline-input id="SensorTypeName" placeholder="Sensor Type" type="text"></livewire:components.req-underline-input>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -153,6 +153,7 @@
             let ActionsDone = [];
             let TableObjects = [];
             function EnableDisableEditDelete(){
+                console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
                     //enable
                     $("#EditFrame").removeClass("bg-[#f2f2f2]");
@@ -198,14 +199,14 @@
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
-                        $("#"+id).addClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
                         closeEditMenu();
                         closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
                         let index = ItemsSelected.indexOf(id);
-                        $("#"+id).removeClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
                         closeAddMenu();
@@ -221,7 +222,7 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).attr("id");
+                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[3].textContent;
                             ItemsSelected.push(obj);
                         }
                         CheckBoxes[i].checked = true
@@ -287,7 +288,7 @@
                 }
                 //adding checkbox
                 let tr = document.createElement("tr");
-                tr.id=FormVals[0];
+                tr.id=SpaceToUnderScore(FormVals[0]);
                 let checkboxTD = document.createElement("td")
                 checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.SensorTypeChecked($event,'"+FormVals[0]+"')\">"
                 tr.appendChild(checkboxTD);
@@ -305,7 +306,7 @@
                 //adding regular values
                 FormVals.forEach(function(value,index){
                     let td = document.createElement("td");
-                    td.textContent = value;
+                    td.textContent = value.trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
@@ -321,6 +322,9 @@
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
+            function SpaceToUnderScore(input){
+                return input.replaceAll(" ","_");
+            }
             //used for editing
             $js("EditConfirm",function(e){
                 if ($("#EditSensorType #SensorTypeName").val() == ""){
@@ -328,8 +332,9 @@
                 }
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("EditSensorType");
-                let OGCopy = $("#"+EditItem).clone(false);
-                $("#"+EditItem).children().each(function(index){
+                let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
+                $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
+                    
                     //we exclude the checkbox, sequence num, Sensor Type ID
                     if (index >=3){
                         $(this).text(FormVals[index-3]);
@@ -337,16 +342,19 @@
                 });
                 let Result = ValidateIfUnique(FormVals[0],"edit");
                 if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+EditItem));
-                    $("#"+EditItem).remove();
+                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
+                    $("#"+SpaceToUnderScore(EditItem)).remove();
                     setAlertText(Result);
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
                     console.log(ActionsDone);
                     setTimeout(function(){
-                        $("#"+EditItem).children().first().children().click(); //clicks the checkbox
+                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
+                        console.log("Hello");
+                        console.log($("#"+SpaceToUnderScore(EditItem)).children().first());
+                        $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.SensorTypeChecked($event,'"+FormVals[0]+"')\">");
                     },100);
                     //now we close the menu
                     setAlertText("Successfully updated Sensor Type");
@@ -391,7 +399,7 @@
                     EditMenuStatus = true;
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
-                    let Obj = TRToObject($("#"+EditItem));
+                    let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
                     $("#EditSensorType #SensorTypeName").val(Obj["SENSOR TYPE"]);
                     $("#EditSensorType #description").val(Obj["DESCRIPTION"]);
                 }
@@ -403,7 +411,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+ItemsSelected[0]).children()[3].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[3].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -441,7 +449,7 @@
                     ItemsToUnCheck.push(item);
                 });
                 ItemsToUnCheck.forEach(function(item){
-                    $("#"+item).children().first().children().click();
+                    $("#"+SpaceToUnderScore(item)).children().first().children().click();
                 })
                 //update buttons
                 EnableDisableEditDelete();
@@ -460,8 +468,8 @@
                         ItemsToDelete.push(item);
                     });
                     ItemsToDelete.forEach(function(item){
-                        $("#"+item).children().first().children().click();
-                        $("#"+item).remove();
+                        $("#"+SpaceToUnderScore(item)).children().first().children().click();
+                        $("#"+SpaceToUnderScore(item)).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
                     console.log(ActionsDone);

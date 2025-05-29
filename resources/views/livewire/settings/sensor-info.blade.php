@@ -4,22 +4,6 @@
     {{-- info selection --}}
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
-            <div id="OrganizationSelector" class="w-full flex items-center">
-                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
-                <div class="selectWrapperLG w-full">
-                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach($Organizations as $org)
-                            @if (isset($_SESSION["User"]))
-                                @if ($org->organization_id == $OrgInfo->organization_id)
-                                    <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
-                                @else
-                                    <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
-                                @endif
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-            </div>
         </div>
     </div>
     <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-[645px]">
@@ -27,7 +11,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Application Information </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Sensor Information</label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -53,7 +37,7 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $applications !!}
+                    {!! $Sensors !!}
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -100,26 +84,26 @@
         {{-- top of add --}}
         <button id="Add">
             <div class="absolute">
-                <div class="absolute left-[-25px] top-37 lg:z-3 md:z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl">
+                <div class="absolute left-[-25px] top-17 lg:z-3 md:z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl">
                     +
                 </div>
             </div>
         </button>
-        <div class="text-white bg-[#00719d] z-2 top-27 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
+        <div class="text-white bg-[#00719d] z-2 top-8 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
             <h1 class="absolute top-14">Add Row</h1>       
         </div>
-        <div class="absolute text-white lg:right-18 left-85 top-30">
+        <div class="absolute text-white lg:right-18 left-85 top-10">
             <button type="button" wire:click="$js.CloseOpenAdd" class="absolute z-2 hover:bg-[#015c80] p-2 rounded-lg cursor-pointer text-2xl">✕</button>
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddApplication" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.underline-input id="applicationID" placeholder="Application ID" type="text"></livewire:components.underline-input>
-                    <livewire:components.req-underline-input id="applicationName" placeholder="Application Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="applicationDescription" placeholder="Application Description" type="text"></livewire:components.underline-input>
+            <div id="AddSensor" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
+                    <livewire:components.req-underline-input id="SensorName" placeholder="Sensor Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
-            <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
+            <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
                     <button id="AddConfirm" type="submit" wire:click="$js.AddConfirm($event)" class="absolute left-22 top-8 bg-white text-[#74bec9] p-4 rounded-full font-semibold pl-20 pr-20 cursor-pointer hover:bg-neutral-100">CONFIRM</button>
             </div>
         </form>
@@ -129,30 +113,28 @@
         {{-- top of edit --}}
         <button id="Edit">
             <div class="absolute">
-                <div class="absolute left-[-25px] top-37 z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-4 pr-4 pl-4 pt-4 text-5xl">
+                <div class="absolute left-[-25px] top-17 z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-4 pr-4 pl-4 pt-4 text-5xl">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" width="24px" height="24px" fill="#FFFFFF" viewBox="0 0 26 26">
                         <path id="Edit" class="cls-1" d="M24,23c0,.55-.45,1-1,1H3c-.55,0-1-.45-1-1s.45-1,1-1h20c.55,0,1,.45,1,1ZM6.61,19.79l-.21-3.44c-.02-.28.06-.55.21-.79L15.06,2.59c.37-.58,1.16-.77,1.76-.41.01,0,.03.02.04.02l3.45,2.23c.29.19.49.48.56.82.07.34,0,.7-.19.99l-8.44,12.96c-.15.23-.38.42-.65.51l-3.23,1.21c-.16.06-.31.08-.46.08h0c-.68,0-1.25-.54-1.29-1.21ZM8.41,16.45l.14,2.26,2.14-.8,7.94-12.18-2.27-1.47-7.94,12.19Z"/>
                     </svg>
                 </div>
             </div>
         </button>
-        <div class="text-white bg-[#00719d] z-2 top-27 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
+        <div class="text-white bg-[#00719d] z-2 top-8 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
             <h1 class="absolute top-14">Edit Row</h1>       
         </div>
-        <div class="absolute text-white right-18 top-30">
+        <div class="absolute text-white right-18 top-10">
             <button type="button" wire:click="$js.CloseOpenEdit" class="absolute z-2 hover:bg-[#015c80] p-2 rounded-lg cursor-pointer text-2xl">✕</button>
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditApplication" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <div class="border-b-2 border-[#32a3cf] pl-2 mt-4 w-[90%]">
-                        <input type="text" id="applicationID" placeholder="Application ID" value="" required disabled class="w-full outline-none text-lg text-white">
-                    </div>
-                    <livewire:components.req-underline-input id="applicationName" placeholder="Application Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="applicationDescription" placeholder="Application Description" type="text"></livewire:components.underline-input>
+            <div id="EditSensor" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
+                    <livewire:components.req-underline-input id="SensorName" placeholder="Sensor Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
-            <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
+            <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
                 <button type="submit" wire:click="$js.EditConfirm($event)" id="EditConfirm" class="absolute left-22 top-8 bg-white text-[#74bec9] p-4 rounded-full font-semibold pl-20 pr-20 cursor-pointer hover:bg-neutral-100">CONFIRM</button>
             </div>
         </form>
@@ -170,11 +152,10 @@
             let DeleteMenuStatus = false;
             let EditItem = ""; //used to pre-populate an edit
             let headers = $wire.headers;
-            let organization = "";
-            let user = $wire.user;
             let ActionsDone = [];
             let TableObjects = [];
             function EnableDisableEditDelete(){
+                console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
                     //enable
                     $("#EditFrame").removeClass("bg-[#f2f2f2]");
@@ -182,7 +163,6 @@
                     $("#EditFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
                     EditItem = ItemsSelected[0];
                     
-
                     //enable
                     $("#DeleteFrame").removeClass("bg-[#f2f2f2]");
                     $("#Delete").prop("disabled",false);
@@ -217,18 +197,18 @@
                 }
             }
             //select box stuff 
-            $js('ApplicationChecked',function(e,id){
+            $js('SensorChecked',function(e,id){
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
-                        $("#"+id).addClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
                         closeEditMenu();
                         closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
                         let index = ItemsSelected.indexOf(id);
-                        $("#"+id).removeClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
                         closeAddMenu();
@@ -244,7 +224,7 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).attr("id");
+                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[4].textContent;
                             ItemsSelected.push(obj);
                         }
                         CheckBoxes[i].checked = true
@@ -274,16 +254,9 @@
             });
 
             //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(ID,IDName, Mode){
+            function ValidateIfUnique(IDName, Mode){
                 let result = "";
-                let IDDupeCount = 0;
                 let NameDupeCount = 0;
-                $("#InfoTable").children().each(function(index){
-                    let id = $(this).children()[2].textContent;
-                    if (id.toString() == ID.toString()){
-                        IDDupeCount+=1
-                    }
-                });
                 $("#InfoTable").children().each(function(index){
                     let name = $(this).children()[3].textContent;
                     if (name.toString() == IDName.toString()){
@@ -291,147 +264,99 @@
                     }
                 });
                 if (Mode == "add"){
-                    if (IDDupeCount == 1){
-                        return "Application ID must be unique";
-                    }
-                    else if (NameDupeCount == 1){
-                        return "Application Name must be unique";
+                    if (NameDupeCount == 1){
+                        return "Sensor name must be unique";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (IDDupeCount > 1){
-                        return "Application ID must be unique";
-                    }
-                    else if (NameDupeCount > 1){
-                        return "Application Name must be unique";
+                    if (NameDupeCount > 1){
+                        return "Sensor name must be unique";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddApplication #applicationName").val() == ""){
+                if ($("#AddSensor #SensorName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddApplication");
-                let result = ValidateIfUnique(FormVals[0],FormVals[1],"add");
+                let FormVals = PopulateArrayWithVals("AddSensor");
+                let result = ValidateIfUnique(FormVals[1],"add");
                 if (result != ""){
                     setAlertText(result);
                     displayAlert();
                     return;
                 }
-                let UUIDRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-                if (FormVals[0] != ""){
-                    if (UUIDRegex.test(FormVals[0]) == false){
-                        setAlertText("Improper Application ID, ensure it is a proper UUID");
-                        displayAlert();
-                        return;
-                    }
-                }
-                else{
-                    FormVals[0] = "Will generate automatically";
-                }
-
-                //chk
+                //adding checkbox
                 let tr = document.createElement("tr");
-                tr.id=FormVals[0];
+                tr.id=SpaceToUnderScore(FormVals[1]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ApplicationChecked($event,'"+FormVals[0]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.SensorChecked($event,'"+FormVals[1]+"')\">"
                 tr.appendChild(checkboxTD);
 
-                //sequence
+                //adding sequence
                 let SequenceTD = document.createElement("td");
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
+                    
+                //adding sensor id placeholder
+                let SensorID = document.createElement("td");
+                SensorID.textContent = "Will generate automatically";
+                tr.appendChild(SensorID);
+
+                //adding regular values
                 FormVals.forEach(function(value,index){
-                    if (index == 0){
-                        console.log(organization);
-                        let td2 = document.createElement("td");
-                        td2.textContent = organization;
-                        tr.appendChild(td2);
-                    }
-                    if (index == 2){
-                        //just appending current date plus who made application
-                        let td2 = document.createElement("td");
-                        td2.textContent = CurrentDateTimeAsString();
-                        tr.appendChild(td2);
-                        let td3 = document.createElement("td");
-                        td3.textContent = user["user_username"];
-                        tr.appendChild(td3);
-                    }
                     let td = document.createElement("td");
                     td.textContent = value.trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
+                console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added Application");
+                setAlertText("Successfully added Sensor");
                 displayAlert();
                 closeAddMenu()
             });
-            function CurrentDateAsString(){
-                let Month = ((new Date().getMonth()+1).length == 2) ? (new Date().getMonth()+1) : "0" + (new Date().getMonth()+1)
-                let Day =   (new Date().getDate().toString().length == 2) ? new Date().getDate() : "0" + (new Date().getDate())
-                let Year = new Date().getFullYear()
-                let date = Year + "-" + Month + "-" + Day;
-                return date
-            }
-            function CurrentDateTimeAsString(){
-                let Month = ((new Date().getMonth()+1).length == 2) ? (new Date().getMonth()+1) : "0" + (new Date().getMonth()+1)
-                let Day =   (new Date().getDate().toString().length == 2) ? new Date().getDate() : "0" + (new Date().getDate())
-                let Year = new Date().getFullYear()
-                let Hours = (new Date().getHours().toString().length == 2) ? new Date().getHours() : "0"+ new Date().getHours();
-                let Minutes = (new Date().getMinutes().toString().length == 2) ? new Date().getMinutes() : "0"+ new Date().getMinutes();
-                let Seconds = (new Date().getSeconds().toString().length == 2) ? new Date().getSeconds() : "0"+ new Date().getSeconds();
-                let Time = Hours + ":" + Minutes + ":" + Seconds;
-                let date = Year + "-" + Month + "-" + Day;
-                let DateTime = date + "T" + Time;
-                return DateTime;
-            }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #applicationID`).val());
-                FormVals.push($(`#${EditAdd} #applicationName`).val());
-                FormVals.push($(`#${EditAdd} #applicationDescription`).val());
+                FormVals.push($(`#${EditAdd} #SensorType`).find(":selected").text());
+                FormVals.push($(`#${EditAdd} #SensorName`).val());
+                FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
+            }
+            function SpaceToUnderScore(input){
+                return input.replaceAll(" ","_");
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditApplication #applicationName").val() == ""){
+                if ($("#EditSensor #SensorName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditApplication");
-                let OGCopy = $("#"+EditItem).clone(false);
-                $("#"+EditItem).children().each(function(index){
-                    //we exclude the checkbox, sequence num, exclude org name
+                let FormVals = PopulateArrayWithVals("EditSensor");
+                let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
+                $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
+                    //we exclude the checkbox, sequence num, Sensor ID
                     if (index >=3){
-                        if (index >6){ //new offset after skipping organization
-                            $(this).text(FormVals[index-5]);
-                        }
-                        else if (index == 5 || index == 6){ //skipping index 5 since thats the organization index
-                            return;
-                        }
-                        else{
-                            $(this).text(FormVals[index-3]);
-                        }
+                        $(this).text(FormVals[index-3]);
                     }
                 });
-                let Result = ValidateIfUnique(FormVals[0],FormVals[1],"edit");
+                let Result = ValidateIfUnique(FormVals[1],"edit");
                 if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+EditItem));
-                    $("#"+EditItem).remove();
+                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
+                    $("#"+SpaceToUnderScore(EditItem)).remove();
                     setAlertText(Result);
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
+                    console.log(ActionsDone);
                     setTimeout(function(){
-                        $("#"+EditItem).children().first().children().click(); //clicks the checkbox
+                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated Application");
+                    setAlertText("Successfully updated Sensor");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -473,10 +398,10 @@
                     EditMenuStatus = true;
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
-                    let Obj = TRToObject($("#"+EditItem));
-                    $("#EditApplication #applicationID").val(Obj["APPLICATION ID"]);
-                    $("#EditApplication #applicationName").val(Obj["APPLICATION NAME"]);
-                    $("#EditApplication #applicationDescription").val(Obj["DESCRIPTION"]);
+                    let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
+                    $("#EditSensor #SensorType").val(Obj["SENSOR TYPE"]);
+                    $("#EditSensor #SensorName").val(Obj["SENSOR NAME"]);
+                    $("#EditSensor #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
                     closeEditMenu();
@@ -486,7 +411,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+ItemsSelected[0]).children()[4].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[4].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -524,14 +449,14 @@
                     ItemsToUnCheck.push(item);
                 });
                 ItemsToUnCheck.forEach(function(item){
-                    $("#"+item).children().first().children().click();
+                    $("#"+SpaceToUnderScore(item)).children().first().children().click();
                 })
                 //update buttons
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadOrganizations");
-                await $wire.call("LoadApplicationInfo");
+                await $wire.call("LoadSensorTypeInfo");
+                await $wire.call("LoadSensorInfo")
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[1].textContent = index+1;
@@ -544,15 +469,16 @@
                         ItemsToDelete.push(item);
                     });
                     ItemsToDelete.forEach(function(item){
-                        $("#"+item).children().first().children().click();
-                        $("#"+item).remove();
+                        $("#"+SpaceToUnderScore(item)).children().first().children().click();
+                        $("#"+SpaceToUnderScore(item)).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
+                    console.log(ActionsDone);
                     CloseDeleteModal();
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Applications");
+                    setAlertText("Successfully deleted Sensor(s)");
                     displayAlert();
                 });
             }
@@ -570,20 +496,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update Application \"" + Obj["APPLICATION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update Sensor \"" + Obj["SENSOR NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert Application \"" + Obj["APPLICATION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert Sensor \"" + Obj["SENSOR NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete Application(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete Sensor(s) " + ItemInfo + "<br>";
                             }
                         }
                     }
@@ -602,14 +528,8 @@
                     displayAlert();
                 }
             })
-            $js("ChangeOrg",async function(ev,Org){
-                await $wire.call("SetOrg",Org)
-                await refresh();
-            })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
-                await $wire.call("LoadUsersOrganization");
-                organization = $wire.organization;
                 await refresh();
                 EnableDisableEditDelete();
             })
@@ -628,7 +548,7 @@
             }
             function ObjectToTR(obj){
                 let Tr = document.createElement("tr");
-                Tr.id = obj["Application ID"];
+                Tr.id = obj["Sensor ID"];
                 $.each(obj, function(key,value){
                     let td = document.createElement("td");
                     td.textContent = value;
@@ -686,7 +606,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("ApplicationInfo.csv",TableObjects);
+                    let result = exportToCsv("SensorInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
@@ -706,6 +626,3 @@
             
     </script>
     @endscript
-
-
-

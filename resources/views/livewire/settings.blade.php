@@ -18,6 +18,8 @@
                 <livewire:settings.application-info></livewire:settings.application-info>
             @elseif ($settingToDisplay == "sensorTypeInfo")
                 <livewire:settings.sensor-type-info></livewire:settings.sensor-type-info>
+            @elseif ($settingToDisplay == "sensorInfo")
+                <livewire:settings.sensor-info></livewire:settings.sensor-info>
             @endif
         </div>
     </div>

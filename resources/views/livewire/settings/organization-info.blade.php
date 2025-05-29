@@ -325,7 +325,7 @@
                 //adding regular values
                 FormVals.forEach(function(value,index){
                     let td = document.createElement("td");
-                    td.textContent = value;
+                    td.textContent = value.trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));

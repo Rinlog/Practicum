@@ -7,39 +7,78 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use \Exception;
-class SensorTypeInfo extends Component
+class SensorInfo extends Component
 {
-    public $headers = [
+     public $headers = [
         "SEQ.",
-        "SENSOR TYPE ID",
+        "SENSOR ID",
         "SENSOR TYPE",
+        "SENSOR NAME",
         "DESCRIPTION"
     ];
-    public $SensorTypes = "";
+    public $Sensors = "";
+
+    public $SensorTypeInfo = [];
     public function LoadSensorTypeInfo(){
+        try{
+            $this->SensorTypeInfo = DB::table("sensor_type")->get();
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
+    public function SearchForSensorType(string $typeID){
+        try{
+            foreach($this->SensorTypeInfo as $key => $value){
+                if ($value->{"sensor_type_id"} == $typeID){
+                    return $value;
+                }
+            }
+            return null;
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
+    public function SearchForSensorTypeByName(string $Name){
+        try{
+            foreach($this->SensorTypeInfo as $key => $value){
+                if ($value->{"sensor_type"} == $Name){
+                    return $value;
+                }
+            }
+            return null;
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
+    public function LoadSensorInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (isset($_SESSION["User"])) {
             try{
-                $SensorTypeInfo = DB::table("sensor_type")->get();
-                $this->SensorTypes = "";
-                foreach ($SensorTypeInfo as $key => $SensorType) {
-                    $SensorTypeAsID = $this->SpaceToUnderScore($SensorType->sensor_type);
-                    $this->SensorTypes.=
-                    "<tr id='{$SensorTypeAsID}'>
+                $SensorInfo = DB::table("sensor")->get();
+                $this->Sensors = "";
+                foreach ($SensorInfo as $key => $Sensor) {
+                    $SensorType = $this->SearchForSensorType($Sensor->sensor_type_id);
+                    $SensorNameAsID = $this->SpaceToUnderScore($Sensor->sensor_name);
+                    $this->Sensors.=
+                    "<tr id='{$SensorNameAsID}'>
                         <td>
-                        <input type='checkbox' wire:click=\"\$js.SensorTypeChecked(\$event,'{$SensorType->sensor_type}')\">
+                        <input type='checkbox' wire:click=\"\$js.SensorChecked(\$event,'{$Sensor->sensor_name}')\">
                         </td>
                         <td></td>
-                        <td>{$SensorType->sensor_type_id}</td>
+                        <td>{$Sensor->sensor_id}</td>
                         <td>{$SensorType->sensor_type}</td>
-                        <td>{$SensorType->sensor_type_desc}</td>
+                        <td>{$Sensor->sensor_name}</td>
+                        <td>{$Sensor->sensor_desc}</td>
                     </tr>";
                 }
             }
             catch(Exception $e){
-
+                Log::channel("customlog")->error($e->getMessage());
             }
         }
     }
@@ -65,20 +104,22 @@ class SensorTypeInfo extends Component
             $Value = $ActionSplit[1];
             if (str_contains(strtolower($Query),"insert")) {
                 $Object = json_decode($Value);
-                if (strtolower($Object->{"SENSOR TYPE ID"}) == "will generate automatically"){
-                    $Object->{"SENSOR TYPE ID"} = Uuid::uuid4()->toString();
+                if (strtolower($Object->{"SENSOR ID"}) == "will generate automatically"){
+                    $Object->{"SENSOR ID"} = Uuid::uuid4()->toString();
                 }
+                $SensorType = $this->SearchForSensorTypeByName($Object->{"SENSOR TYPE"});
                 try{
-                    $result = DB::table("sensor_type")->insert([
-                        "sensor_type_id"=>$Object->{"SENSOR TYPE ID"},
-                        "sensor_type" => $Object->{"SENSOR TYPE"},
-                        "sensor_type_desc"=>$Object->{"DESCRIPTION"}
+                    $result = DB::table("sensor")->insert([
+                        "sensor_id"=>$Object->{"SENSOR ID"},
+                        "sensor_type_id" => $SensorType->{"sensor_type_id"},
+                        "sensor_name"=>$Object->{"SENSOR NAME"},
+                        "sensor_desc"=>$Object->{"DESCRIPTION"}
                     ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Inserted sensor type ". $Object->{"SENSOR TYPE"}
+                        "log_activity_desc"=>"Inserted sensor ". $Object->{"SENSOR ID"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -89,13 +130,13 @@ class SensorTypeInfo extends Component
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
                 try{
-                    $result = DB::table("sensor_type")->whereIn("sensor_type", $ItemsToDelete)->delete();
+                    $result = DB::table("sensor")->whereIn("sensor_name", $ItemsToDelete)->delete();
 
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"DELETE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Deleted sensor type(s): ". $Value
+                        "log_activity_desc"=>"Deleted sensor(s): ". $Value
                     ]);
                     array_push($Results, $result);
                 }
@@ -110,15 +151,17 @@ class SensorTypeInfo extends Component
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
 
-                    $result = DB::table("sensor_type")->where("sensor_type", $idToUpdate)->update([
-                        "sensor_type" => $Object->{"SENSOR TYPE"},
-                        "sensor_type_desc"=>$Object->{"DESCRIPTION"}
+                    $SensorType = $this->SearchForSensorTypeByName($Object->{"SENSOR TYPE"});
+                    $result = DB::table("sensor")->where("sensor_name", $idToUpdate)->update([
+                        "sensor_type_id" => $SensorType->{"sensor_type_id"},
+                        "sensor_name"=>$Object->{"SENSOR NAME"},
+                        "sensor_desc"=>$Object->{"DESCRIPTION"}
                     ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Updated sensor type ". $Object->{"SENSOR TYPE"}
+                        "log_activity_desc"=>"Updated sensor ". $SensorType->{"sensor_type_id"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -138,11 +181,11 @@ class SensorTypeInfo extends Component
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
             "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-            "log_activity_desc"=>"Downloaded CSV of sensor type Info"
+            "log_activity_desc"=>"Downloaded CSV of sensor Info"
         ]);
     }
     public function render()
     {
-        return view('livewire..settings.sensor-type-info');
+        return view('livewire..settings.sensor-info');
     }
 }
