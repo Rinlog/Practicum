@@ -358,7 +358,6 @@
                     $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
-                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
                     setAlertText("Successfully updated Sensor");

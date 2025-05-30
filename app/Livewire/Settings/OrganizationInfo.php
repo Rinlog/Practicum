@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 use \Exception;
 class OrganizationInfo extends Component
 {
@@ -28,10 +29,11 @@ class OrganizationInfo extends Component
                 $OrgInfo = DB::table("organization")->get();
                 $this->DisplayOrgs = "";
                 foreach ($OrgInfo as $key => $Org) {
+                    $OrgNameAsID = $this->SpaceToUnderScore($Org->organization_name);
                     $this->DisplayOrgs.=
-                    "<tr id={$Org->organization_id}>
+                    "<tr id={$OrgNameAsID}>
                         <td>
-                        <input type='checkbox' wire:click=\"\$js.OrgChecked(\$event,'{$Org->organization_id}')\">
+                        <input type='checkbox' wire:click=\"\$js.OrgChecked(\$event,'{$Org->organization_name}')\">
                         </td>
                         <td></td>
                         <td>{$Org->organization_id}</td>
@@ -49,6 +51,15 @@ class OrganizationInfo extends Component
             }
         }
     }
+    public function SpaceToUnderScore($input){
+        try{
+            $input = str_replace(" ","_", $input);
+            return $input;
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
     public function SaveToDb($actions){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -62,6 +73,9 @@ class OrganizationInfo extends Component
             $Value = $ActionSplit[1];
             if (str_contains(strtolower($Query),"insert")) {
                 $Object = json_decode($Value);
+                if (strtolower($Object->{"ORGANIZATION ID"}) == "will generate automatically"){
+                    $Object->{"ORGANIZATION ID"} = Uuid::uuid4()->toString();
+                }
                 try{
                     $result = DB::table("organization")->insert([
                         "organization_id"=>$Object->{"ORGANIZATION ID"},
@@ -76,7 +90,7 @@ class OrganizationInfo extends Component
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Inserted organization ". $Object->{"ORGANIZATION ID"}
+                        "log_activity_desc"=>"Inserted organization ". $Object->{"ORGANIZATION NAME"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -87,7 +101,7 @@ class OrganizationInfo extends Component
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
                 try{
-                    $result = DB::table("organization")->whereIn("organization_id", $ItemsToDelete)->delete();
+                    $result = DB::table("organization")->whereIn("organization_name", $ItemsToDelete)->delete();
 
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
@@ -108,8 +122,7 @@ class OrganizationInfo extends Component
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
 
-                    $result = DB::table("organization")->where("organization_id", $idToUpdate)->update([
-                        "organization_id"=>$Object->{"ORGANIZATION ID"},
+                    $result = DB::table("organization")->where("organization_name", $idToUpdate)->update([
                         "organization_name" => $Object->{"ORGANIZATION NAME"},
                         "organization_civic_address"=>$Object->{"CIVIC ADDRESS"},
                         "organization_phone"=> $Object->{"PHONE"},
@@ -121,7 +134,7 @@ class OrganizationInfo extends Component
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Updated organization ". $Object->{"ORGANIZATION ID"}
+                        "log_activity_desc"=>"Updated organization ". $Object->{"ORGANIZATION NAME"}
                     ]);
                     array_push($Results, $result);
                 }
