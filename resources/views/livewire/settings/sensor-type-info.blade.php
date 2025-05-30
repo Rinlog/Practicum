@@ -350,11 +350,12 @@
                 else{
                     ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
                     console.log(ActionsDone);
+                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[0])); //updates the id
+                    EditItem = FormVals[0]; //update EditItem
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.SensorTypeChecked($event,'"+FormVals[0]+"')\">");
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
-                        console.log("Hello");
-                        console.log($("#"+SpaceToUnderScore(EditItem)).children().first());
-                        $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.SensorTypeChecked($event,'"+FormVals[0]+"')\">");
                     },100);
                     //now we close the menu
                     setAlertText("Successfully updated Sensor Type");

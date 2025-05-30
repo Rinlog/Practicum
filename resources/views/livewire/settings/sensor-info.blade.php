@@ -352,7 +352,12 @@
                 else{
                     ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
                     console.log(ActionsDone);
+                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[1])); //updates the id
+                    EditItem = FormVals[1]; //update EditItem
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.SensorChecked($event,'"+FormVals[1]+"')\">");
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
+                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
