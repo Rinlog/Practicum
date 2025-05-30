@@ -320,10 +320,10 @@
                     }
                 });
                 if (Mode == "add"){
-                    if (EUIDupeCount == 1){
+                    if (EUIDupeCount >= 1){
                         return "Device EUI must be unique";
                     }
-                    else if (NameDupeCount == 1){
+                    else if (NameDupeCount >= 1){
                         return "Device Name must be unique";
                     }
                 }
@@ -367,7 +367,7 @@
                         tr.appendChild(td2);
                     }
                     let td = document.createElement("td");
-                    td.textContent = value.trim();
+                    td.textContent = value.toString().trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));

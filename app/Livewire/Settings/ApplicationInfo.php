@@ -79,10 +79,11 @@ class ApplicationInfo extends Component
                 $applicationInfo = DB::table("application")->where("organization_id", $this->OrgInfo->organization_id)->get();
                 $this->applications = "";
                 foreach ($applicationInfo as $key => $application) {
+                    $ApplicationNameAsID = $this->SpaceToUnderScore($application->application_name);
                     $this->applications.=
-                    "<tr id={$application->application_id}>
+                    "<tr id={$ApplicationNameAsID}>
                         <td>
-                        <input type='checkbox' wire:click=\"\$js.ApplicationChecked(\$event,'{$application->application_id}')\">
+                        <input type='checkbox' wire:click=\"\$js.ApplicationChecked(\$event,'{$application->application_name}')\">
                         </td>
                         <td></td>
                         <td>{$this->organization}</td>
@@ -97,6 +98,28 @@ class ApplicationInfo extends Component
             catch(Exception $e){
 
             }
+        }
+    }
+    public function SpaceToUnderScore($input){
+        try{
+            $input = str_replace(" ","_", $input);
+            return $input;
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
+    public function GetApplicationIDsFromNames($names){
+        try{
+            $result = DB::table("application")->wherein("application_name",$names)->get();
+            $ArrayOfIDs = [];
+            foreach ($result as $key => $value) {
+                array_push($ArrayOfIDs, $value->application_id);
+            }
+            return $ArrayOfIDs;
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function SaveToDb($actions){
@@ -130,19 +153,20 @@ class ApplicationInfo extends Component
                         "applog_activity_time"=>now(),
                         "applog_activity_type"=>"INSERT",
                         "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "applog_activity_desc"=>"Inserted application ". $Object->{"APPLICATION ID"}
+                        "applog_activity_desc"=>"Inserted application ". $Object->{"APPLICATION NAME"}
                     ]);
                     array_push($Results, $result);
                 }
                 catch(Exception $e){
                     array_push($Results, false);
+                    Log::channel("customlog")->error("". $e->getMessage());
                 }
             }
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
                 try{
-                    DB::table("application_log")->whereIn("application_id",$ItemsToDelete)->delete();
-                    $result = DB::table("application")->whereIn("application_id", $ItemsToDelete)->delete();
+                    DB::table("application_log")->whereIn("application_id",$this->GetApplicationIDsFromNames($ItemsToDelete))->delete();
+                    $result = DB::table("application")->whereIn("application_id", $this->GetApplicationIDsFromNames($ItemsToDelete))->delete();
 
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
@@ -154,6 +178,7 @@ class ApplicationInfo extends Component
                 }
                 catch(Exception $e){
                     array_push($Results, 0);
+                    Log::channel("customlog")->error("". $e->getMessage());
                 }
             }
             else if (str_contains(strtolower($Query),"update")){
@@ -163,8 +188,11 @@ class ApplicationInfo extends Component
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
 
-                    $result = DB::table("application")->where("application_id", $idToUpdate)->update([
-                        "application_id"=>$Object->{"APPLICATION ID"},
+                    //get the id before updating it otherwise the new updated row means the id to update will no longer be valid
+                    if (strtolower($Object->{"APPLICATION ID"}) == "will generate automatically"){
+                        $Object->{"APPLICATION ID"} = DB::table("application")->where("application_name", $idToUpdate)->value("application_id");
+                    }
+                    $result = DB::table("application")->where("application_name", $idToUpdate)->update([
                         "application_name" => $Object->{"APPLICATION NAME"},
                         "application_desc"=> $Object->{"DESCRIPTION"},
                     ]);
@@ -173,12 +201,13 @@ class ApplicationInfo extends Component
                         "applog_activity_time"=>now(),
                         "applog_activity_type"=>"UPDATE",
                         "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "applog_activity_desc"=>"Updated application ". $Object->{"APPLICATION ID"}
+                        "applog_activity_desc"=>"Updated application ". $Object->{"APPLICATION NAME"}
                     ]);
                     array_push($Results, $result);
                 }
                 catch(Exception $e){
                     array_push($Results, 0);
+                    Log::channel("customlog")->error("". $e->getMessage());
                 }
             }
         }

@@ -175,6 +175,7 @@
             let ActionsDone = [];
             let TableObjects = [];
             function EnableDisableEditDelete(){
+                console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
                     //enable
                     $("#EditFrame").removeClass("bg-[#f2f2f2]");
@@ -221,14 +222,14 @@
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
-                        $("#"+id).addClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
                         closeEditMenu();
                         closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
                         let index = ItemsSelected.indexOf(id);
-                        $("#"+id).removeClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
                         closeAddMenu();
@@ -279,22 +280,22 @@
                 let IDDupeCount = 0;
                 let NameDupeCount = 0;
                 $("#InfoTable").children().each(function(index){
-                    let id = $(this).children()[2].textContent;
+                    let id = $(this).children()[3].textContent;
                     if (id.toString() == ID.toString()){
                         IDDupeCount+=1
                     }
                 });
                 $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[3].textContent;
-                    if (name.toString() == IDName.toString()){
+                    let name = $(this).children()[4].textContent;
+                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
                         NameDupeCount+=1
                     }
                 });
                 if (Mode == "add"){
-                    if (IDDupeCount == 1){
+                    if (IDDupeCount >= 1){
                         return "Application ID must be unique";
                     }
-                    else if (NameDupeCount == 1){
+                    else if (NameDupeCount >= 1){
                         return "Application Name must be unique";
                     }
                 }
@@ -335,9 +336,9 @@
 
                 //chk
                 let tr = document.createElement("tr");
-                tr.id=FormVals[0];
+                tr.id=SpaceToUnderScore(FormVals[1]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ApplicationChecked($event,'"+FormVals[0]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ApplicationChecked($event,'"+FormVals[1]+"')\">"
                 tr.appendChild(checkboxTD);
 
                 //sequence
@@ -346,7 +347,6 @@
                 tr.appendChild(SequenceTD);
                 FormVals.forEach(function(value,index){
                     if (index == 0){
-                        console.log(organization);
                         let td2 = document.createElement("td");
                         td2.textContent = organization;
                         tr.appendChild(td2);
@@ -361,7 +361,7 @@
                         tr.appendChild(td3);
                     }
                     let td = document.createElement("td");
-                    td.textContent = value.trim();
+                    td.textContent = value.toString().trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
@@ -403,8 +403,8 @@
                 }
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("EditApplication");
-                let OGCopy = $("#"+EditItem).clone(false);
-                $("#"+EditItem).children().each(function(index){
+                let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
+                $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
                     //we exclude the checkbox, sequence num, exclude org name
                     if (index >=3){
                         if (index >6){ //new offset after skipping organization
@@ -420,15 +420,20 @@
                 });
                 let Result = ValidateIfUnique(FormVals[0],FormVals[1],"edit");
                 if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+EditItem));
-                    $("#"+EditItem).remove();
+                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
+                    $("#"+SpaceToUnderScore(EditItem)).remove();
                     setAlertText(Result);
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+EditItem))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
+                    console.log(ActionsDone);
+                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[1])); //updates the id
+                    EditItem = FormVals[1]; //update EditItem
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.ApplicationChecked($event,'"+FormVals[1]+"')\">");
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
-                        $("#"+EditItem).children().first().children().click(); //clicks the checkbox
+                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
                     setAlertText("Successfully updated Application");
@@ -473,7 +478,7 @@
                     EditMenuStatus = true;
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
-                    let Obj = TRToObject($("#"+EditItem));
+                    let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
                     $("#EditApplication #applicationID").val(Obj["APPLICATION ID"]);
                     $("#EditApplication #applicationName").val(Obj["APPLICATION NAME"]);
                     $("#EditApplication #applicationDescription").val(Obj["DESCRIPTION"]);
@@ -486,7 +491,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+ItemsSelected[0]).children()[4].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[4].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -524,7 +529,7 @@
                     ItemsToUnCheck.push(item);
                 });
                 ItemsToUnCheck.forEach(function(item){
-                    $("#"+item).children().first().children().click();
+                    $("#"+SpaceToUnderScore(item)).children().first().children().click();
                 })
                 //update buttons
                 EnableDisableEditDelete();
@@ -544,8 +549,8 @@
                         ItemsToDelete.push(item);
                     });
                     ItemsToDelete.forEach(function(item){
-                        $("#"+item).children().first().children().click();
-                        $("#"+item).remove();
+                        $("#"+SpaceToUnderScore(item)).children().first().children().click();
+                        $("#"+SpaceToUnderScore(item)).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
                     CloseDeleteModal();
@@ -614,6 +619,9 @@
                 EnableDisableEditDelete();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            function SpaceToUnderScore(input){
+                return input.replaceAll(" ","_");
+            }
             function TRToObject(tr){
                 let Values = [];
                 tr.children().each(function(){
@@ -649,7 +657,6 @@
                     const processRow = function (obj) {
                         let finalVal = '';
                         $.each(obj,function(key,value){
-                            console.log(value)
                             finalVal+=value + ",";
                         })
                         finalVal = finalVal.substr(0,finalVal.length-1);

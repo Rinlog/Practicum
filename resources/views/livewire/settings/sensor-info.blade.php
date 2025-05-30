@@ -259,12 +259,12 @@
                 let NameDupeCount = 0;
                 $("#InfoTable").children().each(function(index){
                     let name = $(this).children()[3].textContent;
-                    if (name.toString() == IDName.toString()){
+                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
                         NameDupeCount+=1
                     }
                 });
                 if (Mode == "add"){
-                    if (NameDupeCount == 1){
+                    if (NameDupeCount >= 1){
                         return "Sensor name must be unique";
                     }
                 }
@@ -308,7 +308,7 @@
                 //adding regular values
                 FormVals.forEach(function(value,index){
                     let td = document.createElement("td");
-                    td.textContent = value.trim();
+                    td.textContent = value.toString().trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
