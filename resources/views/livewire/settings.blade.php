@@ -26,6 +26,8 @@
                 <livewire:settings.location-info></livewire:settings.location-info>
             @elseif ($settingToDisplay == "subLocationInfo")
                 <livewire:settings.sub-location-info></livewire:settings.sub-location-info>
+            @elseif ($settingToDisplay == "softwareComponentInfo")
+                <livewire:settings.software-component-info></livewire:settings.software-component-info>
             @endif
         </div>
     </div>
