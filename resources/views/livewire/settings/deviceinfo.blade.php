@@ -635,6 +635,7 @@
             })
             $js("ChangeOrg",async function(ev,Org){
                 await $wire.call("SetOrg",Org)
+                organization = $wire.organization;
                 await refresh();
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------

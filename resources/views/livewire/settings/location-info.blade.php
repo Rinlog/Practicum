@@ -27,7 +27,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Application Information </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Location Information </label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -53,7 +53,7 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $applications !!}
+                    {!! $DisplayTableInfo !!}
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -113,10 +113,13 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddApplication" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.underline-input id="applicationID" placeholder="Application ID" type="text"></livewire:components.underline-input>
-                    <livewire:components.req-underline-input id="applicationName" placeholder="Application Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="applicationDescription" placeholder="Application Description" type="text"></livewire:components.underline-input>
+            <div id="AddLocation" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                    <livewire:components.req-underline-input id="locationName" placeholder="Location Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="civicAddress" placeholder="Civic Address" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="longitude" placeholder="Longitude" type="number"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="latitude" placeholder="Latitude" type="number"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="altitude" placeholder="Altitude" type="number"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -144,12 +147,13 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditApplication" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <div class="border-b-2 border-[#32a3cf] pl-2 mt-4 w-[90%]">
-                        <input type="text" id="applicationID" placeholder="Application ID" value="" required disabled class="w-full outline-none text-lg text-white">
-                    </div>
-                    <livewire:components.req-underline-input id="applicationName" placeholder="Application Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="applicationDescription" placeholder="Application Description" type="text"></livewire:components.underline-input>
+            <div id="EditLocation" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                    <livewire:components.req-underline-input id="locationName" placeholder="Location Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="civicAddress" placeholder="Civic Address" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="longitude" placeholder="Longitude" type="number"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="latitude" placeholder="Latitude" type="number"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="altitude" placeholder="Altitude" type="number"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -218,7 +222,7 @@
                 }
             }
             //select box stuff 
-            $js('ApplicationChecked',function(e,id){
+            $js('ItemChecked',function(e,id){
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
@@ -245,7 +249,7 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[4].textContent
+                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[4].textContent;
                             ItemsSelected.push(obj);
                         }
                         CheckBoxes[i].checked = true
@@ -272,98 +276,70 @@
             });
 
             //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(ID,IDName, Mode){
+            function ValidateIfUnique(Item1, Mode){
                 let result = "";
-                let IDDupeCount = 0;
-                let NameDupeCount = 0;
+                let Item1DupeCount = 0;
+
                 $("#InfoTable").children().each(function(index){
-                    let id = $(this).children()[3].textContent;
-                    if (id.toString() == ID.toString()){
-                        IDDupeCount+=1
-                    }
-                });
-                $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[4].textContent;
-                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
-                        NameDupeCount+=1
+                    let tempitem1 = $(this).children()[4].textContent;
+                    if (tempitem1.toString() == Item1.toString()){
+                        Item1DupeCount+=1
                     }
                 });
                 if (Mode == "add"){
-                    if (IDDupeCount >= 1){
-                        return "Application ID must be unique";
-                    }
-                    else if (NameDupeCount >= 1){
-                        return "Application Name must be unique";
+                    if (Item1DupeCount >= 1 ){
+                        return "This location already exists";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (IDDupeCount > 1){
-                        return "Application ID must be unique";
-                    }
-                    else if (NameDupeCount > 1){
-                        return "Application Name must be unique";
+                    if (Item1DupeCount > 1 ){
+                        return "This location already exists";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddApplication #applicationName").val() == ""){
+                if ($("#AddLocation #locationName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddApplication");
-                let result = ValidateIfUnique(FormVals[0],FormVals[1],"add");
+                let FormVals = PopulateArrayWithVals("AddLocation");
+                let result = ValidateIfUnique(FormVals[0],"add");
                 if (result != ""){
                     setAlertText(result);
                     displayAlert();
                     return;
                 }
-                let UUIDRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-                if (FormVals[0] != ""){
-                    if (UUIDRegex.test(FormVals[0]) == false){
-                        setAlertText("Improper Application ID, ensure it is a proper UUID");
-                        displayAlert();
-                        return;
-                    }
-                }
-                else{
-                    FormVals[0] = "Will generate automatically";
-                }
 
                 //chk
                 let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[1]);
+                tr.id=SpaceToUnderScore(FormVals[0]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ApplicationChecked($event,'"+FormVals[1]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">"
                 tr.appendChild(checkboxTD);
 
                 //sequence
                 let SequenceTD = document.createElement("td");
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
+                //organization
+                let Organization = document.createElement("td");
+                Organization.textContent = organization;
+                tr.appendChild(Organization);
+                //placeholder id
+                let PlaceholderID = document.createElement("td");
+                PlaceholderID.textContent = "Will generate automatically";
+                tr.appendChild(PlaceholderID);
                 FormVals.forEach(function(value,index){
-                    if (index == 0){
-                        let td2 = document.createElement("td");
-                        td2.textContent = organization;
-                        tr.appendChild(td2);
-                    }
-                    if (index == 2){
-                        //just appending current date plus who made application
-                        let td2 = document.createElement("td");
-                        td2.textContent = CurrentDateTimeAsString();
-                        tr.appendChild(td2);
-                        let td3 = document.createElement("td");
-                        td3.textContent = user["user_username"];
-                        tr.appendChild(td3);
-                    }
+                    console.log(value);
                     let td = document.createElement("td");
                     td.textContent = value.toString().trim();
                     tr.appendChild(td)
                 })
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added Application");
+                setAlertText("Successfully added Location");
                 displayAlert();
                 closeAddMenu()
             });
@@ -388,34 +364,29 @@
             }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #applicationID`).val());
-                FormVals.push($(`#${EditAdd} #applicationName`).val());
-                FormVals.push($(`#${EditAdd} #applicationDescription`).val());
+                FormVals.push($(`#${EditAdd} #locationName`).val());
+                FormVals.push($(`#${EditAdd} #civicAddress`).val());
+                FormVals.push($(`#${EditAdd} #longitude`).val());
+                FormVals.push($(`#${EditAdd} #latitude`).val());
+                FormVals.push($(`#${EditAdd} #altitude`).val());
+                FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditApplication #applicationName").val() == ""){
+                if ($("#EditLocation #locationName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditApplication");
+                let FormVals = PopulateArrayWithVals("EditLocation");
                 let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
                 $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
-                    //we exclude the checkbox, sequence num, exclude org name
-                    if (index >=3){
-                        if (index >6){ //new offset after skipping organization
-                            $(this).text(FormVals[index-5]);
-                        }
-                        else if (index == 5 || index == 6){ //skipping index 5 since thats the organization index
-                            return;
-                        }
-                        else{
-                            $(this).text(FormVals[index-3]);
-                        }
+                    //we exclude the checkbox, sequence num, exclude org name, location id
+                    if (index >=4){
+                        $(this).text(FormVals[index-4]);
                     }
                 });
-                let Result = ValidateIfUnique(FormVals[0],FormVals[1],"edit");
+                let Result = ValidateIfUnique(FormVals[0],"edit");
                 if (Result != ""){
                     $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
                     $("#"+SpaceToUnderScore(EditItem)).remove();
@@ -425,15 +396,15 @@
                 else{
                     ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
                     console.log(ActionsDone);
-                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[1])); //updates the id
-                    EditItem = FormVals[1]; //update EditItem
-                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.ApplicationChecked($event,'"+FormVals[1]+"')\">");
+                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[0])); //updates the id
+                    EditItem = FormVals[0]; //update EditItem
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">");
                     $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated Application");
+                    setAlertText("Successfully updated Location");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -476,9 +447,13 @@
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
-                    $("#EditApplication #applicationID").val(Obj["APPLICATION ID"]);
-                    $("#EditApplication #applicationName").val(Obj["APPLICATION NAME"]);
-                    $("#EditApplication #applicationDescription").val(Obj["DESCRIPTION"]);
+                    $("#EditLocation #locationName").val(Obj["LOCATION NAME"]);
+                    $("#EditLocation #civicAddress").val(Obj["CIVIC ADDRESS"]);
+                    $("#EditLocation #latitude").val(Obj["LATITUDE"]);
+                    $("#EditLocation #longitude").val(Obj["LONGITUDE"]);
+                    $("#EditLocation #altitude").val(Obj["ALTITUDE"]);
+                    $("#EditLocation #description").val(Obj["DESCRIPTION"]);
+                    
                 }
                 else{
                     closeEditMenu();
@@ -533,7 +508,7 @@
 
                 //now that everything is unchecked we re-load the table and org
                 await $wire.call("LoadOrganizations");
-                await $wire.call("LoadApplicationInfo");
+                await $wire.call("LoadInfo");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[1].textContent = index+1;
@@ -554,7 +529,7 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Applications");
+                    setAlertText("Successfully deleted Locations");
                     displayAlert();
                 });
             }
@@ -572,20 +547,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update Application \"" + Obj["APPLICATION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update Location \"" + Obj["LOCATION NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert Application \"" + Obj["APPLICATION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert Location \"" + Obj["LOCATION NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete Application(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete Location(s) " + ItemInfo + "<br>";
                             }
                         }
                     }
@@ -690,7 +665,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("ApplicationInfo.csv",TableObjects);
+                    let result = exportToCsv("LocationInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
@@ -710,6 +685,3 @@
             
     </script>
     @endscript
-
-
-

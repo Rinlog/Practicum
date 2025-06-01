@@ -229,7 +229,7 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).attr("id");
+                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[3].textContent;
                             ItemsSelected.push(obj);
                         }
                         CheckBoxes[i].checked = true
