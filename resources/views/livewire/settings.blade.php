@@ -24,6 +24,8 @@
                 <livewire:settings.sensor-data-types></livewire:settings.sensor-data-types>
             @elseif ($settingToDisplay == "locationInfo")
                 <livewire:settings.location-info></livewire:settings.location-info>
+            @elseif ($settingToDisplay == "subLocationInfo")
+                <livewire:settings.sub-location-info></livewire:settings.sub-location-info>
             @endif
         </div>
     </div>

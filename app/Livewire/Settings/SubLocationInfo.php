@@ -2,28 +2,33 @@
 
 namespace App\Livewire\Settings;
 
-
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use \Exception;
-class LocationInfo extends Component
+class SubLocationInfo extends Component
 {
     public $headers = [
         "SEQ.",
         "ORGANIZATION",
-        "LOCATION ID",
         "LOCATION NAME",
+        "SUB-LOCATION ID",
+        "SUB-LOCATION NAME",
         "CIVIC ADDRESS",
+        "FLOOR",
         "LONGITUDE",
         "LATITUDE",
         "ALTITUDE",
         "DESCRIPTION"
     ];
     public $organization = "";
-    public $Organizations = [];
     public $OrgInfo;
+    public $Organizations = [];
+
+    public $Location = "";
+    public $LocationInfo;
+    public $Locations = [];
     public $DisplayTableInfo = "";
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
@@ -49,6 +54,31 @@ class LocationInfo extends Component
 
         }
     }
+    public function LoadLocations(){
+        try{
+
+            $locations = DB::table("location")->where("organization_id",$this->OrgInfo->organization_id)->get();
+            $this->Locations = $locations->toArray();
+        }
+        catch(Exception $e){
+            $this->Locations = "";
+        }
+    }
+    public function setDefaultLocation(){
+            //we will set the first location to be default
+            $this->Location = $this->Locations[0]->location_name;
+            $this->LocationInfo = $this->Locations[0];
+    }
+    public function SetLocation($locationID){
+        $NewLoc = [];
+        foreach ($this->Locations as $location){
+            if ($locationID == $location->location_id){
+                $NewLoc = $location;
+            }
+        }
+        $this->Location = $NewLoc->location_name;
+        $this->LocationInfo = $NewLoc;
+    }
     public function SetOrg($NewOrgID){
         $NewOrg = [];
         foreach ($this->Organizations as $org){
@@ -65,27 +95,29 @@ class LocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $locationInfo = DB::table("location")
-                ->select(DB::raw("location_id, organization_id, location_name, location_civic_address, ST_X(location_geo::geometry) as latitude, ST_Y(location_geo::geometry) as longitude, ST_Z(location_geo::geometry) as altitude, location_desc"))
-                ->where("organization_id", $this->OrgInfo->organization_id)
+                $locationInfo = DB::table("sub_location")
+                ->select(DB::raw("sub_location_id, location_id, sub_location_name, sub_location_civic_address, sub_location_floor, ST_X(sub_location_geo::geometry) as latitude, ST_Y(sub_location_geo::geometry) as longitude, ST_Z(sub_location_geo::geometry) as altitude, sub_location_desc"))
+                ->where("location_id", $this->LocationInfo->location_id)
                 ->get();
                 $this->DisplayTableInfo = "";
                 foreach ($locationInfo as $key => $location) {
-                    $TRID = $this->SpaceToUnderScore($location->location_name);
+                    $TRID = $this->SpaceToUnderScore($location->sub_location_name);
                     $this->DisplayTableInfo.=
                     "<tr id={$TRID}>
                         <td>
-                        <input type='checkbox' wire:click=\"\$js.ItemChecked(\$event,'{$location->location_name}')\">
+                        <input type='checkbox' wire:click=\"\$js.ItemChecked(\$event,'{$location->sub_location_name}')\">
                         </td>
                         <td></td>
                         <td>{$this->organization}</td>
-                        <td>{$location->location_id}</td>
-                        <td>{$location->location_name}</td>
-                        <td>{$location->location_civic_address}</td>
+                        <td>{$this->Location}</td>
+                        <td>{$location->sub_location_id}</td>
+                        <td>{$location->sub_location_name}</td>
+                        <td>{$location->sub_location_civic_address}</td>
+                        <td>{$location->sub_location_floor}</td>
                         <td>{$location->longitude}</td>
                         <td>{$location->latitude}</td>
                         <td>{$location->altitude}</td>
-                        <td>{$location->location_desc}</td>
+                        <td>{$location->sub_location_desc}</td>
                     </tr>";
                 }
             }
@@ -118,8 +150,8 @@ class LocationInfo extends Component
             if (str_contains(strtolower($Query),"insert")) {
                 $Object = json_decode($Value);
                 try{
-                    if (strtolower($Object->{"LOCATION ID"}) == "will generate automatically"){
-                        $Object->{"LOCATION ID"} = Uuid::uuid4()->toString();
+                    if (strtolower($Object->{"SUB-LOCATION ID"}) == "will generate automatically"){
+                        $Object->{"SUB-LOCATION ID"} = Uuid::uuid4()->toString();
                     }
                     $geo = null;
                     if (strlen($Object->{"LATITUDE"}) > 0 && strlen($Object->{"LONGITUDE"}) > 0 && strlen($Object->{"ALTITUDE"}) > 0){
@@ -128,19 +160,20 @@ class LocationInfo extends Component
                         $alt = $Object->{"ALTITUDE"};
                         $geo = DB::raw("ST_MakePoint($lat,$lon,$alt)");
                     }
-                    $result = DB::table("location")->insert([
-                        "location_id"=>$Object->{"LOCATION ID"},
-                        "organization_id"=> $organizationID,
-                        "location_name" => $Object->{"LOCATION NAME"},
-                        "location_civic_address"=>$Object->{"CIVIC ADDRESS"},
-                        "location_geo"=> $geo,
-                        "location_desc"=> $Object->{"DESCRIPTION"},
+                    $result = DB::table("sub_location")->insert([
+                        "sub_location_id"=>$Object->{"SUB-LOCATION ID"},
+                        "location_id"=>$this->LocationInfo->location_id,
+                        "sub_location_name"=> $Object->{"SUB-LOCATION NAME"},
+                        "sub_location_civic_address" => $Object->{"CIVIC ADDRESS"},
+                        "sub_location_floor"=>$Object->{"FLOOR"},
+                        "sub_location_geo"=> $geo,
+                        "sub_location_desc"=> $Object->{"DESCRIPTION"},
                     ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Inserted location ". $Object->{"LOCATION ID"}
+                        "log_activity_desc"=>"Inserted sub location ". $Object->{"SUB-LOCATION ID"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -152,13 +185,13 @@ class LocationInfo extends Component
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
                 try{
-                    $result = DB::table("location")->whereIn("location_name", $ItemsToDelete)->delete();
+                    $result = DB::table("sub_location")->whereIn("sub_location_name", $ItemsToDelete)->delete();
 
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"DELETE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Deleted device(s): ". $Value
+                        "log_activity_desc"=>"Deleted sub location(s): ". $Value
                     ]);
                     array_push($Results, $result);
                 }
@@ -180,20 +213,21 @@ class LocationInfo extends Component
                         $alt = $Object->{"ALTITUDE"};
                         $geo = DB::raw("ST_MakePoint($lat,$lon,$alt)");
                     }
-                    if (strtolower($Object->{"LOCATION ID"}) == "will generate automatically"){
-                        $Object->{"LOCATION ID"} = DB::table("location")->where("location_name", $idToUpdate)->value("location_id");
+                    if (strtolower($Object->{"SUB-LOCATION ID"}) == "will generate automatically"){
+                        $Object->{"SUB-LOCATION ID"} = DB::table("sub_location")->where("sub_location_name", $idToUpdate)->value("sub_location_id");
                     }
-                    $result = DB::table("location")->where("location_name", $idToUpdate)->update([
-                        "location_name" => $Object->{"LOCATION NAME"},
-                        "location_civic_address"=>$Object->{"CIVIC ADDRESS"},
-                        "location_geo"=> $geo,
-                        "location_desc"=> $Object->{"DESCRIPTION"},
+                    $result = DB::table("sub_location")->where("sub_location_name", $idToUpdate)->update([
+                        "sub_location_name"=> $Object->{"SUB-LOCATION NAME"},
+                        "sub_location_civic_address" => $Object->{"CIVIC ADDRESS"},
+                        "sub_location_floor"=>$Object->{"FLOOR"},
+                        "sub_location_geo"=> $geo,
+                        "sub_location_desc"=> $Object->{"DESCRIPTION"},
                     ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Updated location ". $Object->{"LOCATION ID"}
+                        "log_activity_desc"=>"Updated sub location ". $Object->{"SUB-LOCATION ID"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -219,6 +253,6 @@ class LocationInfo extends Component
     }
     public function render()
     {
-        return view('livewire..settings.location-info');
+        return view('livewire..settings.sub-location-info');
     }
 }
