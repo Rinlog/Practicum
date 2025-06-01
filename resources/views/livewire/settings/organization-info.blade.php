@@ -244,10 +244,7 @@
 
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == true){
-                            //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).attr("id");
-                            let index = ItemsSelected.indexOf(obj);
-                            ItemsSelected.splice(index,1);
+                            ItemsSelected.splice(-1,1);
                         }
                         CheckBoxes[i].checked = false
                         $(CheckBoxes[i].parentNode.parentNode).removeClass("bg-[#f8c200]");

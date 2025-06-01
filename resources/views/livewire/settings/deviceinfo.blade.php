@@ -312,8 +312,6 @@
                     if (id.toString() == EUI.toString()){
                         EUIDupeCount+=1
                     }
-                });
-                $("#InfoTable").children().each(function(index){
                     let name = $(this).children()[3].textContent;
                     if (name.toString() == EUIName.toString()){
                         NameDupeCount+=1

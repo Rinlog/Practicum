@@ -11,7 +11,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Sensor Information</label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Sensor Data Type Information</label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -37,7 +37,7 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $Sensors !!}
+                    {!! $DisplayTableInfo !!}
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -97,10 +97,11 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddSensor" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" optionName="sensor_type" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
-                    <livewire:components.req-underline-input id="SensorName" placeholder="Sensor Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
+            <div id="AddSensorDataType" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <livewire:components.frm-select-box onChange="UpdateValueSetType()" id="ValueSetTypeCMB" key="{{ Str::random() }}" optionName="DataType" :options="$ComboBoxOptions"></livewire:components.frm-select-box>
+                <livewire:components.req-underline-input id="ValueSetType" placeholder="Value Set Type" type="text"></livewire:components.req-underline-input>
+                <livewire:components.req-underline-input id="SensorDataType" placeholder="Sensor Data Type" type="text"></livewire:components.req-underline-input>
+                <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -128,10 +129,16 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditSensor" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" optionName="sensor_type" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
-                    <livewire:components.req-underline-input id="SensorName" placeholder="Sensor Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
+            <div id="EditSensorDataType" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Sensor Data Type:</label>
+                    <b class="text-lg" id="SensorDataType"></b>
+                </div>
+                <div class="mt-4 pl-2 text-lg flex flex-col">
+                    <label>Sensor Data Value Set Type: </label>
+                    <b class="text-lg" id="ValueSetType"></b>
+                </div>
+                <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -197,18 +204,18 @@
                 }
             }
             //select box stuff 
-            $js('SensorChecked',function(e,id){
+            $js('ItemChecked',function(e,id){
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
-                        $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(id))).addClass("bg-[#f8c200]");
                         closeEditMenu();
                         closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
                         let index = ItemsSelected.indexOf(id);
-                        $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(id))).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
                         closeAddMenu();
@@ -216,7 +223,6 @@
                     }
                 }
             });
-
             $js("SelectAll",function(e){
                 if (e.target.checked){
                     let CheckBoxes = $("tbody input[type='checkbox']");
@@ -224,8 +230,10 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[4].textContent;
-                            ItemsSelected.push(obj);
+                            let obj1 = $(CheckBoxes[i].parentNode.parentNode).children()[2].textContent;
+                            let obj2 = $(CheckBoxes[i].parentNode.parentNode).children()[3].textContent;
+                            let Combined = obj1 + "~!~" + obj2;
+                            ItemsSelected.push(Combined);
                         }
                         CheckBoxes[i].checked = true
                         $(CheckBoxes[i].parentNode.parentNode).addClass("bg-[#f8c200]");
@@ -239,7 +247,7 @@
 
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == true){
-                            ItemsSelected.splice(-1,1);
+                            ItemsSelected.splice(-1,1); //removes everything
                         }
                         CheckBoxes[i].checked = false
                         $(CheckBoxes[i].parentNode.parentNode).removeClass("bg-[#f8c200]");
@@ -251,35 +259,40 @@
             });
 
             //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(IDName, Mode){
+            function ValidateIfUnique(Item1,Item2, Mode){
                 let result = "";
-                let NameDupeCount = 0;
+                let Item1DupeCount = 0;
+                let Item2DupeCount = 0;
                 $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[3].textContent;
-                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
-                        NameDupeCount+=1
+                    let tempitem1 = $(this).children()[2].textContent;
+                    if (tempitem1.toString() == Item1.toString()){
+                        Item1DupeCount+=1
+                    }
+                    let Tempitem2 = $(this).children()[3].textContent;
+                    if (Tempitem2.toString() == Item2.toString()){
+                        Item2DupeCount+=1
                     }
                 });
                 if (Mode == "add"){
-                    if (NameDupeCount >= 1){
-                        return "Sensor name must be unique";
+                    if (Item1DupeCount >= 1 && Item2DupeCount >= 1){
+                        return "This sensor data type already exists";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (NameDupeCount > 1){
-                        return "Sensor name must be unique";
+                    if (Item1DupeCount > 1 && Item2DupeCount > 1){
+                        return "This sensor data type already exists";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddSensor #SensorName").val() == ""){
+                if ($("#AddSensorDataType #ValueSetType").val() == "" || $("#AddSensorDataType #SensorDataType").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddSensor");
-                let result = ValidateIfUnique(FormVals[1],"add");
+                let FormVals = PopulateArrayWithVals("AddSensorDataType");
+                let result = ValidateIfUnique(FormVals[0],FormVals[1],"add");
                 if (result != ""){
                     setAlertText(result);
                     displayAlert();
@@ -287,9 +300,9 @@
                 }
                 //adding checkbox
                 let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[1]);
+                tr.id=SpaceToUnderScore(FormVals[0]) + "_" + SpaceToUnderScore(FormVals[1]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.SensorChecked($event,'"+FormVals[1]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"-!-"+FormVals[1]+"')\">"
                 tr.appendChild(checkboxTD);
 
                 //adding sequence
@@ -297,10 +310,6 @@
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
                     
-                //adding sensor id placeholder
-                let SensorID = document.createElement("td");
-                SensorID.textContent = "Will generate automatically";
-                tr.appendChild(SensorID);
 
                 //adding regular values
                 FormVals.forEach(function(value,index){
@@ -311,53 +320,53 @@
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added Sensor");
+                setAlertText("Successfully added Sensor Data Type");
                 displayAlert();
                 closeAddMenu()
             });
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #SensorType`).find(":selected").text());
-                FormVals.push($(`#${EditAdd} #SensorName`).val());
+                FormVals.push($(`#${EditAdd} #ValueSetType`).val());
+                FormVals.push($(`#${EditAdd} #SensorDataType`).val());
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
             function SpaceToUnderScore(input){
                 return input.replaceAll(" ","_");
             }
+            function CustomSplitterToUnderScore(input){
+                return input.replaceAll("-!-","_");
+            }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditSensor #SensorName").val() == ""){
+                if ($("#EditSensorDataType #SensorDataTypeName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditSensor");
-                let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
-                $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
-                    //we exclude the checkbox, sequence num, Sensor ID
-                    if (index >=3){
-                        $(this).text(FormVals[index-3]);
+                let FormVals = PopulateArrayWithVals("EditSensorDataType");
+                let OGCopy = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).clone(false);
+                $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().each(function(index){
+                    
+                    //we exclude the checkbox, sequence num, Sensor Data Type ID
+                    if (index >=4){
+                        $(this).text(FormVals[index-2]);//only want last value since other ones can not be updated
                     }
                 });
-                let Result = ValidateIfUnique(FormVals[1],"edit");
+                let Result = ValidateIfUnique(FormVals[0],"edit");
                 if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
-                    $("#"+SpaceToUnderScore(EditItem)).remove();
+                    $(OGCopy).insertAfter($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
+                    $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).remove();
                     setAlertText(Result);
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))))))
                     console.log(ActionsDone);
-                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[1])); //updates the id
-                    EditItem = FormVals[1]; //update EditItem
-                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.SensorChecked($event,'"+FormVals[1]+"')\">");
-                    $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
-                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated Sensor");
+                    setAlertText("Successfully updated Sensor Data Type");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -385,6 +394,7 @@
                     AddMenuStatus = true;
                     $("#AddMenu").removeClass("hide");
                     $("#AddMenu").removeClass("opacity-0");
+                    UpdateValueSetType();
                 }
                 else{
                     closeAddMenu();     
@@ -399,10 +409,10 @@
                     EditMenuStatus = true;
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
-                    let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
-                    $("#EditSensor #SensorType").val(Obj["SENSOR TYPE"]);
-                    $("#EditSensor #SensorName").val(Obj["SENSOR NAME"]);
-                    $("#EditSensor #description").val(Obj["DESCRIPTION"]);
+                    let Obj = TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
+                    $("#EditSensorDataType #ValueSetType").text(Obj["DATA VALUE SET TYPE"]);
+                    $("#EditSensorDataType #SensorDataType").text(Obj["SENSOR DATA TYPE"]);
+                    $("#EditSensorDataType #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
                     closeEditMenu();
@@ -412,7 +422,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[4].innerHTML;
+                let name = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[2].innerHTML + ", " + $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[3].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -450,14 +460,13 @@
                     ItemsToUnCheck.push(item);
                 });
                 ItemsToUnCheck.forEach(function(item){
-                    $("#"+SpaceToUnderScore(item)).children().first().children().click();
+                    $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
                 })
                 //update buttons
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadSensorTypeInfo");
-                await $wire.call("LoadSensorInfo")
+                await $wire.call("LoadInfo");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[1].textContent = index+1;
@@ -470,8 +479,8 @@
                         ItemsToDelete.push(item);
                     });
                     ItemsToDelete.forEach(function(item){
-                        $("#"+SpaceToUnderScore(item)).children().first().children().click();
-                        $("#"+SpaceToUnderScore(item)).remove();
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
                     console.log(ActionsDone);
@@ -479,7 +488,7 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Sensor(s)");
+                    setAlertText("Successfully deleted Sensor Data Type(s)");
                     displayAlert();
                 });
             }
@@ -497,20 +506,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update Sensor \"" + Obj["SENSOR NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update Sensor Data Type \"" + Obj["SENSOR DATA TYPE"] + ", " + Obj["DATA VALUE SET TYPE"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert Sensor \"" + Obj["SENSOR NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert Sensor Data Type \"" + Obj["SENSOR DATA TYPE"] + ", " + Obj["DATA VALUE SET TYPE"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete Sensor(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete Sensor Data Type(s) " + ItemInfo + "<br>";
                             }
                         }
                     }
@@ -549,7 +558,7 @@
             }
             function ObjectToTR(obj){
                 let Tr = document.createElement("tr");
-                Tr.id = obj["Sensor ID"];
+                Tr.id = obj["SensorDataType ID"];
                 $.each(obj, function(key,value){
                     let td = document.createElement("td");
                     td.textContent = value;
@@ -607,7 +616,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("SensorInfo.csv",TableObjects);
+                    let result = exportToCsv("SensorDataTypeInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
@@ -624,6 +633,14 @@
                     displayAlert();
                 }
             });
-            
+            function UpdateValueSetType(){
+                $("#ValueSetType").val($("#ValueSetTypeCMB").val());
+            }
     </script>
     @endscript
+<script>
+    //function for SENSOR DATA TYPE INFO
+    function UpdateValueSetType(){
+       $("#ValueSetType").val($("#ValueSetTypeCMB").val());
+    }
+</script>
