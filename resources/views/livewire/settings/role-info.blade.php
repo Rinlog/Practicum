@@ -19,20 +19,6 @@
                         @endforeach
                     </select>
                 </div>
-                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block md:p-6 lg:p-6 p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Resource Name</label>
-                <div class="selectWrapperLG w-full">
-                    <select id="Resources" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach ($Resources as $TempResource)
-                            @if (isset($Resource))
-                                @if($TempResource->resource_name == $Resource)
-                                    <option selected wire:click="$js.ChangeResource($event,'{{ $TempResource->resource_name  }}')">{{ $TempResource->resource_name  }}</option>
-                                @else
-                                    <option wire:click="$js.ChangeResource($event,'{{ $TempResource->resource_name  }}')">{{ $TempResource->resource_name  }}</option>
-                                @endif
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
             </div>
         </div>
     </div>
@@ -41,7 +27,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Permission Information</label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Role Information</label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -127,17 +113,9 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddPermission" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                @if (isset($ResourceInfo))
-                    <livewire:components.frm-select-box id="resourceSubName" :options="$ResourceInfo" optionName="resource_sub_name"></livewire:components.frm-select-box>
-                @endif
-                <livewire:components.req-underline-input id="permissionName" placeholder="Permission Name" type="text"></livewire:components.req-underline-input>
+            <div id="AddRole" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <livewire:components.req-underline-input id="roleName" placeholder="Role Name" type="text"></livewire:components.req-underline-input>
                 <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
-                <livewire:components.form-chkbox id="Create" text="Create"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Read" text="Read"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Update" text="Update"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Delete" text="Delete"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Report" text="Report"></livewire:components.form-chkbox>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -165,17 +143,9 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditPermission" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                @if (isset($ResourceInfo))
-                    <livewire:components.frm-select-box id="resourceSubName" :options="$ResourceInfo" optionName="resource_sub_name"></livewire:components.frm-select-box>
-                @endif
-                <livewire:components.req-underline-input id="permissionName" placeholder="Permission Name" type="text"></livewire:components.req-underline-input>
+            <div id="EditRole" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <livewire:components.req-underline-input id="roleName" placeholder="Role Name" type="text"></livewire:components.req-underline-input>
                 <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
-                <livewire:components.form-chkbox id="Create" text="Create"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Read" text="Read"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Update" text="Update"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Delete" text="Delete"></livewire:components.form-chkbox>
-                <livewire:components.form-chkbox id="Report" text="Report"></livewire:components.form-chkbox>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -196,8 +166,6 @@
             let DeleteMenuStatus = false;
             let EditItem = ""; //used to pre-populate an edit
             let ComponentID = "";
-            let Resource = "";
-            let SubResources = "";
             let headers = $wire.headers;
             let ActionsDone = [];
             let TableObjects = [];
@@ -271,7 +239,7 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[3].textContent;
+                            let obj = $(CheckBoxes[i].parentNode.parentNode).children()[4].textContent;
                             ItemsSelected.push(obj);
                         }
                         CheckBoxes[i].checked = true
@@ -302,30 +270,30 @@
                 let result = "";
                 let NameDupeCount = 0;
                 $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[3].textContent;
+                    let name = $(this).children()[4].textContent;
                     if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
                         NameDupeCount+=1
                     }
                 });
                 if (Mode == "add"){
                     if (NameDupeCount >= 1){
-                        return "Permission name must be unique";
+                        return "Role name must be unique";
                     }
                 }
                 else if (Mode == "edit"){
                     if (NameDupeCount > 1){
-                        return "Permission name must be unique";
+                        return "Role name must be unique";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddPermission #permissionName").val() == ""){
+                if ($("#AddRole #permissionName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddPermission");
+                let FormVals = PopulateArrayWithVals("AddRole");
                 let result = ValidateIfUnique(FormVals[0],"add");
                 if (result != ""){
                     setAlertText(result);
@@ -343,23 +311,18 @@
                 let SequenceTD = document.createElement("td");
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
-                    
-                //adding Permission id placeholder
-                let PermissionID = document.createElement("td");
-                PermissionID.textContent = "Will generate automatically";
-                tr.appendChild(PermissionID);
+                //adding component id
+                let ComponentIDTD = document.createElement("td");
+                ComponentIDTD.textContent = ComponentID;
+                tr.appendChild(ComponentIDTD);
+
+                //adding Role id placeholder
+                let RoleID = document.createElement("td");
+                RoleID.textContent = "Will generate automatically";
+                tr.appendChild(RoleID);
 
                 //adding regular values
                 FormVals.forEach(function(value,index){
-                    if (index == 1){
-                        //adding component id and resource name
-                        let td = document.createElement("td");
-                        td.textContent = ComponentID;
-                        tr.appendChild(td)
-                        let td2 = document.createElement("td");
-                        td2.textContent = Resource
-                        tr.appendChild(td2)
-                    }
                     let td = document.createElement("td");
                     td.textContent = value.toString().trim();
                     tr.appendChild(td)
@@ -367,20 +330,14 @@
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added Permission");
+                setAlertText("Successfully added Role");
                 displayAlert();
                 closeAddMenu()
             });
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #permissionName`).val());
-                FormVals.push($(`#${EditAdd} #resourceSubName`).val());
+                FormVals.push($(`#${EditAdd} #roleName`).val());
                 FormVals.push($(`#${EditAdd} #description`).val());
-                FormVals.push($(`#${EditAdd} #Create`).prop("checked"));
-                FormVals.push($(`#${EditAdd} #Read`).prop("checked"));
-                FormVals.push($(`#${EditAdd} #Update`).prop("checked"));
-                FormVals.push($(`#${EditAdd} #Delete`).prop("checked"));
-                FormVals.push($(`#${EditAdd} #Report`).prop("checked"));
                 return FormVals;
             }
             function SpaceToUnderScore(input){
@@ -388,24 +345,16 @@
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditPermission #permissionName").val() == ""){
+                if ($("#EditRole #permissionName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditPermission");
+                let FormVals = PopulateArrayWithVals("EditRole");
                 let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
                 $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
-                    //we exclude the checkbox, sequence num, Permission ID
-                    if (index >=3){
-                        if (index >=4 && index <= 5){
-                            return
-                        }
-                        else if (index > 5){
-                            $(this).text(FormVals[index-5]);
-                        }
-                        else{
-                            $(this).text(FormVals[index-3]);
-                        }
+                    //we exclude the checkbox, sequence num, component id, Role ID
+                    if (index >=4){
+                        $(this).text(FormVals[index-4]);
                     }
                 });
                 let Result = ValidateIfUnique(FormVals[0],"edit");
@@ -426,7 +375,7 @@
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated Permission");
+                    setAlertText("Successfully updated Role");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -469,14 +418,8 @@
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
-                    $("#EditPermission #resourceSubName").val(Obj["RESOURCE SUBNAME"]);
-                    $("#EditPermission #permissionName").val(Obj["PERMISSION NAME"]);
-                    $("#EditPermission #description").val(Obj["DESCRIPTION"]);
-                    $("#EditPermission #Create").prop("checked",Obj("CAN CREATE"));
-                    $("#EditPermission #Read").prop("checked",Obj("CAN READ"));
-                    $("#EditPermission #Update").prop("checked",Obj("CAN UPDATE"));
-                    $("#EditPermission #Delete").prop("checked",Obj("CAN DELETE"));
-                    $("#EditPermission #Report").prop("checked",Obj("CAN REPORT"));
+                    $("#EditRole #roleName").val(Obj["ROLE NAME"]);
+                    $("#EditRole #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
                     closeEditMenu();
@@ -486,7 +429,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[3].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[4].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -553,28 +496,14 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Permission(s)");
+                    setAlertText("Successfully deleted Role(s)");
                     displayAlert();
                 });
             }
             $js("ChangeComponent",async function(ev,Component){
                 await $wire.call("setComponent",Component);
                 await $wire.call("LoadSoftwareComponents");
-                await $wire.call("LoadResources");
-                await $wire.call("setDefaultResource");
                 ComponentID = $wire.ComponentInfo["component_id"];
-                Resource = $wire.Resource;
-                SubResources = $wire.ResourceInfo;
-                await refresh();
-                EnableDisableEditDelete();
-            })
-            $js("ChangeResource",async function(ev,ResourceName){
-                await $wire.call("setResource",ResourceName);
-                await $wire.call("LoadSoftwareComponents");
-                await $wire.call("LoadResources");
-                ComponentID = $wire.ComponentInfo["component_id"];
-                Resource = $wire.Resource;
-                SubResources = $wire.ResourceInfo;
                 await refresh();
                 EnableDisableEditDelete();
             })
@@ -592,20 +521,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update Permission \"" + Obj["PERMISSION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update Role \"" + Obj["ROLE NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert Permission \"" + Obj["PERMISSION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert Role \"" + Obj["ROLE NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete Permission(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete Role(s) " + ItemInfo + "<br>";
                             }
                         }
                     }
@@ -628,11 +557,7 @@
             $(document).ready(async function(){
                 await $wire.call("LoadSoftwareComponents");
                 await $wire.call("setDefaultComponent");
-                await $wire.call("LoadResources");
-                await $wire.call("setDefaultResource");
                 ComponentID = $wire.ComponentInfo["component_id"];
-                Resource = $wire.Resource;
-                SubResources = $wire.ResourceInfo;
                 await refresh();
                 EnableDisableEditDelete();
             })
@@ -708,7 +633,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("PermissionInfo.csv",TableObjects);
+                    let result = exportToCsv("RoleInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
