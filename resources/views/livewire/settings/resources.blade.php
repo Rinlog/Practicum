@@ -4,6 +4,22 @@
     {{-- info selection --}}
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
+            <div id="ComponentSelector" class="w-full flex items-center">
+                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[35%] lg:w-[35%]">Software Component Name</label>
+                <div class="selectWrapperLG w-full">
+                    <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        @foreach ($Components as $Component)
+                            @if (isset($ComponentInfo))
+                                @if($Component->component_id == $ComponentInfo->component_id)
+                                    <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                @else
+                                    <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                @endif
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
     <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-[645px]">
@@ -11,7 +27,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Sensor Data Type Information</label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Resource Information</label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -97,11 +113,11 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddSensorDataType" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                <livewire:components.frm-select-box onChange="UpdateValueSetType()" id="ValueSetTypeCMB" key="{{ Str::random() }}" optionName="DataType" :options="$ComboBoxOptions"></livewire:components.frm-select-box>
-                <livewire:components.req-underline-input id="ValueSetType" placeholder="Value Set Type" type="text"></livewire:components.req-underline-input>
-                <livewire:components.req-underline-input id="SensorDataType" placeholder="Sensor Data Type" type="text"></livewire:components.req-underline-input>
+            <div id="AddResource" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <livewire:components.req-underline-input id="resourceName" placeholder="Resource Name" type="text"></livewire:components.req-underline-input>
+                <livewire:components.req-underline-input id="resourceSubName" placeholder="Resource Subname" type="text"></livewire:components.req-underline-input>
                 <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
+                <livewire:components.form-chkbox id="createCRUDR" text="Create CRUDR Permissions?"></livewire:components.form-chkbox>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -129,16 +145,11 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditSensorDataType" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                <div class="mt-6 pl-2 text-lg flex flex-col">
-                    <label>Sensor Data Type:</label>
-                    <b class="text-lg" id="SensorDataType"></b>
-                </div>
-                <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Sensor Data Value Set Type: </label>
-                    <b class="text-lg" id="ValueSetType"></b>
-                </div>
+            <div id="EditResource" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <livewire:components.req-underline-input id="resourceName" placeholder="Resource Name" type="text"></livewire:components.req-underline-input>
+                <livewire:components.req-underline-input id="resourceSubName" placeholder="Resource Subname" type="text"></livewire:components.req-underline-input>
                 <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
+                <livewire:components.form-chkbox id="createCRUDR" text="Create CRUDR Permissions?"></livewire:components.form-chkbox>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -158,6 +169,7 @@
             let EditMenuStatus = false;
             let DeleteMenuStatus = false;
             let EditItem = ""; //used to pre-populate an edit
+            let ComponentID = "";
             let headers = $wire.headers;
             let ActionsDone = [];
             let TableObjects = [];
@@ -230,8 +242,8 @@
                     for (let i = 0; i < CheckBoxes.length; i++){
                         if (CheckBoxes[i].checked == false){
                             //converting json to object
-                            let obj1 = $(CheckBoxes[i].parentNode.parentNode).children()[2].textContent;
-                            let obj2 = $(CheckBoxes[i].parentNode.parentNode).children()[3].textContent;
+                            let obj1 = $(CheckBoxes[i].parentNode.parentNode).children()[3].textContent;
+                            let obj2 = $(CheckBoxes[i].parentNode.parentNode).children()[4].textContent;
                             let Combined = obj1 + "-!-" + obj2;
                             ItemsSelected.push(Combined);
                         }
@@ -264,34 +276,34 @@
                 let Item1DupeCount = 0;
                 let Item2DupeCount = 0;
                 $("#InfoTable").children().each(function(index){
-                    let tempitem1 = $(this).children()[2].textContent;
+                    let tempitem1 = $(this).children()[3].textContent;
                     if (tempitem1.toString() == Item1.toString()){
                         Item1DupeCount+=1
                     }
-                    let Tempitem2 = $(this).children()[3].textContent;
+                    let Tempitem2 = $(this).children()[4].textContent;
                     if (Tempitem2.toString() == Item2.toString()){
                         Item2DupeCount+=1
                     }
                 });
                 if (Mode == "add"){
                     if (Item1DupeCount >= 1 && Item2DupeCount >= 1){
-                        return "This sensor data type already exists";
+                        return "This resource already exists";
                     }
                 }
                 else if (Mode == "edit"){
                     if (Item1DupeCount > 1 && Item2DupeCount > 1){
-                        return "This sensor data type already exists";
+                        return "This resource already exists";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddSensorDataType #ValueSetType").val() == "" || $("#AddSensorDataType #SensorDataType").val() == ""){
+                if ($("#AddResource #resourceName").val() == "" || $("#AddResource #resourceSubName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddSensorDataType");
+                let FormVals = PopulateArrayWithVals("AddResource");
                 let result = ValidateIfUnique(FormVals[0],FormVals[1],"add");
                 if (result != ""){
                     setAlertText(result);
@@ -309,26 +321,33 @@
                 let SequenceTD = document.createElement("td");
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
-                    
+                
+                //adds componentID
+                let ComponentId = document.createElement("td");
+                ComponentId.textContent = ComponentID;
+                tr.appendChild(ComponentId);
 
                 //adding regular values
                 FormVals.forEach(function(value,index){
+                    //we ignore the CRUDR selection
+                    if (index == 3){return};
                     let td = document.createElement("td");
                     td.textContent = value.toString().trim();
                     tr.appendChild(td)
                 })
-                ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
+                ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr)))+"~!~"+FormVals[3]);
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added Sensor Data Type");
+                setAlertText("Successfully added resource");
                 displayAlert();
                 closeAddMenu()
             });
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #ValueSetType`).val());
-                FormVals.push($(`#${EditAdd} #SensorDataType`).val());
+                FormVals.push($(`#${EditAdd} #resourceName`).val());
+                FormVals.push($(`#${EditAdd} #resourceSubName`).val());
                 FormVals.push($(`#${EditAdd} #description`).val());
+                FormVals.push($(`#${EditAdd} #createCRUDR`).prop("checked"));
                 return FormVals;
             }
             function SpaceToUnderScore(input){
@@ -339,20 +358,22 @@
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditSensorDataType #SensorDataTypeName").val() == ""){
+                if ($("#EditResource #resourceName").val() == "" || $("#EditResource #resourceSubName").val() == ""){
                     return;
                 }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditSensorDataType");
+                let FormVals = PopulateArrayWithVals("EditResource");
                 let OGCopy = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).clone(false);
                 $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().each(function(index){
                     
                     //we exclude the checkbox, sequence num, Sensor Data Type ID
-                    if (index >=4){
-                        $(this).text(FormVals[index-2]);//only want last value since other ones can not be updated
+                    if (index >=3){
+                        //skipping CRUDR
+                        if (index-3 == 3){return;}
+                        $(this).text(FormVals[index-3]);//only want last value since other ones can not be updated
                     }
                 });
-                let Result = ValidateIfUnique(FormVals[0],"edit");
+                let Result = ValidateIfUnique(FormVals[0],FormVals[1],"edit");
                 if (Result != ""){
                     $(OGCopy).insertAfter($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
                     $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).remove();
@@ -360,13 +381,13 @@
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem)))))+"~!~"+FormVals[3])
                     console.log(ActionsDone);
                     setTimeout(function(){
                         $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated Sensor Data Type");
+                    setAlertText("Successfully updated resource");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -410,9 +431,9 @@
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
-                    $("#EditSensorDataType #ValueSetType").text(Obj["DATA VALUE SET TYPE"]);
-                    $("#EditSensorDataType #SensorDataType").text(Obj["SENSOR DATA TYPE"]);
-                    $("#EditSensorDataType #description").val(Obj["DESCRIPTION"]);
+                    $("#EditResource #resourceName").val(Obj["RESOURCE NAME"]);
+                    $("#EditResource #resourceSubName").val(Obj["RESOURCE SUBNAME"]);
+                    $("#EditResource #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
                     closeEditMenu();
@@ -422,7 +443,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[2].innerHTML + ", " + $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[3].innerHTML;
+                let name = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[3].innerHTML + ", " + $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[4].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -492,6 +513,13 @@
                     displayAlert();
                 });
             }
+            $js("ChangeComponent",async function(ev,Component){
+                await $wire.call("setComponent",Component);
+                await $wire.call("LoadSoftwareComponents");
+                ComponentID = $wire.ComponentInfo["component_id"];
+                await refresh();
+                EnableDisableEditDelete();
+            })
             $js("saveToDB",async function(ev){
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
                 let Errors = false;
@@ -540,6 +568,9 @@
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
+                await $wire.call("LoadSoftwareComponents");
+                await $wire.call("setDefaultComponent");
+                ComponentID = $wire.ComponentInfo["component_id"];
                 await refresh();
                 EnableDisableEditDelete();
             })
@@ -558,7 +589,6 @@
             }
             function ObjectToTR(obj){
                 let Tr = document.createElement("tr");
-                Tr.id = obj["SensorDataType ID"];
                 $.each(obj, function(key,value){
                     let td = document.createElement("td");
                     td.textContent = value;
@@ -616,7 +646,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("SensorDataTypeInfo.csv",TableObjects);
+                    let result = exportToCsv("ResourceInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
@@ -638,9 +668,3 @@
             }
     </script>
     @endscript
-<script>
-    //function for SENSOR DATA TYPE INFO
-    function UpdateValueSetType(){
-       $("#ValueSetType").val($("#ValueSetTypeCMB").val());
-    }
-</script>

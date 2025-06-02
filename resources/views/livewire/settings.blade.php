@@ -28,6 +28,8 @@
                 <livewire:settings.sub-location-info></livewire:settings.sub-location-info>
             @elseif ($settingToDisplay == "softwareComponentInfo")
                 <livewire:settings.software-component-info></livewire:settings.software-component-info>
+            @elseif ($settingToDisplay == "resourceInfo")
+                <livewire:settings.resources></livewire:settings.resources>
             @endif
         </div>
     </div>
