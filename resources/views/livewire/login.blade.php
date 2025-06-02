@@ -46,7 +46,7 @@
                                 <label class="{{ $passShowErr }} text-red-500">{{ $passErrMsg }}</label>
                             </span>
                             <span class="flex flex-col justify-center items-center w-full mt-3 mb-10">
-                                <x-bigbutton wireclick="login" text="ENTER" id="loginbutton"></x-bigbutton>
+                                <x-bigbutton wireclick="$js.HandleLogin" text="ENTER" id="loginbutton"></x-bigbutton>
                             </span>
                         </div>
                     </div>
@@ -56,7 +56,65 @@
             </main>
             </div>
         </body>
+        <livewire:modals.change-password key="{{ Str::random() }}"></livewire:modals.change-password>
     </html>
 </div>
+@script
+<script>
+    $js("HandleLogin",async function(){
+        let DefaultPass = await $wire.call("CheckForDefaultPass");
+        if (DefaultPass == true){
+
+            OpenModal();
+            $("#ConfirmChange").click(async function(ev){
+                let Password = $("#ChangePassword");
+                let ConfirmPass = $("#ChangeConfirmPassword");
+                let PasswordErr = $("#ChangePasswordErr");
+                let ConfirmPassErr = $("#ChangeConfirmPasswordErr")
+
+                if (Password.val() == ConfirmPass.val()){
+                    CloseModal();
+                    setTimeout(async function(){
+                        let result = await $wire.call("ChangePass",Password.val());
+                        if (result == true){
+                            await $wire.call("login");
+                        }
+                    },200)
+
+                }
+                else{
+                    Password.addClass("border-2 border-red-500");
+                    PasswordErr.removeClass("hide");
+                    PasswordErr.text("Passwords do not match");
+                    ConfirmPass.addClass("border-2 border-red-500");
+                    ConfirmPassErr.removeClass("hide");
+                    ConfirmPassErr.text("Passwords do not match");
+                }
+            })
+        }
+        else{
+            await $wire.call("login");
+        }
+    })
+    function OpenModal(){
+        $("#ChangePassModal").removeClass("hide");
+        setTimeout(function(){
+            $("#ChangePassModalFrame").removeClass("opacity-0 ease-in duration-200");
+            $("#ChangePassModalFrame").addClass("opacity-100 ease-out duration-300");
+            $("#ChangePassModalMain").removeClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
+            $("#ChangePassModalMain").addClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95 duration-300");
+        },50)
+    }
+    function CloseModal(){
+        $("#ChangePassModalFrame").addClass("opacity-0 ease-in duration-200");
+        $("#ChangePassModalFrame").removeClass("opacity-100 ease-out duration-300");
+        $("#ChangePassModalMain").addClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
+        $("#ChangePassModalMain").removeClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
+        setTimeout(() => {
+            $("#ChangePassModal").addClass("hide");
+        }, 200);
+    }
+</script>
+@endscript
 
 

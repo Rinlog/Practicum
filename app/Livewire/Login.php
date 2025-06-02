@@ -52,6 +52,43 @@ class Login extends Component
         $this->passShowErr = "hide";
         $this->passErrMsg = "";
     }
+    public function CheckForDefaultPass(){
+        try{
+            if ($this->Username != "" and $this->Password != "") {
+                $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
+
+                if (password_verify("idl123abc",$user->user_password)) {
+                    if ($this->Password == "idl123abc"){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+                else{
+                    return false;
+                }
+            }
+        }
+        catch (RecordNotFoundException $e) {
+            return false;
+        }
+        catch(Exception $e){
+            return false;
+        }
+    }
+    public function ChangePass($Password){
+        try{
+            DB::table("users")->where("user_username", $this->Username)->update([
+                "user_password"=>(password_hash($Password, PASSWORD_DEFAULT))
+            ]);
+            $this->Password = $Password;
+            return true;
+        }
+        catch(Exception $e){
+            return false;
+        }
+    }
     public function login(){
         try{
             #check if blank
@@ -74,10 +111,18 @@ class Login extends Component
             }
             if ($this->Username != "" and $this->Password != "") {
                 $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
-                
+
                 $userNameValid = false;
                 $passwordValid = false;
-
+                if ($user->user_is_disabled == true){
+                    $this->usrCustomStyle = $this->errStyle;
+                    $this->usrShowErr = "show";
+                    $this->usrErrMsg = "User account is disabled";
+                    return;
+                }
+                else{
+                    $this->clearusr();
+                }
                 #check to make sure login info is correct
                 if (strcasecmp($this->Username,$user->user_username) == 0) {
                     $userNameValid = true;

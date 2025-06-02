@@ -34,6 +34,8 @@
                 <livewire:settings.permission-info></livewire:settings.permission-info>
             @elseif ($settingToDisplay == "roleInfo")
                 <livewire:settings.role-info></livewire:settings.role-info>
+            @elseif ($settingToDisplay == "userInfo")
+                <livewire:settings.user-info></livewire:settings.user-info>
             @endif
         </div>
     </div>
