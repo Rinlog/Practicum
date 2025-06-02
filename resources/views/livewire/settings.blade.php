@@ -30,6 +30,8 @@
                 <livewire:settings.software-component-info></livewire:settings.software-component-info>
             @elseif ($settingToDisplay == "resourceInfo")
                 <livewire:settings.resources></livewire:settings.resources>
+            @elseif ($settingToDisplay == "permissionInfo")
+                <livewire:settings.permission-info></livewire:settings.permission-info>
             @endif
         </div>
     </div>

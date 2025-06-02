@@ -163,7 +163,7 @@
         @script
         <script>
             
-            const ItemsSelected = [];
+            let ItemsSelected = [];
 
             let AddMenuStatus = false;
             let EditMenuStatus = false;
@@ -483,6 +483,7 @@
                 ItemsToUnCheck.forEach(function(item){
                     $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
                 })
+                ItemsSelected = [];
                 //update buttons
                 EnableDisableEditDelete();
 
