@@ -27,7 +27,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Application Sensor Association </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Application Sensor Type Association </label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -114,7 +114,7 @@
         {{-- form --}}  
         <form>
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" optionName="sensor_type" optionId="sensor_type_id" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
+                    <livewire:components.frm-select-box selectMessage="Sensor Type:" id="SensorType" key="{{ Str::random() }}" optionName="sensor_type" optionId="sensor_type_id" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}

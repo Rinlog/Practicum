@@ -98,7 +98,7 @@
         {{-- form --}}  
         <form>
             <div id="AddSensor" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" optionId="sensor_type_id" optionName="sensor_type" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
+                    <livewire:components.frm-select-box selectMessage="Sensor Type:" id="SensorType" key="{{ Str::random() }}" optionId="sensor_type_id" optionName="sensor_type" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
                     <livewire:components.req-underline-input id="SensorName" placeholder="Sensor Name" type="text"></livewire:components.req-underline-input>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
@@ -129,7 +129,7 @@
         {{-- form --}}  
         <form>
             <div id="EditSensor" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" optionId="sensor_type_id" optionName="sensor_type" :options="$SensorTypeInfo" ></livewire:components.frm-select-box>
+                    <livewire:components.frm-select-box selectMessage="Sensor Type:" id="SensorType" key="{{ Str::random() }}" optionId="sensor_type_id" optionName="sensor_type" :options="$SensorTypeInfo" ></livewire:components.frm-select-box>
                     <livewire:components.req-underline-input id="SensorName" placeholder="Sensor Name" type="text"></livewire:components.req-underline-input>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>

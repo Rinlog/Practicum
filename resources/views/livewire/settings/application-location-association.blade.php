@@ -115,6 +115,7 @@
         <form>
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                        <label class="pl-2 text-lg">Organization:</label>
                         <select id="organizations" class="w-full pl-2">
                             @foreach ($Organizations as $option)
                                 <option class="bg-gray-500" id="{{ $option->organization_id }}" wire:click="$js.DisplayInfoBasedOnOrg('{{ $option->organization_id }}')">{{ $option->organization_name }}</option>
@@ -122,13 +123,14 @@
                         </select>
                     </div> 
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                        <label class="pl-2 text-lg">Locations:</label>
                         <select id="locations" class="w-full pl-2">
                             @foreach ($Locations as $option)
                                 <option class="bg-gray-500" id="{{ $option->location_id }}" wire:click="$js.DisplayInfoBasedOnLocation('{{ $option->location_id }}')">{{ $option->location_name }}</option>
                             @endforeach
                         </select>
                     </div> 
-                    <livewire:components.frm-select-box id="subLocations" key="{{ Str::random() }}"></livewire:components.frm-select-box>
+                    <livewire:components.frm-select-box selectMessage="Sub Locations:" id="subLocations" key="{{ Str::random() }}"></livewire:components.frm-select-box>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}

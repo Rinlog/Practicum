@@ -13,6 +13,7 @@ class FrmSelectBox extends Component
     public $optionName = "";
     public $onChange = "";
     public $optionId = "";
+    public $selectMessage;
     public function render()
     {
         return view('livewire..components.frm-select-box');

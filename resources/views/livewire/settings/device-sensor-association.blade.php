@@ -130,12 +130,13 @@
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     @if (isset($Sensors))
                         <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                            <label class="pl-2 text-lg">Sensors:</label>
                             <select id="Sensors" class="w-full pl-2">
                                 @foreach ($Sensors as $option)
                                     <option class="bg-gray-500" id="{{ $option->sensor_id }}" wire:click="$js.SetSensorType('{{ $option->sensor_type_id }}')">{{ $option->sensor_name }}</option>
                                 @endforeach
                             </select>
-                        </div> 
+                        </div>
                     @endif
                     <div class="mt-6 pl-2 text-lg flex flex-col">
                         <label>Sensor Type:</label>

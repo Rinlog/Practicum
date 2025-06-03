@@ -293,7 +293,7 @@ class ApplicationLocationAssociation extends Component
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
             "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-            "log_activity_desc"=>"Downloaded CSV of Application sensor type association Info"
+            "log_activity_desc"=>"Downloaded CSV of Application location association Info"
         ]);
     }
     public function render()
