@@ -5,15 +5,29 @@
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
             <div id="OrganizationSelector" class="w-full flex items-center">
-                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Application</label>
+                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
                 <div class="selectWrapperLG w-full">
                     <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach($Applications as $application)
-                            @if (isset($ApplicationInfo))
-                                @if ($application->application_id == $ApplicationInfo->application_id)
-                                    <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                        @foreach($Organizations as $org)
+                            @if (isset($_SESSION["User"]))
+                                @if ($org->organization_id == $OrgInfo->organization_id)
+                                    <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                 @else
-                                    <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                    <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                @endif
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Device</label>
+                <div class="selectWrapperLG w-full">
+                    <select id="Devices" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        @foreach($Devices as $device)
+                            @if (isset($DeviceInfo))
+                                @if ($device->device_eui == $DeviceInfo->device_eui)
+                                    <option selected wire:click="$js.ChangeDevice($event,'{{ $device->device_eui }}')" id="{{ $device->device_eui }}">{{ $device->device_name }}</option>
+                                @else
+                                    <option wire:click="$js.ChangeDevice($event,'{{ $device->device_eui }}')" id="{{ $device->device_eui }}">{{ $device->device_name }}</option>
                                 @endif
                             @endif
                         @endforeach
@@ -27,7 +41,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Application Sensor Association </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Device Sensor Association </label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -114,7 +128,19 @@
         {{-- form --}}  
         <form>
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box id="SensorType" key="{{ Str::random() }}" optionName="sensor_type" optionId="sensor_type_id" :options="$SensorTypeInfo"></livewire:components.frm-select-box>
+                    @if (isset($Sensors))
+                        <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                            <select id="Sensors" class="w-full pl-2">
+                                @foreach ($Sensors as $option)
+                                    <option class="bg-gray-500" id="{{ $option->sensor_id }}" wire:click="$js.SetSensorType('{{ $option->sensor_type_id }}')">{{ $option->sensor_name }}</option>
+                                @endforeach
+                            </select>
+                        </div> 
+                    @endif
+                    <div class="mt-6 pl-2 text-lg flex flex-col">
+                        <label>Sensor Type:</label>
+                        <b class="text-lg" id="sensorType"></b>
+                    </div>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -145,12 +171,16 @@
         <form>
             <div id="EditAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                 <div class="mt-6 pl-2 text-lg flex flex-col">
-                    <label>Application:</label>
-                    <b class="text-lg" id="application"></b>
+                    <label>Device Name:</label>
+                    <b class="text-lg" id="deviceName"></b>
                 </div>
                 <div class="mt-4 pl-2 text-lg flex flex-col">
                     <label>Sensor Type: </label>
                     <b class="text-lg" id="sensorType"></b>
+                </div>
+                <div class="mt-4 pl-2 text-lg flex flex-col">
+                    <label>Sensor Name: </label>
+                    <b class="text-lg" id="sensorName"></b>
                 </div>
                 <div class="mt-4 pl-2 text-lg flex flex-col">
                     <label>Creation Time: </label>
@@ -185,6 +215,10 @@
             let user = $wire.user;
             let ActionsDone = [];
             let TableObjects = [];
+            let organization = "";
+            let device = "";
+            let SensorTypes = $wire.SensorTypes;
+            let Sensors = $wire.Sensors;
             function EnableDisableEditDelete(){
                 console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
@@ -288,20 +322,21 @@
                 let result = "";
                 let IDDupeCount = 0;
                 let IDAsName = $("option[id='"+ID.toString().trim()+"']").val();
+                console.log(IDAsName);
                 $("#InfoTable").children().each(function(index){
-                    let id = $(this).children()[3].textContent;
+                    let id = $(this).children()[4].textContent;
                     if (id.toString() == IDAsName.toString()){
                         IDDupeCount+=1
                     }
                 });
                 if (Mode == "add"){
                     if (IDDupeCount >= 1){
-                        return "Application sensor associatian already exists";
+                        return "Device sensor associatian already exists";
                     }
                 }
                 else if (Mode == "edit"){
                     if (IDDupeCount > 1){
-                        return "Application sensor associatian already exists";
+                        return "Device sensor associatian already exists";
                     }
                 }
                 return "";
@@ -311,7 +346,7 @@
                 
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("AddAssoc");
-                let result = ValidateIfUnique(FormVals[0],"add");
+                let result = ValidateIfUnique(FormVals[1],"add");
                 if (result != ""){
                     setAlertText(result);
                     displayAlert();
@@ -320,9 +355,9 @@
 
                 //chk
                 let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[0]);
+                tr.id=SpaceToUnderScore(FormVals[1]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[1]+"')\">"
                 tr.appendChild(checkboxTD);
 
                 //sequence
@@ -334,21 +369,27 @@
                 FormVals.forEach(function(value,index){
                     if (index == 0){
                         let td2 = document.createElement("td");
-                        td2.textContent = application;
+                        td2.textContent = device;
                         tr.appendChild(td2);
+                        //putting value of option instead of id
+                        let td = document.createElement("td");
+                        td.textContent = value.toString().trim();
+                        tr.appendChild(td)
+                    }
+                    else if (index == 1){
                         //putting value of option instead of id
                         let td = document.createElement("td");
                         td.textContent = $("option[id='"+value.toString().trim()+"']").val();
                         tr.appendChild(td)
-                    }
-                    else if (index == 1){
-                        //just appending current date plus who made Application sensor assoc
+                        //just appending current date plus who made Application device assoc
                         let td2 = document.createElement("td");
                         td2.textContent = CurrentDateTimeAsString();
                         tr.appendChild(td2);
                         let td3 = document.createElement("td");
                         td3.textContent = user["user_username"];
                         tr.appendChild(td3);
+                    }
+                    else{
                         let td = document.createElement("td");
                         td.textContent = value.toString().trim();
                         tr.appendChild(td)
@@ -357,7 +398,7 @@
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added application sensor type association");
+                setAlertText("Successfully added device sensor association");
                 displayAlert();
                 closeAddMenu()
             });
@@ -382,7 +423,8 @@
             }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #SensorType`).find('option:selected').attr("id"));
+                FormVals.push($(`#${EditAdd} #sensorType`).text());
+                FormVals.push($(`#${EditAdd} #Sensors`).find('option:selected').attr("id"));
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
@@ -396,7 +438,7 @@
                 let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
                 $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
                     //we exclude the checkbox, sequence num, exclude org name
-                    if (index >=6){
+                    if (index >=7){
                         $(this).text(FormVals[FormVals.length-1]);
                     }
                 });
@@ -415,7 +457,7 @@
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated application sensor type association");
+                    setAlertText("Successfully updated device sensor association");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -458,8 +500,9 @@
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
-                    $("#EditAssoc #application").text(Obj["APPLICATION"]);
+                    $("#EditAssoc #deviceName").text(Obj["DEVICE NAME"]);
                     $("#EditAssoc #sensorType").text(Obj["SENSOR TYPE"]);
+                    $("#EditAssoc #sensorName").text(Obj["SENSOR NAME"]);
                     $("#EditAssoc #creationTime").text(Obj["CREATION TIME"]);
                     $("#EditAssoc #createdBy").text(Obj["CREATED BY"]);
                     $("#EditAssoc #description").val(Obj["DESCRIPTION"]);
@@ -472,7 +515,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[3].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[2].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -517,6 +560,7 @@
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
+                await $wire.call("LoadOrganizations");
                 await $wire.call("LoadInfo");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
@@ -538,11 +582,12 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted sensor type associations");
+                    setAlertText("Successfully deleted device sensor associations");
                     displayAlert();
                 });
                 closeAddMenu();
                 closeEditMenu();
+                SetSensorType(Sensors[0]["sensor_type_id"]);//make sure to call this after all $wire calls, since it just modifys js
             }
             $js("saveToDB",async function(ev){
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
@@ -558,14 +603,14 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update association for\"" + Obj["SENSOR TYPE"] + "\"<br>";
+                                ErrorMsg += "Failed to update association for\"" + Obj["SENSOR NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert association for\"" + Obj["SENSOR TYPE"] + "\"<br>";
+                                ErrorMsg += "Failed to insert association for\"" + Obj["SENSOR NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
@@ -590,20 +635,39 @@
                     displayAlert();
                 }
             })
-            $js("ChangeApplication",async function(ev,Application){
-                await $wire.call("SetApplication",Application)
-                application = $wire.application;
+            $js("ChangeOrg",async function(ev,Org){
+                await $wire.call("SetOrg",Org)
+                await $wire.call("LoadDevices");
+                await $wire.call("SetDefaultDevice");
+                organization = $wire.organization;
+                device = $wire.device;
+                await refresh();
+            })
+            $js("ChangeDevice",async function(ev,Device){
+                await $wire.call("SetDevice",Device)
+                organization = $wire.organization;
+                device = $wire.device;
                 await refresh();
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
-                await $wire.call("LoadApplications");
-                await $wire.call("setDefaultApplication");
-                application = $wire.application;
+                await $wire.call("LoadUsersOrganization");
+                await $wire.call("LoadDevices");
+                await $wire.call("SetDefaultDevice");
+                organization = $wire.organization;
+                device = $wire.device;
                 await refresh();
                 EnableDisableEditDelete();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            $js("SetSensorType",SetSensorType);
+            function SetSensorType(SensorTypeID){
+                $(SensorTypes).each(function(index){
+                    if ($(this)[0]["sensor_type_id"] == SensorTypeID){
+                        $("#AddAssoc #sensorType").text($(this)[0]["sensor_type"]);
+                    }
+                })
+            }
             function SpaceToUnderScore(input){
                 return input.replaceAll(" ","_");
             }
@@ -677,7 +741,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("Application-SensorTypeAssocInfo.csv",TableObjects);
+                    let result = exportToCsv("Device-SensorAssocInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){

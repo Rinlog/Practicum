@@ -550,6 +550,8 @@
                     setAlertText("Successfully deleted device associations");
                     displayAlert();
                 });
+                closeAddMenu();
+                closeEditMenu();
                 DisplayDevicesBasedOnOrg(organizations[0]["organization_id"]);//make sure to call this after all $wire calls, since it just modifys js
             }
             $js("saveToDB",async function(ev){

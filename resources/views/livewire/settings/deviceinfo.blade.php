@@ -587,6 +587,8 @@
                     setAlertText("Successfully deleted devices");
                     displayAlert();
                 });
+                closeAddMenu();
+                closeEditMenu();
             }
             $js("saveToDB",async function(ev){
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));

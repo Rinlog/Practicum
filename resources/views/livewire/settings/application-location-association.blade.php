@@ -310,7 +310,7 @@
                 let IDDupeCount = 0;
                 let IDAsName = $("option[id='"+ID.toString().trim()+"']").val();
                 $("#InfoTable").children().each(function(index){
-                    let id = $(this).children()[3].textContent;
+                    let id = $(this).children()[4].textContent;
                     if (id.toString() == IDAsName.toString()){
                         IDDupeCount+=1
                     }
@@ -570,6 +570,8 @@
                     setAlertText("Successfully deleted application location associations");
                     displayAlert();
                 });
+                closeAddMenu();
+                closeEditMenu();
                 DisplayInfoBasedOnOrg(organizations[0]["organization_id"]);//make sure to call this after all $wire calls, since it just modifys js
                 DisplayInfoBasedOnLocation(locations[0]["location_id"]);
             }

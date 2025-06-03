@@ -513,6 +513,8 @@
                     setAlertText("Successfully deleted Sensor Data Type(s)");
                     displayAlert();
                 });
+                closeAddMenu();
+                closeEditMenu();
             }
             $js("ChangeComponent",async function(ev,Component){
                 await $wire.call("setComponent",Component);

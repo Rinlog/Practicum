@@ -42,6 +42,8 @@
                 <livewire:settings.application-device-association></livewire:settings.application-device-association>
             @elseif ($settingToDisplay == "applicationLocationAssociation")
                 <livewire:settings.application-location-association></livewire:settings.application-location-association>
+            @elseif ($settingToDisplay == "deviceSensorAssociation")
+                <livewire:settings.device-sensor-association></livewire:settings.device-sensor-association>
             @endif
         </div>
     </div>
