@@ -12,6 +12,7 @@ class FrmSelectBox extends Component
     #[Reactive]
     public $optionName = "";
     public $onChange = "";
+    public $optionId = "";
     public function render()
     {
         return view('livewire..components.frm-select-box');

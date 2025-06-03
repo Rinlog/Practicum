@@ -36,6 +36,8 @@
                 <livewire:settings.role-info></livewire:settings.role-info>
             @elseif ($settingToDisplay == "userInfo")
                 <livewire:settings.user-info></livewire:settings.user-info>
+            @elseif ($settingToDisplay == "applicationSensorTypeAssociation")
+                <livewire:settings.application-sensor-type-association></livewire:settings.application-sensor-type-association>
             @endif
         </div>
     </div>
