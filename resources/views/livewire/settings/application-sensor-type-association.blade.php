@@ -538,7 +538,7 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Applications");
+                    setAlertText("Successfully deleted sensor type associations");
                     displayAlert();
                 });
             }

@@ -27,7 +27,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Application Device Association </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Application Location Association </label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -117,11 +117,18 @@
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                         <select id="organizations" class="w-full pl-2">
                             @foreach ($Organizations as $option)
-                                <option class="bg-gray-500" id="{{ $option->organization_id }}" wire:click="$js.DisplayDevicesBasedOnOrg('{{ $option->organization_id }}')">{{ $option->organization_name }}</option>
+                                <option class="bg-gray-500" id="{{ $option->organization_id }}" wire:click="$js.DisplayInfoBasedOnOrg('{{ $option->organization_id }}')">{{ $option->organization_name }}</option>
                             @endforeach
                         </select>
                     </div> 
-                    <livewire:components.frm-select-box id="devices" key="{{ Str::random() }}"></livewire:components.frm-select-box>
+                    <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                        <select id="locations" class="w-full pl-2">
+                            @foreach ($Locations as $option)
+                                <option class="bg-gray-500" id="{{ $option->location_id }}" wire:click="$js.DisplayInfoBasedOnLocation('{{ $option->location_id }}')">{{ $option->location_name }}</option>
+                            @endforeach
+                        </select>
+                    </div> 
+                    <livewire:components.frm-select-box id="subLocations" key="{{ Str::random() }}"></livewire:components.frm-select-box>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -156,8 +163,12 @@
                     <b class="text-lg" id="application"></b>
                 </div>
                 <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Device Name: </label>
-                    <b class="text-lg" id="deviceName"></b>
+                    <label>Location: </label>
+                    <b class="text-lg" id="location"></b>
+                </div>
+                <div class="mt-4 pl-2 text-lg flex flex-col">
+                    <label>Sub Location: </label>
+                    <b class="text-lg" id="subLocation"></b>
                 </div>
                 <div class="mt-4 pl-2 text-lg flex flex-col">
                     <label>Creation Time: </label>
@@ -193,7 +204,8 @@
             let ActionsDone = [];
             let TableObjects = [];
             let organizations = $wire.Organizations;
-            let devices = $wire.Devices;
+            let locations = $wire.Locations;
+            let subLocations = $wire.SubLocations;
             function EnableDisableEditDelete(){
                 console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
@@ -305,12 +317,12 @@
                 });
                 if (Mode == "add"){
                     if (IDDupeCount >= 1){
-                        return "Application device associatian already exists";
+                        return "Application location associatian already exists";
                     }
                 }
                 else if (Mode == "edit"){
                     if (IDDupeCount > 1){
-                        return "Application device associatian already exists";
+                        return "Application location associatian already exists";
                     }
                 }
                 return "";
@@ -320,7 +332,7 @@
                 
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("AddAssoc");
-                let result = ValidateIfUnique(FormVals[0],"add");
+                let result = ValidateIfUnique(FormVals[1],"add");
                 if (result != ""){
                     setAlertText(result);
                     displayAlert();
@@ -329,9 +341,9 @@
 
                 //chk
                 let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[0]);
+                tr.id=SpaceToUnderScore(FormVals[1]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[1]+"')\">"
                 tr.appendChild(checkboxTD);
 
                 //sequence
@@ -351,6 +363,10 @@
                         tr.appendChild(td)
                     }
                     else if (index == 1){
+                        //putting value of option instead of id
+                        let td = document.createElement("td");
+                        td.textContent = $("option[id='"+value.toString().trim()+"']").val();
+                        tr.appendChild(td)
                         //just appending current date plus who made Application device assoc
                         let td2 = document.createElement("td");
                         td2.textContent = CurrentDateTimeAsString();
@@ -358,6 +374,8 @@
                         let td3 = document.createElement("td");
                         td3.textContent = user["user_username"];
                         tr.appendChild(td3);
+                    }
+                    else{
                         let td = document.createElement("td");
                         td.textContent = value.toString().trim();
                         tr.appendChild(td)
@@ -366,7 +384,7 @@
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added application device association");
+                setAlertText("Successfully added application location association");
                 displayAlert();
                 closeAddMenu()
             });
@@ -391,7 +409,8 @@
             }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #devices`).find('option:selected').attr("id"));
+                FormVals.push($(`#${EditAdd} #locations`).find('option:selected').attr("id"));
+                FormVals.push($(`#${EditAdd} #subLocations`).find('option:selected').attr("id"));
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
@@ -405,7 +424,7 @@
                 let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
                 $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
                     //we exclude the checkbox, sequence num, exclude org name
-                    if (index >=6){
+                    if (index >=7){
                         $(this).text(FormVals[FormVals.length-1]);
                     }
                 });
@@ -424,7 +443,7 @@
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated application device association");
+                    setAlertText("Successfully updated application location association");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -468,7 +487,8 @@
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
                     $("#EditAssoc #application").text(Obj["APPLICATION"]);
-                    $("#EditAssoc #deviceName").text(Obj["DEVICE NAME"]);
+                    $("#EditAssoc #location").text(Obj["LOCATION"]);
+                    $("#EditAssoc #subLocation").text(Obj["SUB-LOCATION"]);
                     $("#EditAssoc #creationTime").text(Obj["CREATION TIME"]);
                     $("#EditAssoc #createdBy").text(Obj["CREATED BY"]);
                     $("#EditAssoc #description").val(Obj["DESCRIPTION"]);
@@ -547,10 +567,11 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted device associations");
+                    setAlertText("Successfully deleted application location associations");
                     displayAlert();
                 });
-                DisplayDevicesBasedOnOrg(organizations[0]["organization_id"]);//make sure to call this after all $wire calls, since it just modifys js
+                DisplayInfoBasedOnOrg(organizations[0]["organization_id"]);//make sure to call this after all $wire calls, since it just modifys js
+                DisplayInfoBasedOnLocation(locations[0]["location_id"]);
             }
             $js("saveToDB",async function(ev){
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
@@ -566,14 +587,14 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update association for\"" + Obj["DEVICE NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update association for\"" + Obj["SUB-LOCATION"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert association for\"" + Obj["DEVICE NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert association for\"" + Obj["SUB-LOCATION"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
@@ -612,24 +633,46 @@
                 EnableDisableEditDelete();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
-            $js("DisplayDevicesBasedOnOrg",DisplayDevicesBasedOnOrg);
-            function DisplayDevicesBasedOnOrg(Org){
+            $js("DisplayInfoBasedOnOrg",DisplayInfoBasedOnOrg);
+            $js("DisplayInfoBasedOnLocation",DisplayInfoBasedOnLocation)
+            function DisplayInfoBasedOnOrg(Org){
                 try{
-                    let DisplayDevices = [];
-                    $(devices).each(function(index){
+                    let DisplayLocations = [];
+                    $(locations).each(function(index){
                         if (Org == $(this)[0]["organization_id"]){
-                            DisplayDevices.push($(this));
+                            DisplayLocations.push($(this));
+                            
+                        }
+                    })
+
+                    $("#locations").html("");
+                    let InfoString = "";
+                    $(DisplayLocations).each(function(index){
+                        InfoString+="<option class='bg-gray-500' id="+$(this)[0]["location_id"]+" wire:click=\"$js.DisplayInfoBasedOnLocation('"+$(this)[0]["location_id"]+"')\">"+$(this)[0]["location_name"]+"</option>"
+                    })
+                    $("#locations").html(InfoString);
+                }
+                catch(e){
+                    console.log(e);
+                }
+            }
+            function DisplayInfoBasedOnLocation(location){
+                try{
+                    let DisplayLocations = [];
+                    $(subLocations).each(function(index){
+                        if (location == $(this)[0]["location_id"]){
+                            DisplayLocations.push($(this));
                             
                         }
                     })
                     
-                    $("#devices").html("");
-                    $(DisplayDevices).each(function(index){
+                    $("#subLocations").html("");
+                    $(DisplayLocations).each(function(index){
                         let Option = document.createElement("option");
-                        Option.id = $(this)[0]["device_eui"];
+                        Option.id = $(this)[0]["sub_location_id"];
                         $(Option).addClass("bg-gray-500")
-                        Option.textContent = $(this)[0]["device_name"];
-                        $("#devices").append(Option);
+                        Option.textContent = $(this)[0]["sub_location_name"];
+                        $("#subLocations").append(Option);
                     })
                 }
                 catch(e){
@@ -709,7 +752,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("Application-DeviceAssocInfo.csv",TableObjects);
+                    let result = exportToCsv("Application-LocationAssocInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
