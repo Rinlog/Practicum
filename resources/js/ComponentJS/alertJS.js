@@ -4,14 +4,14 @@ import $ from 'jquery';
 export function OpenAlert(){
     $("#AlertBox").removeClass("hide");
     setTimeout(function(){
+        $("#AlertBox").removeClass("opacity-0 min-w-0")
         $("#AlertBox").addClass("min-w-100 opacity-100")
-        $("#AlertBox").removeClass("opacity-0 w-0")
     },25)
 }
 export function CloseAlert(){
     $("#AlertText").text("");
     $("#AlertBox").removeClass("min-w-100 opacity-100")
-    $("#AlertBox").addClass("opacity-0 w-0")
+    $("#AlertBox").addClass("opacity-0 min-w-0")
     setTimeout(function(){
         $("#AlertBox").addClass("hide");
     },300)

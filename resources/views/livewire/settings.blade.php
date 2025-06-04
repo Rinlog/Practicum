@@ -50,6 +50,8 @@
                 <livewire:settings.user-role-association></livewire:settings.user-role-association>
             @elseif ($settingToDisplay == "sensorDataTypeAssociation")
                 <livewire:settings.sensor-data-type-association></livewire:settings.sensor-data-type-association>
+            @elseif ($settingToDisplay == "deviceDeployement")
+                <livewire:settings.device-deployment></livewire:settings.device-deployment>
             @endif
         </div>
     </div>
