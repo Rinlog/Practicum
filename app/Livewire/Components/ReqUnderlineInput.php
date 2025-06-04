@@ -10,6 +10,7 @@ class ReqUnderlineInput extends Component
     public $placeholder = "";
     public $type="";
     public $value="";
+    public $text;
     public function render()
     {
         return view('livewire.components.req-underline-input');

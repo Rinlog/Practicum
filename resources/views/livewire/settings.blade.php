@@ -46,6 +46,8 @@
                 <livewire:settings.device-sensor-association></livewire:settings.device-sensor-association>
             @elseif ($settingToDisplay == "rolePermissionAssociation")
                 <livewire:settings.role-permission-association></livewire:settings.role-permission-association>
+            @elseif ($settingToDisplay == "userRoleAssociation")
+                <livewire:settings.user-role-association></livewire:settings.user-role-association>
             @endif
         </div>
     </div>

@@ -12,6 +12,7 @@ class UnderlineInput extends Component
     public $value="";
     public $customStyles = "";
     public $borderColor = "border-[#32a3cf]";
+    public $text;
     public function render()
     {
         return view('livewire..components.underline-input');
