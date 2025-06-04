@@ -7,26 +7,29 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use \Exception;
-class RolePermissionAssociation extends Component
+
+class SensorDataTypeAssociation extends Component
 {
     public $headers = [
         "SEQ.",
-        "COMPONENT",
-        "ROLE",
-        "PERMISSION",
+        "SENSOR ID",
+        "DATA ITEM NAME",
+        "INCOMING DATA ITEM NAME",
+        "DATA TYPE",
+        "DATA VALUE SET TYPE",
+        "DATA VALUE SET",
+        "DATA UNITS",
         "CREATION TIME",
         "CREATED BY",
         "DESCRIPTION"
     ];
-    public $component = "";
-    public $ComponentInfo;
-    public $Components = [];
+    public $sensor = "";
+    public $SensorInfo;
+    public $Sensors = [];
     public $user = "";
+    public $SensorDataTypes = [];
+    public $SensorDataTypeNames = [];
     public $DisplayTableInfo = "";
-    public $Roles = [];
-    public $role = "";
-    public $RoleInfo;
-    public $Permissions = [];
     public function LoadUserInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -40,29 +43,29 @@ class RolePermissionAssociation extends Component
             }
         }
     }
-    public function LoadSoftwareComponents(){
+    public function LoadSensors(){
         try{
-            $this->Components = DB::table("software_component")->get()->toArray();
+            $this->Sensors = DB::table("sensor")->get()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-    public function setDefaultComponent(){
+    public function setDefaultSensor(){
         try{
-            $this->component = $this->Components[0]->component_name;
-            $this->ComponentInfo = $this->Components[0];
+            $this->sensor = $this->Sensors[0]->sensor_name;
+            $this->SensorInfo = $this->Sensors[0];
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-    public function setComponent($componentID){
+    public function setSensor($SensorID){
         try{
-           foreach($this->Components as $component){
-                if($component->component_id == $componentID){
-                    $this->component = $component->component_name;
-                    $this->ComponentInfo = $component;
+           foreach($this->Sensors as $sensor){
+                if($sensor->sensor_id == $SensorID){
+                    $this->sensor = $sensor->sensor_name;
+                    $this->SensorInfo = $sensor;
                 }
             }
         }
@@ -70,66 +73,13 @@ class RolePermissionAssociation extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-    public function LoadRoles(){
+    public function LoadSensorDataTypes(){
         try{
-            $this->Roles = DB::table("role")->where("component_id", $this->ComponentInfo->component_id)->get()->toArray();
+            $this->SensorDataTypes = DB::table("sensor_data_types")->get()->toArray();
+            $this->SensorDataTypeNames = DB::table("sensor_data_types")->groupBy("data_type")->get("data_type")->toArray();
         }
         catch(Exception $e){
-
-        }
-    }
-    public function SetDefaultRole(){
-        try{
-            $this->role = $this->Roles[0]->role_name;
-            $this->RoleInfo = $this->Roles[0];
-        }
-        catch(Exception $e){
-
-        }
-    }
-    public function SetRole($NewRoleID){
-        try{
-            foreach ($this->Roles as $Role){
-                if ($Role->role_id == $NewRoleID) {
-                    $this->role = $Role->role_name;
-                    $this->RoleInfo = $Role;
-                }
-            }
-        }
-        catch(Exception $e){
-
-        }
-    }
-    public function LoadPermission(){
-        try{
-            $this->Permissions = DB::table("permission")->get()->toArray();
-        }
-        catch(Exception $e){
-
-        }
-    }
-    public function SearchForPermission($PermissionID){
-        try{
-            foreach( $this->Permissions as $Permission ){
-                if ($Permission->permission_id == $PermissionID) {
-                    return $Permission;
-                }
-            }
-        }
-        catch(Exception $e){
-        
-        }
-    }
-    public function SearchForPermissionByName($PermissionName){
-        try{
-            foreach( $this->Permissions as $Permission ){
-                if ($Permission->permission_name == $PermissionName) {
-                    return $Permission;
-                }
-            }
-        }
-        catch(Exception $e){
-        
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function LoadInfo(){
@@ -138,19 +88,23 @@ class RolePermissionAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("role_permission_association")->where("role_id", $this->RoleInfo->role_id)->get();
+                $assocInfo = DB::table("sensor_data_types_association")->where("sensor_id", $this->SensorInfo->sensor_id)->get();
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
-                    $Permission = $this->SearchForPermission($assoc->permission_id);
+                    $DataValueSet = $this->DecodePostGresJson($assoc->data_value_set);
                     $this->DisplayTableInfo.=
-                    "<tr id={$assoc->permission_id}>
+                    "<tr id={$assoc->data_item_name}>
                         <td>
-                        <input type='checkbox' wire:click=\"\$js.ItemChecked(\$event,'{$assoc->permission_id}')\">
+                        <input type='checkbox' wire:click=\"\$js.ItemChecked(\$event,'{$assoc->data_item_name}')\">
                         </td>
                         <td></td>
-                        <td>{$this->ComponentInfo->component_name}</td>
-                        <td>{$this->RoleInfo->role_name}</td>
-                        <td>{$Permission->permission_name}</td>
+                        <td>{$assoc->sensor_id}</td>
+                        <td>{$assoc->data_item_name}</td>
+                        <td>{$assoc->incoming_data_item_name}</td>
+                        <td>{$assoc->data_type}</td>
+                        <td>{$assoc->data_value_set_type}</td>
+                        <td>{$DataValueSet}</td>
+                        <td>{$assoc->data_units}</td>
                         <td>{$assoc->assoc_creation_time}</td>
                         <td>{$assoc->assoc_created_by}</td>
                         <td>{$assoc->assoc_desc}</td>
@@ -171,6 +125,28 @@ class RolePermissionAssociation extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    function FormatToPostGresJson($input){
+        try{
+            $input = json_encode([$input]);
+            $input = str_replace("[","{", $input);
+            $input = str_replace("]","}", $input);
+            return $input;
+        }
+        catch(Exception $e){
+            Log::channel("customLog")->error($e->getMessage());
+        }
+    }
+    function DecodePostGresJson($input){
+        try{
+            $input = str_replace("{","[", $input);
+            $input = str_replace("}","]", $input);
+            $input = json_decode($input);
+            return $input[0];
+        }
+        catch(Exception $e){
+            Log::channel("customLog")->error($e->getMessage());
+        }
+    }
     public function SaveToDb($actions){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -184,11 +160,16 @@ class RolePermissionAssociation extends Component
             $Value = $ActionSplit[1];
             if (str_contains(strtolower($Query),"insert")) {
                 $Object = json_decode($Value);
+                $ValueSet = $this->FormatToPostGresJson($Object->{"DATA VALUE SET"});
                 try{
-                    $Permission = $this->SearchForPermissionByName($Object->{"PERMISSION"});
-                    $result = DB::table("role_permission_association")->insert([
-                        "role_id"=> $this->RoleInfo->role_id,
-                        "permission_id"=> $Permission->permission_id,
+                    $result = DB::table("sensor_data_types_association")->insert([
+                        "sensor_id"=> $Object->{"SENSOR ID"},
+                        "data_item_name"=> $Object->{"DATA ITEM NAME"},
+                        "incoming_data_item_name"=> $Object->{"INCOMING DATA ITEM NAME"},
+                        "data_type"=> $Object->{"DATA TYPE"},
+                        "data_value_set_type"=> $Object->{"DATA VALUE SET TYPE"},
+                        "data_value_set"=> $ValueSet,
+                        "data_units"=> $Object->{"DATA UNITS"},
                         "assoc_creation_time" => now(),
                         "assoc_created_by"=>$_SESSION["User"]->user_username,
                         "assoc_desc"=> $Object->{"DESCRIPTION"},
@@ -197,7 +178,7 @@ class RolePermissionAssociation extends Component
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"associated permission ".$Permission->permission_id." with role " . $this->RoleInfo->role_id
+                        "log_activity_desc"=>"Inserted sensor data type association: " . $Object->{"SENSOR ID"} . ", " . $Object->{"DATA ITEM NAME"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -209,13 +190,14 @@ class RolePermissionAssociation extends Component
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
                 try{
-                    $result = DB::table("role_permission_association")->where("role_id", $this->RoleInfo->role_id)->whereIn("permission_id", $ItemsToDelete)->delete();
 
+                    $result = DB::table("sensor_data_types_association")->where("sensor_id", $this->SensorInfo->sensor_id)->whereIn("data_item_name", $ItemsToDelete)->delete();
+                    
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"DELETE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"deleted role permission association(s): ". $Value
+                        "log_activity_desc"=>"Deleted sensor data type association(s): " . $Value
                     ]);
                     array_push($Results, $result);
                 }
@@ -231,15 +213,21 @@ class RolePermissionAssociation extends Component
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
 
-                    $Permission = $this->SearchForPermissionByName($Object->{"PERMISSION"});
-                    $result = DB::table("role_permission_association")->where("role_id", $this->RoleInfo->role_id)->where("permission_id",$idToUpdate)->update([
+                    $ValueSet = $this->FormatToPostGresJson($Object->{"DATA VALUE SET"});
+                    $result = DB::table("sensor_data_types_association")->where("sensor_id", $this->SensorInfo->sensor_id)->where("data_item_name", $idToUpdate)->update([
+                        "data_item_name"=> $Object->{"DATA ITEM NAME"},
+                        "incoming_data_item_name"=> $Object->{"INCOMING DATA ITEM NAME"},
+                        "data_type"=> $Object->{"DATA TYPE"},
+                        "data_value_set_type"=> $Object->{"DATA VALUE SET TYPE"},
+                        "data_value_set"=> $ValueSet,
+                        "data_units"=> $Object->{"DATA UNITS"},
                         "assoc_desc"=> $Object->{"DESCRIPTION"},
                     ]);
-                    DB::table("log")->insert([
+                   DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"updated role permission association: ".$this->RoleInfo->role_id.", " . $Permission->permission_id
+                        "log_activity_desc"=>"Updated sensor data type association: " . $Object->{"SENSOR ID"} . ", " . $Object->{"DATA TYPE"}
                     ]);
                     array_push($Results, $result);
                 }
@@ -260,13 +248,13 @@ class RolePermissionAssociation extends Component
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
             "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-            "log_activity_desc"=>"Downloaded CSV of role permission association Info"
+            "log_activity_desc"=>"Downloaded CSV of user role association Info"
         ]);
     }
     public function render()
     {
-        $this->LoadPermission();
         $this->LoadUserInfo();
-        return view('livewire..settings.role-permission-association');
+        $this->LoadSensorDataTypes();
+        return view('livewire..settings.sensor-data-type-association');
     }
 }

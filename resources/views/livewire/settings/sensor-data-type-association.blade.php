@@ -5,29 +5,15 @@
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
             <div id="OrganizationSelector" class="w-full flex items-center">
-                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Software Component Name</label>
+                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md ">Sensor</label>
                 <div class="selectWrapperLG w-full">
-                    <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach ($Components as $Component)
-                            @if (isset($ComponentInfo))
-                                @if($Component->component_id == $ComponentInfo->component_id)
-                                    <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                    <select id="Sensors" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        @foreach ($Sensors as $sensor)
+                            @if (isset($SensorInfo))
+                                @if($sensor->sensor_id == $SensorInfo->sensor_id)
+                                    <option selected wire:click="$js.ChangeSensor($event,'{{ $sensor->sensor_id }}')">{{ $sensor->sensor_name }}</option>
                                 @else
-                                    <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
-                                @endif
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Role</label>
-                <div class="selectWrapperLG w-full">
-                    <select id="Roles" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach ($Roles as $role)
-                            @if (isset($RoleInfo))
-                                @if($role->role_id == $RoleInfo->role_id)
-                                    <option selected wire:click="$js.ChangeRole($event,'{{ $role->role_id }}')">{{ $role->role_name }}</option>
-                                @else
-                                    <option wire:click="$js.ChangeRole($event,'{{ $role->role_id }}')">{{ $role->role_name }}</option>
+                                    <option wire:click="$js.ChangeSensor($event,'{{ $sensor->sensor_id }}')">{{ $sensor->sensor_name }}</option>
                                 @endif
                             @endif
                         @endforeach
@@ -41,7 +27,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Role Permission Association </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Sensor Data Type Association </label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -128,7 +114,19 @@
         {{-- form --}}  
         <form>
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box selectMessage="Permission:" id="permissions" key="{{ Str::random() }}" :options="$Permissions" optionName="permission_name" optionId="permission_id"></livewire:components.frm-select-box>
+                    <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                        <label class="pl-2 text-lg">Sensor Data Types:</label>
+                        <select id="sensorDataTypes" class="w-full pl-2">
+                            @foreach ($SensorDataTypeNames as $sensorDataType)
+                                <option class="bg-gray-500" id="{{ $sensorDataType->data_type }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType->data_type }}')">{{ $sensorDataType->data_type}}</option>
+                            @endforeach
+                        </select>
+                    </div> 
+                    <livewire:components.frm-select-box selectMessage="Data Value Set Type:" id="valueSetType" key="{{ Str::random() }}"></livewire:components.frm-select-box>
+                    <livewire:components.req-underline-input  id="dataItem" placeholder="Data Item Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.req-underline-input  id="incomingDataItem" placeholder="Incoming Data Item Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="dataValueSet" placeholder="Data Value Set" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="units" placeholder="Units" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -158,23 +156,20 @@
         {{-- form --}}  
         <form>
             <div id="EditAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                <div class="mt-6 pl-2 text-lg flex flex-col">
-                    <label>Role:</label>
-                    <b class="text-lg" id="role"></b>
-                </div>
-                <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Permission: </label>
-                    <b class="text-lg" id="permission"></b>
-                </div>
-                <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Creation Time: </label>
-                    <b class="text-lg" id="creationTime"></b>
-                </div>
-                <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Created By: </label>
-                    <b class="text-lg" id="createdBy"></b>
-                </div>
-                <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
+                    <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
+                        <label class="pl-2 text-lg">Sensor Data Types:</label>
+                        <select id="sensorDataTypes" class="w-full pl-2">
+                            @foreach ($SensorDataTypeNames as $sensorDataType)
+                                <option class="bg-gray-500" id="{{ $sensorDataType->data_type }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType->data_type }}')">{{ $sensorDataType->data_type}}</option>
+                            @endforeach
+                        </select>
+                    </div> 
+                    <livewire:components.frm-select-box selectMessage="Data Value Set Type:" id="valueSetType" key="{{ Str::random() }}"></livewire:components.frm-select-box>
+                    <livewire:components.req-underline-input  id="dataItem" placeholder="Data Item Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.req-underline-input  id="incomingDataItem" placeholder="Incoming Data Item Name" type="text"></livewire:components.req-underline-input>
+                    <livewire:components.underline-input id="dataValueSet" placeholder="Data Value Set" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="units" placeholder="Units" type="text"></livewire:components.underline-input>
+                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -195,12 +190,16 @@
             let DeleteMenuStatus = false;
             let EditItem = ""; //used to pre-populate an edit
             let headers = $wire.headers;
-            let role = "";
-            let component = "";
+            let sensorId = "";
+            let sensorDataTypes = [];
+            let users = $wire.Users;
             let user = $wire.user;
             let ActionsDone = [];
             let TableObjects = [];
             let organizations = $wire.Organizations;
+            function CustomSplitterToUnderScore(input){
+                return input.replaceAll("-!-","_");
+            }
             function EnableDisableEditDelete(){
                 console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
@@ -249,14 +248,14 @@
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
-                        $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(id))).addClass("bg-[#f8c200]");
                         closeEditMenu();
                         closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
                         let index = ItemsSelected.indexOf(id);
-                        $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(id))).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
                         closeAddMenu();
@@ -303,28 +302,30 @@
 
                 let result = "";
                 let IDDupeCount = 0;
-                let IDAsName = $("option[id='"+ID.toString().trim()+"']").val();
+                let IDAsName = ID
                 $("#InfoTable").children().each(function(index){
-                    let id = $(this).children()[4].textContent;
+                    let id = $(this).children()[3].textContent;
                     if (id.toString() == IDAsName.toString()){
                         IDDupeCount+=1
                     }
                 });
                 if (Mode == "add"){
                     if (IDDupeCount >= 1){
-                        return "Role permission associatian already exists";
+                        return "Sensor data type association already exists";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (IDDupeCount > 1){
-                        return "Role permission associatian already exists";
+                    if (IDDupeCount > 1 ){
+                        return "Sensor data type association already exists";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                
+                if ($("#AddAssoc #dataItem").val() == "" || $("#AddAssoc #incomingDataItem").val() == ""){
+                    return;
+                }
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("AddAssoc");
                 let result = ValidateIfUnique(FormVals[0],"add");
@@ -336,7 +337,7 @@
 
                 //chk
                 let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[0]);
+                tr.id=SpaceToUnderScore(FormVals[0])
                 let checkboxTD = document.createElement("td")
                 checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">"
                 tr.appendChild(checkboxTD);
@@ -346,28 +347,25 @@
                 SequenceTD.textContent = ($("#InfoTable").children().length + 1)
                 tr.appendChild(SequenceTD);
 
+                let SensorID = document.createElement("td");
+                SensorID.textContent = sensorId
+                tr.appendChild(SensorID);
                 //normal vals
                 FormVals.forEach(function(value,index){
-                    if (index == 0){
-                        let td2 = document.createElement("td");
-                        td2.textContent = component;
-                        tr.appendChild(td2);
-                        let td3 = document.createElement("td");
-                        td3.textContent = role;
-                        tr.appendChild(td3);
-                        //putting value of option instead of id
-                        let td = document.createElement("td");
-                        td.textContent = $("option[id='"+value.toString().trim()+"']").val();
-                        tr.appendChild(td)
-                    }
-                    else if (index == 1){
-                        //just appending current date plus who made Application device assoc
+                    if (index == 6){
+                        //creation time
                         let td2 = document.createElement("td");
                         td2.textContent = CurrentDateTimeAsString();
                         tr.appendChild(td2);
+                        //created by
                         let td3 = document.createElement("td");
                         td3.textContent = user["user_username"];
                         tr.appendChild(td3);
+                        let td = document.createElement("td");
+                        td.textContent = value.toString().trim();
+                        tr.appendChild(td)
+                    }
+                    else{
                         let td = document.createElement("td");
                         td.textContent = value.toString().trim();
                         tr.appendChild(td)
@@ -376,7 +374,7 @@
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added role permission association");
+                setAlertText("Successfully added sensor data type association");
                 displayAlert();
                 closeAddMenu()
             });
@@ -401,40 +399,57 @@
             }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #permissions`).find('option:selected').attr("id"));
+                FormVals.push($(`#${EditAdd} #dataItem`).val());
+                FormVals.push($(`#${EditAdd} #incomingDataItem`).val());
+                FormVals.push($(`#${EditAdd} #sensorDataTypes`).val());
+                FormVals.push($(`#${EditAdd} #valueSetType`).val());
+                FormVals.push($(`#${EditAdd} #dataValueSet`).val());
+                FormVals.push($(`#${EditAdd} #units`).val());
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditAssoc #applicationName").val() == ""){
+                if ($("#EditAssoc #expiryDate").val() == ""){
                     return;
                 }
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("EditAssoc");
-                let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
-                $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
+                let OGCopy = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).clone(false);
+                $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().each(function(index){
                     //we exclude the checkbox, sequence num, exclude org name
-                    if (index >=7){
-                        $(this).text(FormVals[FormVals.length-1]);
+                    if (index >=3){
+                        if (index == 9 || index == 10){
+                            return
+                        }
+                        else if (index > 10){
+                            $(this).text(FormVals[index-5]);
+                        }
+                        else{
+                            $(this).text(FormVals[index-3]);
+                        }
                     }
                 });
                 
                 Result = ""; //setting to default since no need to validate for uniqueness
                 if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
-                    $("#"+SpaceToUnderScore(EditItem)).remove();
+                    $(OGCopy).insertAfter($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
+                    $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).remove();
                     setAlertText(Result);
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))))))
                     console.log(ActionsDone);
+                     $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[0])); //updates the id
+                    EditItem = FormVals[0]; //update EditItem
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">");
+                    $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated role permission association");
+                    setAlertText("Successfully updated user role association");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -476,11 +491,13 @@
                     EditMenuStatus = true;
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
-                    let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
-                    $("#EditAssoc #role").text(Obj["ROLE"]);
-                    $("#EditAssoc #permission").text(Obj["PERMISSION"]);
-                    $("#EditAssoc #creationTime").text(Obj["CREATION TIME"]);
-                    $("#EditAssoc #createdBy").text(Obj["CREATED BY"]);
+                    let Obj = TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
+                    $("#EditAssoc #sensorDataTypes").val(Obj["DATA TYPE"]);
+                    $("#EditAssoc #valueSetType").val(Obj["DATA VALUE SET TYPE"]);
+                    $("#EditAssoc #dataItem").val(Obj["DATA ITEM NAME"]);
+                    $("#EditAssoc #incomingDataItem").val(Obj["INCOMING DATA ITEM NAME"]);
+                    $("#EditAssoc #dataValueSet").val(Obj["DATA VALUE SET"]);
+                    $("#EditAssoc #units").val(Obj["DATA UNITS"]);
                     $("#EditAssoc #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
@@ -491,7 +508,7 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[4].innerHTML;
+                let name = "Sensor: "+ $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[2].innerHTML + " Data Item:" + $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[3].innerHTML;
                 if (ItemsSelected.length == 1){
                     $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
@@ -529,7 +546,7 @@
                     ItemsToUnCheck.push(item);
                 });
                 ItemsToUnCheck.forEach(function(item){
-                    $("#"+SpaceToUnderScore(item)).children().first().children().click();
+                    $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
                 })
                 ItemsSelected = [];
                 //update buttons
@@ -549,19 +566,20 @@
                         ItemsToDelete.push(item);
                     });
                     ItemsToDelete.forEach(function(item){
-                        $("#"+SpaceToUnderScore(item)).children().first().children().click();
-                        $("#"+SpaceToUnderScore(item)).remove();
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
+                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
                     CloseDeleteModal();
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted role permission associations");
+                    setAlertText("Successfully deleted sensor data type associations");
                     displayAlert();
                 });
                 closeAddMenu();
                 closeEditMenu();
+                DisplayValueTypeBasedOnDataType(sensorDataTypes[0]["data_type"]);
             }
             $js("saveToDB",async function(ev){
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
@@ -577,14 +595,14 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update association for\"" + Obj["PERMISSION"] + "\"<br>";
+                                ErrorMsg += "Failed to update association for sensor \"" + Obj["SENSOR ID"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert association for\"" + Obj["PERMISSION"] + "\"<br>";
+                                ErrorMsg += "Failed to insert association for sensor \"" + Obj["SENSOR ID"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
@@ -609,52 +627,45 @@
                     displayAlert();
                 }
             })
-            $js("ChangeComponent",async function(ev,Component){
-                await $wire.call("setComponent",Component)
-                await $wire.call("LoadRoles");
-                await $wire.call("SetDefaultRole");
-                component = $wire.component;
-                role = $wire.role;
-                await refresh();
-                EnableDisableEditDelete();
-            })
-            $js("ChangeRole",async function(ev,Role){
-                await $wire.call("SetRole",Role)
-                component = $wire.component;
-                role = $wire.role;
+            $js("ChangeSensor",async function(ev,Sensor){
+                await $wire.call("setSensor",Sensor)
+                sensorDataTypes = $wire.SensorDataTypes;
+                sensorId = $wire.SensorInfo["sensor_id"];
                 await refresh();
                 EnableDisableEditDelete();
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
-                await $wire.call("LoadSoftwareComponents");
-                await $wire.call("setDefaultComponent");
-                await $wire.call("LoadRoles");
-                await $wire.call("SetDefaultRole");
-                component = $wire.component;
-                role = $wire.role;
+                await $wire.call("LoadSensors");
+                await $wire.call("setDefaultSensor");
+                sensorDataTypes = $wire.SensorDataTypes;
+                sensorId = $wire.SensorInfo["sensor_id"];
                 await refresh();
                 EnableDisableEditDelete();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
-            $js("DisplayDevicesBasedOnOrg",DisplayDevicesBasedOnOrg);
-            function DisplayDevicesBasedOnOrg(Org){
+            $js("DisplayValueTypeBasedOnDataType",DisplayValueTypeBasedOnDataType);
+            function DisplayValueTypeBasedOnDataType(DataType){
                 try{
-                    let DisplayDevices = [];
-                    $(devices).each(function(index){
-                        if (Org == $(this)[0]["organization_id"]){
-                            DisplayDevices.push($(this));
+                    let DisplayValueTypes = [];
+                    $(sensorDataTypes).each(function(index){
+                        if (DataType == $(this)[0]["data_type"]){
+                            DisplayValueTypes.push($(this));
                             
                         }
                     })
                     
-                    $("#devices").html("");
-                    $(DisplayDevices).each(function(index){
+                    $("#AddAssoc #valueSetType").html("");
+                    $("#EditAssoc #valueSetType").html("");
+                    console.log($("#AddAssoc #valueSetType"));
+                    console.log($("#EditAssoc #valueSetType"));
+                    $(DisplayValueTypes).each(function(index){
                         let Option = document.createElement("option");
-                        Option.id = $(this)[0]["device_eui"];
+                        Option.id = $(this)[0]["data_value_set_type"];
                         $(Option).addClass("bg-gray-500")
-                        Option.textContent = $(this)[0]["device_name"];
-                        $("#devices").append(Option);
+                        Option.textContent = $(this)[0]["data_value_set_type"];
+                        $("#AddAssoc #valueSetType").append(Option);
+                        $("#EditAssoc #valueSetType").append($(Option).clone());
                     })
                 }
                 catch(e){
@@ -698,6 +709,9 @@
                     const processRow = function (obj) {
                         let finalVal = '';
                         $.each(obj,function(key,value){
+                            if (value.includes(",")){
+                                value = "\""+value+"\"";
+                            }
                             finalVal+=value + ",";
                         })
                         finalVal = finalVal.substr(0,finalVal.length-1);
@@ -728,13 +742,13 @@
                     return true;
                 }
                 catch(ex){
+                    console.log(ex);
                     return false;
                 }
-                
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("Role-PermissionAssocInfo.csv",TableObjects);
+                    let result = exportToCsv("Sensor-DataTypeAssocInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
