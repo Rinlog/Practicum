@@ -25,7 +25,7 @@ export function DisplayAlert(){
     let timeout = setTimeout(function(){
         CloseAlert();
         Counter-=1;
-    },2500);
+    },3000);
     if (Counter > 1){
         clearTimeout(OldTimeout);
         Counter-=1;

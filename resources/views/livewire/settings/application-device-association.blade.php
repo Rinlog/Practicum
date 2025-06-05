@@ -548,7 +548,7 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted device associations");
+                    setAlertText("Successfully deleted application device associations");
                     displayAlert();
                 });
                 closeAddMenu();
