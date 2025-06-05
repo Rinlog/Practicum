@@ -613,6 +613,7 @@
                 await $wire.call("setComponent",Component)
                 await $wire.call("LoadRoles");
                 await $wire.call("SetDefaultRole");
+                await $wire.call("LoadPermission");
                 component = $wire.component;
                 role = $wire.role;
                 await refresh();
@@ -631,6 +632,7 @@
                 await $wire.call("setDefaultComponent");
                 await $wire.call("LoadRoles");
                 await $wire.call("SetDefaultRole");
+                await $wire.call("LoadPermission");
                 component = $wire.component;
                 role = $wire.role;
                 await refresh();

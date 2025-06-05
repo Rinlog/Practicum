@@ -115,7 +115,7 @@
         <form>
             <div id="AddUser" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <livewire:components.req-underline-input id="userName" placeholder="User Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="name" placeholder="Name" type="text"></livewire:components.underline-input>
+                    <livewire:components.req-underline-input id="name" placeholder="Name" type="text"></livewire:components.req-underline-input>
                     <livewire:components.underline-input id="phone" placeholder="Phone" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="email" placeholder="Email" type="text"></livewire:components.underline-input>
                     <livewire:components.form-chkbox id="isDisabled" text="Is Disabled"></livewire:components.form-chkbox>
@@ -148,7 +148,7 @@
         <form>
             <div id="EditUser" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <livewire:components.req-underline-input id="userName" placeholder="User Name" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="name" placeholder="Name" type="text"></livewire:components.underline-input>
+                    <livewire:components.req-underline-input id="name" placeholder="Name" type="text"></livewire:components.req-underline-input>
                     <livewire:components.underline-input id="phone" placeholder="Phone" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="email" placeholder="Email" type="text"></livewire:components.underline-input>
                     <livewire:components.form-chkbox id="isDisabled" text="Is Disabled"></livewire:components.form-chkbox>
@@ -299,7 +299,7 @@
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddUser #userName").val() == ""){
+                if ($("#AddUser #userName").val() == "" || $("#AddUser #name").val() == ""){
                     return;
                 }
                 e.preventDefault();
@@ -388,7 +388,7 @@
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditUser #userName").val() == ""){
+                if ($("#EditUser #userName").val() == "" || $("#EditUser #name").val() == ""){
                     return;
                 }
                 e.preventDefault();

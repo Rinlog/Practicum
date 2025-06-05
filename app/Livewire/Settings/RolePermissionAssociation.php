@@ -102,10 +102,11 @@ class RolePermissionAssociation extends Component
     }
     public function LoadPermission(){
         try{
-            $this->Permissions = DB::table("permission")->get()->toArray();
+            $this->Permissions = DB::table("permission")->join("resource","permission.resource_name","=",
+            "resource.resource_name")->where("resource.component_id", $this->ComponentInfo->component_id)->distinct()->get(["permission.permission_id", "permission.permission_name"])->toArray();
         }
         catch(Exception $e){
-
+            Log::channel("customlog")->error("". $e->getMessage());
         }
     }
     public function SearchForPermission($PermissionID){
@@ -265,7 +266,6 @@ class RolePermissionAssociation extends Component
     }
     public function render()
     {
-        $this->LoadPermission();
         $this->LoadUserInfo();
         return view('livewire..settings.role-permission-association');
     }

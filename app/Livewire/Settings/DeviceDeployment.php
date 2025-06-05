@@ -279,13 +279,21 @@ class DeviceDeployment extends Component
                         "deploy_data_port"=>$Object->{"DATA PORT"},
                         "deploy_desc"=>$Object->{"DESCRIPTION"},
                     ]);
+                    $result2 = DB::table("device")->where("device_eui","$Device->device_eui")->update([
+                        "device_is_deployed"=>$Object->{"LATEST DEPLOYMENT"}
+                    ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
                         "log_activity_desc"=>"Deployed device ". $Object->{"DEPLOYMENT ID"}
                     ]);
-                    array_push($Results, $result);
+                    if ($result == true && $result2 == 1) {
+                        array_push($Results, $result);
+                    }
+                    else{
+                        array_push($Results, false);
+                    }
                 }
                 catch(Exception $e){
                     array_push($Results, false);
@@ -339,13 +347,21 @@ class DeviceDeployment extends Component
                         "deploy_data_port"=>$Object->{"DATA PORT"},
                         "deploy_desc"=>$Object->{"DESCRIPTION"},
                     ]);
+                    $result2 = DB::table("device")->where("device_eui",$idToUpdate)->update([
+                        "device_is_deployed"=>$Object->{"LATEST DEPLOYMENT"}
+                    ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
                         "log_activity_desc"=>"Updated device deployment ". $Object->{"DEPLOYMENT ID"}
                     ]);
-                    array_push($Results, $result);
+                    if ($result == 1 && $result2 == 1){
+                        array_push($Results, $result);
+                    }
+                    else{
+                        array_push($Results, 0);
+                    }
                 }
                 catch(Exception $e){
                     Log::channel("customlog")->error($e->getMessage());

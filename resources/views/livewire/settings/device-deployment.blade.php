@@ -537,7 +537,7 @@
                     $("#EditDeployment #ipAddress").val(Obj["IP ADDRESS"]);
                     $("#EditDeployment #dataPort").val(Obj["DATA PORT"]);
                     $("#EditDeployment #description").val(Obj["DESCRIPTION"]);
-                    $("#EditDeployment #isLatestDeployment").val(Obj["LATEST DEPLOYMENT"]);
+                    $("#EditDeployment #isLatestDeployment").prop("checked",Obj["LATEST DEPLOYMENT"]);
                     
                 }
                 else{
