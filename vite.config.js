@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
+import jQuery from 'jquery';
 export default defineConfig({
     plugins: [
         laravel({
@@ -11,7 +12,7 @@ export default defineConfig({
     ],
     resolve: {
         alias:{
-            '$': 'jQuery',
+            '$': jQuery,
         }
     },
     content: [

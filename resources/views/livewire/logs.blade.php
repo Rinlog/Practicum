@@ -7,5 +7,11 @@
     {{-- main section --}}
     <div class="w-screen flex flex-col flex-wrap">
         <livewire:usercontrols.usercontrolnav></livewire:usercontrols.usercontrolnav>
+
+        @if ($LogPage == "generalLog")
+            <livewire:logs.general-log></livewire:logs.general-log>
+        @elseif ($LogPage == "applicationLog")
+            <livewire:logs.application-log></livewire:logs.application-log>
+        @endif
     </div>
 </div>

@@ -582,7 +582,9 @@
                     const processRow = function (obj) {
                         let finalVal = '';
                         $.each(obj,function(key,value){
-                            console.log(value)
+                            if (value.includes(",")){
+                                value = "\""+value+"\"";
+                            }
                             finalVal+=value + ",";
                         })
                         finalVal = finalVal.substr(0,finalVal.length-1);

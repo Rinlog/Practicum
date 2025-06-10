@@ -14,6 +14,7 @@ class FrmSelectBox extends Component
     public $onChange = "";
     public $optionId = "";
     public $selectMessage;
+    public $textColor = "";
     public function render()
     {
         return view('livewire..components.frm-select-box');
