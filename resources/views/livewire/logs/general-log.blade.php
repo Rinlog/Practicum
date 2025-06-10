@@ -203,6 +203,23 @@
                     SearchThroughTable($("#SearchBarLogs").val());
                 })
             }
+            $("#Filter").click(function(e){
+                if ($("#FilterDropDown").attr("isopen") == "false"){
+                    $("#FilterDropDown").addClass("transition ease-out duration-100");
+                    $("#FilterDropDown").removeClass("transform opacity-0 scale-0");
+                    $("#FilterDropDown").addClass("transform opacity-100 scale-100");
+                    $("#FilterDropDown").attr("isOpen",true);
+                    $("#startTime").val("00:00");
+                    $("#endTime").val("23:59");
+                    }
+                else{
+                    $("#FilterDropDown").removeClass("transition ease-out duration-100");
+                    $("#FilterDropDown").addClass("transition ease-in duration-75");
+                    $("#FilterDropDown").addClass("transform opacity-0 scale-0");
+                    $("#FilterDropDown").removeClass("transform opacity-100 scale-100");
+                    $("#FilterDropDown").attr("isOpen",false);
+                }
+            });
             $js("Filter",async function(){
                 let vals = PopulateArrayWithVals("FilterDropDown");
                 if (vals[1] == "" || vals[2] == ""){

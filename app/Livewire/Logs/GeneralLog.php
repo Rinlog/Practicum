@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Logs;
 
-use DateTime;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;

@@ -15,11 +15,11 @@
                         <span class="flex flex-row flex-grow">
                             <ul class="flex h-full">
                                 @if ($LogPage == "generalLog")
-                                    <li class="bg-white h-full w-full p-9 pr-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToGeneralLog">General Log</h2></li>
-                                    <li class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToApplicationLog">Application Log</h2></li>
+                                    <li wire:click="$js.SwitchToGeneralLog" class="bg-white h-full w-full p-9 pr-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToGeneralLog">General Log</h2></li>
+                                    <li wire:click="$js.SwitchToApplicationLog" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToApplicationLog">Application Log</h2></li>
                                 @else
-                                    <li class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToGeneralLog">General Log</h2></li>
-                                    <li class="bg-white h-full w-full p-9 pl-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToApplicationLog">Application Log</h2></li>
+                                    <li wire:click="$js.SwitchToGeneralLog" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToGeneralLog">General Log</h2></li>
+                                    <li wire:click="$js.SwitchToApplicationLog" class="bg-white h-full w-full p-9 pl-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToApplicationLog">Application Log</h2></li>
                                 @endif
                             </ul>
                         </span>
