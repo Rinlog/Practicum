@@ -1,17 +1,12 @@
-<div id="MainWindowLogs" class="flex flex-col lg:flex-row lg:w-[1750px] gap-10">
+<div id="MainWindowLogs" class="flex flex-col lg:flex-row lg:w-[1750px] gap-0 lg:overflow-y-hidden">
     @vite(['resources/js/ComponentJS/FilterJS.js'])
-    <div class="relative w-[90%] md:w-[80%] lg:w-[100%] p-10">
-    {{-- info selection --}}
-    <div class="flex">
-        <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
-        </div>
-    </div>
-    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-[750px]">
+    <div class="relative w-[90%] md:w-[80%] lg:w-[100%] pl-10 pr-10 overflow-y-hidden">
+    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md rounded-b-lg h-[750px] lg:overflow-y-hidden">
         <span class="flex items-center justify-between mb-4">
             {{-- top half --}}
             {{-- calendar + filter --}}
-            <span class="flex gap-4 items-center">
-                <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer w-[290px]">
+            <span class="flex gap-4 items-center flex-grow">
+                <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[290px]">
                     <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
                         <path id="Calendar" class="cls-1" d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>
                     </svg>
@@ -21,7 +16,7 @@
                     </svg>
                 </button>
                 <span id="FilterContainer" class="relative">                
-                    <button id="Filter" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer w-[290px]">
+                    <button id="Filter" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[290px]">
                         <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" class="min-h-[26px] size-5" viewBox="0 0 26 26">
                             <path id="Filter" class="cls-1" d="M22,3l-6.72,9.56v8.19l-4.51,2.26v-10.44L4,3h18M22,1H4c-.75,0-1.43.42-1.78,1.08-.34.66-.29,1.46.14,2.07l6.4,9.04v9.81c0,.69.36,1.34.95,1.7.32.2.69.3,1.05.3.31,0,.61-.07.89-.21l4.51-2.26c.68-.34,1.11-1.03,1.11-1.79v-7.55l6.35-9.04c.43-.61.48-1.41.14-2.07-.34-.66-1.03-1.08-1.77-1.08h0ZM22,5h0,0Z"/>
                         </svg>
@@ -51,6 +46,13 @@
                         </div>
                     </div>
                 </span>
+                {{-- Search bar --}}
+                <div class="flex w-full relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 30 30" stroke="#666666" fill="#666666" class="mt-4 absolute left-3">
+                        <path d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z"></path>
+                    </svg>
+                    <input type="text" id="SearchBarLogs" class="bg-white p-4 rounded-lg w-[80%] border-2 border-gray-200 pl-10" placeholder="Search by Keyword">
+                </div>
             </span>
             {{-- refresh button --}}
             {{-- export button --}}
@@ -102,6 +104,7 @@
             let setStartDate = moment().subtract(7,"days");
             let setEndDate = new Date();
             let TimeFrame = "LAST 7 DAYS";
+            let OGTable = [];
             let picker = new DateRangePicker("#DateRangePicker",{
                 minDate:moment().subtract(12,"months"),
                 maxDate:new Date(),
@@ -173,8 +176,8 @@
                 await $wire.set("StartDate",moment().subtract(7,"days"));
                 await $wire.set("EndDate",new Date());
                 await $wire.set("ActivityType", "%");
-                await $wire.set("StartTime", 0);
-                await $wire.set("EndTime", 100000000000000);
+                await $wire.set("StartTime", '00:00');
+                await $wire.set("EndTime", '23:59');
                 await $wire.set("User", "%");
                 await refresh();
             })
@@ -192,6 +195,13 @@
                 })
                 UpdateShowingCount();
                 PrepFileForExport();
+                OGTable = [];
+                $("#InfoTable").children().each(function(index){
+                    OGTable.push($(this).clone(true,true));
+                });
+                $("#SearchBarLogs").on('input',function(ev){
+                    SearchThroughTable($("#SearchBarLogs").val());
+                })
             }
             $js("Filter",async function(){
                 let vals = PopulateArrayWithVals("FilterDropDown");
@@ -205,6 +215,72 @@
                 await refresh();
                 $("#DateRangeText").text(TimeFrame);
             })
+            function SearchThroughTable(searchInput){
+                try{
+                    let FilteredTable = []
+                    let OGTableCopy = [];
+                    $(OGTable).each(function(index){
+                        OGTableCopy.push($(this).clone(true,true));
+                    })
+                    if (searchInput != ""){
+                        $(OGTableCopy).each(function(index){
+                            let AlreadyAdded = false;
+                            $(this).children().each(function(index){
+                                //adding tr to filtered list
+                                if ($(this).text().toLowerCase().includes(searchInput) && AlreadyAdded == false){
+                                    FilteredTable.push($(this).parent());
+                                    AlreadyAdded = true;
+                                }
+                                //highlighting matching bits
+                                if ($(this).text().toLowerCase().includes(searchInput)){
+
+                                    let CleanInput = CleanseSearch(searchInput);
+                                    let Regex = new RegExp(""+CleanInput+"","ig")
+                                    let NewText = $(this).text();
+                                    console.log(Regex);
+                                    NewText = NewText.replace(Regex,'<span class="bg-yellow-500 text-white">$&</span>');
+                                    $(this).html(NewText);
+                                }
+                            })
+                        })
+                    }
+                    $("#InfoTable").empty();
+
+                    if (FilteredTable.length == 0){
+                        $(OGTable).each(function(index){
+                            $("#InfoTable").append($(this));
+                        })
+                        UpdateShowingCount();
+                    }
+                    else{
+                        $(FilteredTable).each(function(index){
+                            $("#InfoTable").append($(this));
+                        })
+                        UpdateShowingCount();
+                    }
+                }
+                catch(e){
+                    console.log(e);
+                }
+            }
+            function CleanseSearch(input){
+                try{
+                    let Regex = /(\(\)?)|(\(?\))/;
+                    console.log(Regex.test(input));
+                    if (Regex.test(input)){
+                        input = input.replace("(","\\(");
+                        input = input.replace(")","\\)");
+                        console.log(input);
+                        return input
+                    }
+                    else{
+                        return input;
+                    }
+                }   
+                catch(e){
+                    console.log(e);
+                }
+            }
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
                 await $wire.set("StartDate",JSON.stringify(setStartDate));

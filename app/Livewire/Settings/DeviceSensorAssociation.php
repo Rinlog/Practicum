@@ -241,7 +241,7 @@ class DeviceSensorAssociation extends Component
 
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
-                        "log_activity_type"=>"INSERT",
+                        "log_activity_type"=>"DELETE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
                         "log_activity_desc"=>"deleted device sensor association(s): ". $Value
                     ]);
@@ -265,7 +265,7 @@ class DeviceSensorAssociation extends Component
                     ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
-                        "log_activity_type"=>"INSERT",
+                        "log_activity_type"=>"UPDATE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
                         "log_activity_desc"=>"updated device sensor association: ".$this->DeviceInfo->device_eui.", " . $Sensor->sensor_id
                     ]);

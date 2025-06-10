@@ -158,7 +158,7 @@ class LocationInfo extends Component
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"DELETE",
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Deleted device(s): ". $Value
+                        "log_activity_desc"=>"Deleted location(s): ". $Value
                     ]);
                     array_push($Results, $result);
                 }
