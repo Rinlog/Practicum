@@ -20,11 +20,11 @@
             --}}
             <div>
             <main class="relative">
-                <img id="ExpandedLogo" src="\images\NBCC_Horizontal_White.png" class="absolute w-[200px] left-345 top-42 z-2">
                 <div class="bg-[url(/public/images/LoginBackground.jpeg)] bg-no-repeat bg-cover grid grid-cols-12 w-screen h-screen">
                     <div class="col-span-12"></div> <!--centering our login with these divs -->
                     <div class="lg:col-span-7 col-span-4"></div>
-                    <div id="LoginSection" class="z-1 lg:col-span-3 md:col-span-5 col-span-12 bg-[#fdfdfd] rounded-lg flex jusify-center items-center flex-col shadow-md h-125 lg:h-133" >
+                    <div id="LoginSection" class="relative z-1 lg:col-span-3 md:col-span-5 col-span-12 bg-[#fdfdfd] rounded-lg flex jusify-center items-center flex-col shadow-md h-125 lg:h-133" >
+                        <img id="ExpandedLogo" src="\images\NBCC_Horizontal_White.png" class="absolute w-[200px] right-0 top-[-50px] z-2">
                         <span class="flex flex-col justify-center items-center w-full shadow-md bg-neutral-100 rounded-lg">
                             <h1 class="font-bold mt-8 text-[#00719d]">WELCOME</h1>
                             <h3 class="font-bold text-[#00719d]">TO THE INTEGRATED DATA LAYER (IDL)</h3>

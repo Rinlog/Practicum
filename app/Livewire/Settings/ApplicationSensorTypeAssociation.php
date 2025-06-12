@@ -61,9 +61,9 @@ class ApplicationSensorTypeAssociation extends Component
             }
         }
     }
-    public function SetApplication($NewOrgID){
+    public function SetApplication($ApplicationID){
         foreach ($this->Applications as $Application){
-            if ($Application->application_id == $NewOrgID) {
+            if ($Application->application_id == $ApplicationID) {
                 $this->ApplicationInfo = $Application;
                 $this->application = $Application->application_name;
             }

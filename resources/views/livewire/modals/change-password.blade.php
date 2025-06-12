@@ -11,24 +11,25 @@
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
             </button>
-            <h1 class="text-[#00719d]"><b>CHANGE PASSWORD</b></h1>
+            <h1 class="text-[#399ebd] pb-4"><b>GETTING STARTED</b></h1>
+            <label class="text-[#737373] pb-4">Before you begin, let's create you your new password.</label>
         </div>
         <!--Content-->
         <div class="flex flex-col items-center justify-center pb-2 text-[#737373] flex-wrap text-center">
-            <form class="flex gap-4 flex-col">
+            <form class="flex gap-4 flex-col flex-grow w-[70%] pb-8">
                 <span>
                     <x-input id="ChangePassword" placeholder="Password" type="password"></x-input>
                     <label id="ChangePasswordErr" class="hide text-red-500"></label>
                 </span>
 
                 <span>
-                    <x-input id="ChangeConfirmPassword" placeholder="Confirm_Password" type="password"></x-input>
+                    <x-input id="ChangeConfirmPassword" placeholder="Confirm-Password" type="password"></x-input>
                     <label id="ChangeConfirmPasswordErr" class="hide text-red-500"></label>
                 </span>
             </form>
         </div>
         <!--Footer-->
-        <div class="bg-gray-50 px-4 py-4 justify-center items-center flex">
+        <div class="bg-white px-4 py-4 justify-center items-center flex pb-16">
           <x-bigbutton width="w-2/5" id="ConfirmChange" text="CONFIRM" customStyle="text-lg font-semibold"></x-bigbutton>
         </div>
       </div>

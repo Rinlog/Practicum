@@ -1,11 +1,27 @@
-<div id="MainWindowLogs" class="flex flex-col lg:flex-row lg:w-[1750px] gap-0 lg:overflow-y-hidden">
+<div id="MainWindowLogs" class="flex flex-col lg:flex-row lg:w-[1750px] gap-0">
     @vite(['resources/js/ComponentJS/FilterJS.js'])
-    <div class="relative w-[90%] md:w-[80%] lg:w-[100%] pl-10 pr-10 overflow-y-hidden">
-    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md rounded-b-lg h-[750px] lg:overflow-y-hidden">
-        <span class="flex items-center justify-between mb-4">
+    <div class="relative w-[90%] md:w-[80%] lg:w-[100%] pl-10 pr-10">
+    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md flex flex-col gap-2 rounded-b-lg h-[1340px] w-full md:h-[781px] lg:h-[750px] overflow-y-hidden">
+        <div id="ApplicationSelector" class="w-full flex items-center">
+                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Application</label>
+                <div class="selectWrapperLG w-full">
+                    <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] w-[75%] text-white text-lg hover:bg-[#4a4a4a] p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        @foreach($Applications as $application)
+                            @if (isset($ApplicationInfo))
+                                @if ($application->application_id == $ApplicationInfo->application_id)
+                                    <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                @else
+                                    <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                @endif
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+        </div>
+        <span class="flex lg:flex-row lg:items-center md:flex-col flex-col lg:justify-between md:justify-between mb-4 gap-4">
             {{-- top half --}}
             {{-- calendar + filter --}}
-            <span class="flex gap-4 items-center flex-grow">
+            <span class="flex lg:flex-row lg:items-center md:flex-row md:items-center flex-col gap-4 items-start lg:flex-grow md:flex-grow">
                 <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[290px]">
                     <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
                         <path id="Calendar" class="cls-1" d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>
@@ -26,7 +42,7 @@
                         </svg>
                     </button>
                     <div id="FilterDropDown" isOpen="false" class="absolute left-0 z-10 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                        <div class="p-4" role="none">
+                        <div class="p-4 flex flex-col items-center" role="none">
                             <livewire:components.underline-input id="activityType" text="Activity Type" textColor="text-gray-500" inputColor="text-gray-600"></livewire:components.underline-input>
                             <livewire:components.req-underline-input id="startTime" text="Start Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
                             <livewire:components.req-underline-input id="endTime" text="End Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
@@ -38,16 +54,16 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <span class="flex justify-center items-center pt-2">
-                                <button wire:click="$js.Filter" class="bg-white border-2 border-[#46c0e5] p-3 rounded-full text-[#46c0e5] font-semibold hover:text-[#3c8fb0] hover:border-[#3c8fb0] cursor-pointer w-full">
-                                    CONFIRM
-                                </button>
-                            </span>
                         </div>
+                        <span class="flex flex-row justify-center items-center p-4">
+                            <button wire:click="$js.Filter" class="bg-white border-2 border-[#46c0e5] p-3 rounded-full text-[#46c0e5] font-semibold hover:text-[#3c8fb0] hover:border-[#3c8fb0] cursor-pointer w-full">
+                                CONFIRM
+                            </button>
+                        </span>
                     </div>
                 </span>
                 {{-- Search bar --}}
-                <div class="flex w-full relative">
+                <div class="flex lg:w-full md:w-full relative">
                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 30 30" stroke="#666666" fill="#666666" class="mt-4 absolute left-3">
                         <path d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z"></path>
                     </svg>
@@ -101,8 +117,8 @@
             let application = "";
             let ActionsDone = [];
             let TableObjects = [];
-            let setStartDate = moment().subtract(7,"days");
-            let setEndDate = new Date();
+            let setStartDate = moment().subtract(6,"days");
+            let setEndDate = moment().subtract(0,"day");
             let TimeFrame = "LAST 7 DAYS";
             let OGTable = [];
             let picker = new DateRangePicker("#DateRangePicker",{
@@ -122,27 +138,35 @@
                 },
             },async function(startDate,endDate, label){
                 if (label.toLowerCase() == "custom range"){
-                    console.log(startDate);
-                    console.log(endDate);
-                    setStartDate = startDate;
-                    setEndDate = endDate;
+                    let Offset = new Date().getTimezoneOffset();
+                    let HourOffset = Offset/60;
+                    //subtracting offset to have it convert correctly to unix time
+                    let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
+                    let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
+
+                    setStartDate = JSON.stringify(new Date(NewStartDate));
+                    setEndDate = JSON.stringify(new Date(NewEndDate));
                     await SetTimeFrame();
                     TimeFrame = startDate.format('L') + "-" + endDate.format('L');
                     $("#DateRangeText").text(startDate.format('L') + "-" + endDate.format('L'))
                 }
                 else{
-                    console.log(startDate);
-                    console.log(endDate);
-                    setStartDate = startDate;
-                    setEndDate = endDate;
+                     let Offset = new Date().getTimezoneOffset();
+                    let HourOffset = Offset/60;
+                    //subtracting offset to have it convert correctly to unix time
+                    let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
+                    let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
+
+                    setStartDate = JSON.stringify(new Date(NewStartDate));
+                    setEndDate = JSON.stringify(new Date(NewEndDate));
                     await SetTimeFrame();
                     TimeFrame = label.toUpperCase();
                     $("#DateRangeText").text(label.toUpperCase());
                 }
             });
             async function SetTimeFrame(){
-                await $wire.set("StartDate",JSON.stringify(setStartDate));
-                await $wire.set("EndDate",JSON.stringify(setEndDate));
+                await $wire.set("StartDate",setStartDate);
+                await $wire.set("EndDate",setEndDate);
                 await refresh();
             }
             function CurrentDateAsString(){
@@ -173,8 +197,20 @@
                 return FormVals;
             }
             $js("refresh",async function(){
-                await $wire.set("StartDate",moment().subtract(7,"days"));
-                await $wire.set("EndDate",new Date());
+                TimeFrame = "LAST 7 DAYS";
+                picker.startDate = moment().subtract(6,"days");
+                picker.endDate = moment().subtract(0,"day");
+
+                let Offset = new Date().getTimezoneOffset();
+                let HourOffset = Offset/60;
+                //subtracting offset to have it convert correctly to unix time
+                let NewStartDate = new Date(moment().subtract(6,"days")).setHours(0 + (-1 * HourOffset),0,0);
+                let NewEndDate = new Date(moment().subtract(0,"day")).setHours(23 + (-1 * HourOffset),59,59)
+
+                setStartDate = JSON.stringify(new Date(NewStartDate));
+                setEndDate = JSON.stringify(new Date(NewEndDate));
+                await $wire.set("StartDate",setStartDate);
+                await $wire.set("EndDate",setEndDate);
                 await $wire.set("ActivityType", "%");
                 await $wire.set("StartTime", '00:00');
                 await $wire.set("EndTime", '23:59');
@@ -204,22 +240,22 @@
                 })
             }
             $("#Filter").click(function(e){
-                    if ($("#FilterDropDown").attr("isOpen") == "false"){
-                        $("#FilterDropDown").addClass("transition ease-out duration-100");
-                        $("#FilterDropDown").removeClass("transform opacity-0 scale-0");
-                        $("#FilterDropDown").addClass("transform opacity-100 scale-100");
-                        $("#FilterDropDown").attr("isOpen",true);
-                        $("#startTime").val("00:00");
-                        $("#endTime").val("23:59");
+                if ($("#FilterDropDown").attr("isopen") == "false"){
+                    $("#FilterDropDown").addClass("transition ease-out duration-100");
+                    $("#FilterDropDown").removeClass("transform opacity-0 scale-0");
+                    $("#FilterDropDown").addClass("transform opacity-100 scale-100");
+                    $("#FilterDropDown").attr("isOpen",true);
+                    $("#startTime").val("00:00");
+                    $("#endTime").val("23:59");
                     }
-                    else{
-                        $("#FilterDropDown").removeClass("transition ease-out duration-100");
-                        $("#FilterDropDown").addClass("transition ease-in duration-75");
-                        $("#FilterDropDown").addClass("transform opacity-0 scale-0");
-                        $("#FilterDropDown").removeClass("transform opacity-100 scale-100");
-                        $("#FilterDropDown").attr("isOpen",false);
-                    }
-                });
+                else{
+                    $("#FilterDropDown").removeClass("transition ease-out duration-100");
+                    $("#FilterDropDown").addClass("transition ease-in duration-75");
+                    $("#FilterDropDown").addClass("transform opacity-0 scale-0");
+                    $("#FilterDropDown").removeClass("transform opacity-100 scale-100");
+                    $("#FilterDropDown").attr("isOpen",false);
+                }
+            });
             $js("Filter",async function(){
                 let vals = PopulateArrayWithVals("FilterDropDown");
                 if (vals[1] == "" || vals[2] == ""){
@@ -229,6 +265,12 @@
                 await $wire.set("StartTime",vals[1]);
                 await $wire.set("EndTime",vals[2]);
                 await $wire.set("User",vals[3]);
+                await refresh();
+                $("#DateRangeText").text(TimeFrame);
+            })
+            $js("ChangeApplication",async function(ev,Application){
+                await $wire.call("SetApplication",Application)
+                application = $wire.application;
                 await refresh();
                 $("#DateRangeText").text(TimeFrame);
             })
@@ -282,17 +324,14 @@
             }
             function CleanseSearch(input){
                 try{
-                    let Regex = /(\(\)?)|(\(?\))/;
-                    console.log(Regex.test(input));
-                    if (Regex.test(input)){
-                        input = input.replace("(","\\(");
-                        input = input.replace(")","\\)");
-                        console.log(input);
-                        return input
-                    }
-                    else{
-                        return input;
-                    }
+                    //add more as needed...
+                    input = input.replace("(","\\(");
+                    input = input.replace(")","\\)");
+                    input = input.replace("{","\\{");
+                    input = input.replace("}","\\}");
+                    console.log(input);
+                    return input;
+                    
                 }   
                 catch(e){
                     console.log(e);
@@ -302,6 +341,8 @@
             $(document).ready(async function(){
                 await $wire.set("StartDate",JSON.stringify(setStartDate));
                 await $wire.set("EndDate",JSON.stringify(setEndDate));
+                await $wire.call("LoadApplications");
+                await $wire.call("SetDefaultApplication");
                 await refresh();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -381,7 +422,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("GeneralLogInfo.csv",TableObjects);
+                    let result = exportToCsv("ApplicationLogInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){
