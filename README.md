@@ -23,10 +23,13 @@
 </table>
 
 ## Getting Started
-<p>The first step is to make sure that the data base is set up appropriately and to make sure you have run laravels migrations</p>
-<p>To set up the dev environment make sure to run the commands below into the terminal</p>
+<p>The first step is to make sure that the data base is set up appropriately and to make sure you have run through 
+  <a href="https://laravel.com/docs/12.x/installation">laravels installation guide</a>
+</p>
+<p>Once you have done that just run the commands below to install any needed dependencys and than start up the application</p>
 
 ```markdown
-1. npm install
-2. npm run dev
+npm install
+
+npm run dev
 ```
