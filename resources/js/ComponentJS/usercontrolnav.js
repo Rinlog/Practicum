@@ -10,9 +10,9 @@ $(document).ready(function(e){
         }
         else{
             $("#UserDropDown").removeClass("transition ease-out duration-100");
+            $("#UserDropDown").removeClass("transform opacity-100 scale-100");
             $("#UserDropDown").addClass("transition ease-in duration-75");
             $("#UserDropDown").addClass("transform opacity-0 scale-0");
-            $("#UserDropDown").removeClass("transform opacity-100 scale-100");
             $("#UserDropDown").attr("isOpen",false);
         }
     });

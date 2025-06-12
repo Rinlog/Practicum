@@ -72,6 +72,34 @@
                 let PasswordErr = $("#ChangePasswordErr");
                 let ConfirmPassErr = $("#ChangeConfirmPasswordErr")
 
+                Password.removeClass("border-2 border-red-500");
+                PasswordErr.addClass("hide");
+                PasswordErr.text("");
+                ConfirmPass.removeClass("border-2 border-red-500");
+                ConfirmPassErr.addClass("hide");
+                ConfirmPassErr.text("");
+
+                if (Password.val() == "" && ConfirmPass.val() == ""){
+                    Password.addClass("border-2 border-red-500");
+                    PasswordErr.removeClass("hide");
+                    PasswordErr.text("Password can not be blank");
+                    ConfirmPass.addClass("border-2 border-red-500");
+                    ConfirmPassErr.removeClass("hide");
+                    ConfirmPassErr.text("Confirm pass can not be blank");
+                    return;
+                }
+                else if (Password.val() == ""){
+                    Password.addClass("border-2 border-red-500");
+                    PasswordErr.removeClass("hide");
+                    PasswordErr.text("Password can not be blank");
+                    return;
+                }
+                else if (ConfirmPass.val() == ""){
+                    ConfirmPass.addClass("border-2 border-red-500");
+                    ConfirmPassErr.removeClass("hide");
+                    ConfirmPassErr.text("Confirm pass can not be blank");
+                    return;
+                }
                 if (Password.val() == ConfirmPass.val()){
                     CloseModal();
                     setTimeout(async function(){

@@ -114,11 +114,15 @@ $(document).ready(function(e){
     function UserControlCorrection(leftNorm){
         if (leftNorm == "left"){
             $("#UserControlDiv").removeClass("pr-25");
+            $("#UserDropDown").removeClass('right-25');
             $("#UserControlDiv").addClass("pr-70");
+            $("#UserDropDown").addClass('right-70');
         }
         else if (leftNorm == "normal"){
             $("#UserControlDiv").addClass("pr-25");
+            $("#UserDropDown").addClass('right-25');
             $("#UserControlDiv").removeClass("pr-70");
+            $("#UserDropDown").removeClass('right-70');
         }
     }
     $("#SettingSearchBar").on("input",function(e){
