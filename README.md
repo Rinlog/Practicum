@@ -24,7 +24,7 @@
 
 ## Getting Started
 <p>The first step is to make sure that the data base is set up appropriately and to make sure you have run through 
-  <a href="https://laravel.com/docs/12.x/installation">laravels installation guide</a>
+  <a href="https://laravel.com/docs/12.x/installation">laravels installation guide</a>. I set up the project using Laravel herd so i recommend doing it the same way.
 </p>
 <p>Once you have done that just run the commands below to install any needed dependencys and than start up the application</p>
 
