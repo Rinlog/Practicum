@@ -425,6 +425,7 @@
                     let result = exportToCsv("ApplicationLogInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
+                    $("#DateRangeText").text(TimeFrame);
                     if (result == true){
                         setAlertText("Exported to CSV");
                         displayAlert();

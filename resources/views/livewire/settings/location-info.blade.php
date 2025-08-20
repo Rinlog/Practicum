@@ -22,7 +22,7 @@
             </div>
         </div>
     </div>
-    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-[645px]">
+    <div class="lg:p-10 md:p-10 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-screen md:h-[645px] lg:h-[645px]">
         <span class="flex items-center justify-between mb-4">
             {{-- top half --}}
             {{-- refresh button --}}
