@@ -8,7 +8,7 @@
     <div class="w-screen flex flex-col flex-wrap">
         <livewire:usercontrols.usercontrolnav></livewire:usercontrols.usercontrolnav>
         <div id="InfoSection" class="flex flex-col lg:flex-row lg:w-[1750px] gap-0 lg:overflow-y-hidden ">
-            <div class="relative w-[90%] md:w-[90%] lg:w-[100%] pl-10 pr-10 pt-5 overflow-y-hidden">
+            <div class="relative w-full lg:flex-1 pl-10 pr-10 pt-5 overflow-y-hidden overflow-x-hidden">
                 {{-- info selection --}}
                 <div class="flex">
                     <div class="relative inline-block text-left w-full pr-4 lg:pr-0 bg-[#f6f6f6] rounded-t-lg">

@@ -76,48 +76,54 @@ import $ from 'jquery';
         options = $.extend(this.element.data(), options);
 
         //html template for the picker UI
-        if (typeof options.template !== 'string' && !(options.template instanceof $))
-            options.template = '<div class="daterangepicker dropdown-menu">' +
-                '<div class="calendar left">' +
-                    '<div class="daterangepicker_input">' +
-                      '<span class="flex justify-center items-center">'+
-                        '<svg xmlns="http://www.w3.org/2000/svg" id="Path" class="size-5" viewBox="0 0 26 26" fill="#00719d">'+
-                            '<path id="Calendar" class="cls-1" d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>'+
-                        '</svg>'+
-                        '<input class="text-[#00719d] text-left order border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" type="text" name="daterangepicker_start" value="" />' +
-                      '</span>'+
-                      '<div class="calendar-time">' +
-                        '<div></div>' +
-                        '<i class="fa fa-clock-o glyphicon glyphicon-time"></i>' +
-                      '</div>' +
-                    '</div>' +
-                    '<div class="calendar-table"></div>' +
-                '</div>' +
-                '<div class="calendar right">' +
-                    '<div class="daterangepicker_input">' +
-                      '<span class="flex justify-center items-center">'+
-                        '<svg xmlns="http://www.w3.org/2000/svg" id="Path" class="size-5" viewBox="0 0 26 26" fill="#00719d">'+
-                            '<path id="Calendar" class="cls-1" d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>'+
-                        '</svg>'+
-                      '<input class="text-[#00719d] text-left order border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" type="text" name="daterangepicker_end" value="" />' +
-                      '</span>'+
-                      '<div class="calendar-time">' +
-                        '<div></div>' +
-                        '<i class="fa fa-clock-o glyphicon glyphicon-time"></i>' +
-                      '</div>' +
-                    '</div>' +
-                    '<div class="calendar-table"></div>' +
-                '</div>' +
-                '<div class="ranges">' +
-                    '<div class="range_inputs flex items-end justify-center h-[20%] gap-2">' +
-                        '<span class="flex justify-center gap-2">'+
-                            '<button class="applyBtn" disabled="disabled" type="button"></button> ' +
-                            '<button class="cancelBtn" type="button"></button>' +
-                        '</span>'+
-                    '</div>' +
-                '</div>' +
-            '</div>';
+        if (typeof options.template !== 'string' && !(options.template instanceof $)) {
+    options.template = `
+    <div class="daterangepicker dropdown-menu w-full max-w-4xl mx-auto p-4 bg-white shadow-lg rounded-md overflow-auto">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Left Calendar -->
+            <div class="calendar left flex-1">
+                <div class="daterangepicker_input mb-2">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#00719d]" viewBox="0 0 26 26" fill="currentColor">
+                            <path d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>
+                        </svg>
+                        <input class="text-[#00719d] w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" type="text" name="daterangepicker_start" value="" />
+                    </span>
+                    <div class="calendar-time mt-1">
+                        <div></div>
+                        <i class="fa fa-clock-o glyphicon glyphicon-time"></i>
+                    </div>
+                </div>
+                <div class="calendar-table"></div>
+            </div>
 
+            <!-- Right Calendar -->
+            <div class="calendar right flex-1">
+                <div class="daterangepicker_input mb-2">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#00719d]" viewBox="0 0 26 26" fill="currentColor">
+                            <path d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>
+                        </svg>
+                        <input class="text-[#00719d] w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" type="text" name="daterangepicker_end" value="" />
+                    </span>
+                    <div class="calendar-time mt-1">
+                        <div></div>
+                        <i class="fa fa-clock-o glyphicon glyphicon-time"></i>
+                    </div>
+                </div>
+                <div class="calendar-table"></div>
+            </div>
+        </div>
+
+        <!-- Ranges Section -->
+        <div class="ranges mt-4">
+            <div class="range_inputs flex flex-col sm:flex-row items-center justify-center gap-2 mt-4">
+                <button class="applyBtn disabled:opacity-50" disabled type="button">Apply</button>
+                <button class="cancelBtn" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>`;
+}
         this.parentEl = (options.parentEl && $(options.parentEl).length) ? $(options.parentEl) : $(this.parentEl);
         this.container = $(options.template).appendTo(this.parentEl);
 

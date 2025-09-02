@@ -1,7 +1,7 @@
 <nav id="SideNav" class="relative w-16 transition-all duration-300 ease-in-out">
         @vite(['resources/css/navigation.css','resources/js/ComponentJS/navigation.js'])
         {{-- left side navbar --}}
-        <div id="SideNavFrame" class="w-16 bg-gradient-to-b from-[#00709e] to-[#003a50] transition-all duration-300 ease-in-out text-white lg:h-[955px] h-full">
+        <div id="SideNavFrame" class="w-16 bg-gradient-to-b from-[#00709e] to-[#003a50] transition-all duration-300 ease-in-out text-white lg:min-h-[955px] h-full">
             <div class="shadow-md bg-[#056e99] flex flex-row items-center justify-start h-15">
                 <img id="ExpandedLogo" src="\images\NBCC_Horizontal_White.png" class="pl-4 w-[200px] min-w-[220px]">
             </div>

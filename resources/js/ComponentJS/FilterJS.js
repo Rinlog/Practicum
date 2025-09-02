@@ -2,7 +2,7 @@ $(document).ready(async function(){
     //triggers dropdown to close if clicked outside of
     document.addEventListener("click",function(ev){
             let parent = ev.target.parentNode;
-            while (parent.id != "FilterContainer" && parent.id != "FilterDropDown" ){
+            while (parent.id != "FilterContainer" && parent.id != "FilterDropDown" && parent.id != "TriggerOpenFilter" ){
                 parent = parent.parentNode;
                 if (parent === null){
                     break;

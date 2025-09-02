@@ -1,11 +1,11 @@
-<div id="MainWindowLogs" class="flex flex-col lg:flex-row lg:w-[1750px] gap-0">
+<div id="MainWindowLogs" class="flex flex-col lg:flex-row w-full max-w-[1750px] gap-0">
     @vite(['resources/js/ComponentJS/FilterJS.js'])
-    <div class="relative w-[90%] md:w-[80%] lg:w-[100%] pl-10 pr-10">
-    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md rounded-b-lg h-[1340px] w-full md:h-[781px] lg:h-[750px] overflow-y-hidden">
+    <div class="relative w-full lg:flex-1 pl-10 pr-10 flex-grow flex-col sm:flex-row">
+    <div class="lg:p-10 md:p-10 pr-10 pl-2 pt-2 bg-white shadow-md flex flex-grow flex-col gap-2 rounded-b-lg min-h-[1430px] w-full md:min-h-[781px] lg:min-h-[750px] overflow-y-hidden">
         <span class="flex lg:flex-row lg:items-center md:flex-col flex-col lg:justify-between md:justify-between mb-4 gap-4">
             {{-- top half --}}
             {{-- calendar + filter --}}
-            <span class="flex lg:flex-row lg:items-center md:flex-row md:items-center flex-col gap-4 items-start lg:flex-grow md:flex-grow">
+            <span class="flex lg:flex-row lg:items-center flex-col gap-4 items-start lg:flex-grow md:flex-grow">
                 <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[290px]">
                     <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
                         <path id="Calendar" class="cls-1" d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>
@@ -47,7 +47,7 @@
                     </div>
                 </span>
                 {{-- Search bar --}}
-                <div class="flex lg:w-full md:w-full relative">
+                <div class="flex lg:w-full relative">
                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 30 30" stroke="#666666" fill="#666666" class="mt-4 absolute left-3">
                         <path d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z"></path>
                     </svg>
@@ -71,7 +71,7 @@
             </span>
         </span>
         {{-- table section --}}
-        <table class="rounded-lg border-2 border-[#f4f4f4] border-separate w-full block overflow-y-auto overflow-x-auto border-spacing-[0]">
+        <table class="rounded-lg border-2 border-[#f4f4f4] border-separate w-full min-h-[550px] block overflow-y-auto overflow-x-auto border-spacing-[0]">
             <thead class="rounded-lg bg-[#f2f2f2] border-2 border-[#f4f4f4] border-separate">
                 <tr>
                     <th>#</th>
@@ -85,8 +85,41 @@
             </tbody>
         </table>
         {{-- bottom section --}}
-        <div class="flex justify-between lg:mt-4">
+        <div class="flex justify-between lg:mt-4 lg:flex-row md:flex-row flex-col">
             <label class="text-gray-600">Showing <span id="LogCount">0</span> Results</label>
+
+            {{-- Active Filter Section --}}
+            <div class="flex gap-2 lg:justify-end lg:flex-row lg:items-center md:flex-row md:items-center md:justify-end flex-col items-start">
+                <label class="text-gray-600">Active Filters:</label>
+                <button id="TriggerOpenFilter">
+                    <div class="bg-[#3fc4e7] rounded-full p-3 text-white font-semibold flex gap-3 cursor-pointer hover:bg-[#3c8fb0]">
+                        <span id="TimeRangeFilterText">{{$StartTime}} - {{ $EndTime }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" id="Path" viewBox="0 0 26 26" class="fill-white w-[24px] h-[24px]">
+                            <path id="Edit" class="cls-1" d="M24,23c0,.55-.45,1-1,1H3c-.55,0-1-.45-1-1s.45-1,1-1h20c.55,0,1,.45,1,1ZM6.61,19.79l-.21-3.44c-.02-.28.06-.55.21-.79L15.06,2.59c.37-.58,1.16-.77,1.76-.41.01,0,.03.02.04.02l3.45,2.23c.29.19.49.48.56.82.07.34,0,.7-.19.99l-8.44,12.96c-.15.23-.38.42-.65.51l-3.23,1.21c-.16.06-.31.08-.46.08h0c-.68,0-1.25-.54-1.29-1.21ZM8.41,16.45l.14,2.26,2.14-.8,7.94-12.18-2.27-1.47-7.94,12.19Z"/>
+                        </svg>
+                    </div>
+                </button>
+                @if ($ActivityType != "%" && $ActivityType != "")
+                <button id="ActivityTypeValue" wire:click="$js.ResetActivity">
+                    <div class="bg-[#3fc4e7] rounded-full p-3 text-white font-semibold flex gap-3 cursor-pointer hover:bg-[#3c8fb0] items-center">
+                        <span id="TimeRangeFilterText">Activity: {{ $ActivityType }}</span>
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                        </svg>
+                    </div>
+                </button>
+                @endif
+                @if ($User != "%")
+                <button id="UserValue" wire:click="$js.ResetUser">
+                    <div class="bg-[#3fc4e7] rounded-full p-3 text-white font-semibold flex gap-3 cursor-pointer hover:bg-[#3c8fb0] items-center">
+                        <span id="TimeRangeFilterText">User: {{ $User }}</span>
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                        </svg>
+                    </div>
+                </button>
+                @endif
+            </div>
         </div>
     </div>
     </div>
@@ -223,7 +256,14 @@
                     SearchThroughTable($("#SearchBarLogs").val());
                 })
             }
-            $("#Filter").click(function(e){
+            $("#TriggerOpenFilter").click(function(e){
+                OpenCloseFilter()
+            })
+            $("#Filter").on("click",function(e){
+                OpenCloseFilter()
+            });
+            function OpenCloseFilter(){
+                console.log($("#FilterDropDown").attr("isopen"))
                 if ($("#FilterDropDown").attr("isopen") == "false"){
                     $("#FilterDropDown").addClass("transition ease-out duration-100");
                     $("#FilterDropDown").removeClass("transform opacity-0 scale-0");
@@ -239,7 +279,17 @@
                     $("#FilterDropDown").removeClass("transform opacity-100 scale-100");
                     $("#FilterDropDown").attr("isOpen",false);
                 }
-            });
+            }
+            $js("ResetUser",async function(){
+                $wire.set("User","%")
+                await refresh();
+                $("#DateRangeText").text(TimeFrame);
+            })
+            $js("ResetActivity",async function(){
+                $wire.set("ActivityType","%")
+                await refresh();
+                $("#DateRangeText").text(TimeFrame);
+            })
             $js("Filter",async function(){
                 let vals = PopulateArrayWithVals("FilterDropDown");
                 if (vals[1] == "" || vals[2] == ""){
