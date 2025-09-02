@@ -5,7 +5,7 @@
             <div class="shadow-md bg-[#056e99] flex flex-row items-center justify-start h-15">
                 <img id="ExpandedLogo" src="\images\NBCC_Horizontal_White.png" class="pl-4 w-[200px] min-w-[220px]">
             </div>
-            <ul class="flex flex-col gap-4 lg:justify-center lg:h-[80%] h-[800px]">
+            <ul class="flex flex-col gap-4 lg:justify-center h-[800px]">
 
                 <li id="home" class="slider hover:border-l-4 border-[#49b5d6] cursor-pointer"><a href="/home">
                     <span class="flex flex-row items-center gap-6 p-4">

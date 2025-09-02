@@ -79,7 +79,7 @@ class ApplicationLog extends Component
             ->get(DB::raw("application_id, split_part(applog_activity_time::text,' ',1) AS date, split_part(applog_activity_time::text,' ',2) as time, applog_activity_type, applog_activity_performed_by, applog_activity_desc" ));
             foreach($TableInfo as $Row){
                 $this->DisplayTableInfo .= "
-                <tr>
+                <tr class= 'cursor-pointer hover:bg-[#f8f8f8]' wire:click='\$js.OpenRowDetails(\"".$this->application."\",\"".$Row->date."\",\"".$Row->time."\",\"".$Row->applog_activity_type."\",\"".$Row->applog_activity_performed_by."\",\"".$Row->applog_activity_desc."\")'>
                 <td></td>
                 <td>".$this->application."</td>
                 <td>".$Row->date."</td>

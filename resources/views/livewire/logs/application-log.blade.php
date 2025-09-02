@@ -140,6 +140,7 @@
     </div>
     </div>
     <livewire:alert.notification key="{{ Str::random() }}"></livewire:alert.notification>
+    <livewire:modals.display-details-modal application="true" key="{{ Str::random() }}"></livewire:modals.display-details-modal>
 </div>
         @script
         <script>
@@ -490,6 +491,23 @@
                     displayAlert();
                 }
             });
+            function OpenDetailsModal(){
+                $("#DisplayMessageFrame").removeClass("opacity-0 ease-in duration-200");
+                $("#DisplayMessageFrame").addClass("opacity-100 ease-out duration-300");
+                $("#DisplayMessageMain").removeClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
+                $("#DisplayMessageMain").addClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
+            }
+            $js("OpenRowDetails",function(Application,Date,Time,Activity,User,Description){
+                $("#ApplicationDetailsModal").text(Application)
+                $("#DateDetailsModal").text(Date)
+                $("#TimeDetailsModal").text(Time)
+                $("#ActivityDetailsModal").text(Activity)
+                $("#UserDetailsModal").text(User)
+                $("#DescriptionDetailsModal").text(Description)
+                $("#DisplayMessage").removeClass("hide")
+                setTimeout(function(e){OpenDetailsModal()},50)
+                
+            })
             
     </script>
     @endscript
