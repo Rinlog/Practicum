@@ -8,6 +8,6 @@ class ChangePassword extends Component
 {
     public function render()
     {
-        return view('livewire..modals.change-password');
+        return view('livewire.modals.change-password');
     }
 }

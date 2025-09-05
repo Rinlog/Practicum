@@ -5,7 +5,6 @@
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
-            @vite(['resources/scss/login.scss'])
             {{--@vite(['resources\js\ComponentJS\alertJS.js'])--}}
             @if (!empty($_SESSION["UserName"]))
                 <script>window.location = "/home";</script>

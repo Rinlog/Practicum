@@ -4,7 +4,6 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
 ?>
 <div id="UserControlMainDiv" class="relative w-screen flex justify-end items-center bg-white h-15 shadow-md">
     @vite('resources/js/ComponentJS/usercontrolnav.js')
-    @vite('app/Includes/OutPutIfLoggedIn.php")?>')
     <div>
         <div class="inline-block text-left">
             <div id="UserControlDiv" class="transition-all duration-300 pr-25">

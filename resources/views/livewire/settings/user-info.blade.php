@@ -569,14 +569,14 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update User \"" + Obj["LOCATION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update User \"" + Obj["USER NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert User \"" + Obj["LOCATION NAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert User \"" + Obj["USER NAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){

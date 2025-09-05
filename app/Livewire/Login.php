@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use \Illuminate\Database\RecordNotFoundException;
 use \Exception;
+use Ramsey\Uuid\Uuid;
 
 #[Title("Login | IDL")]
 class Login extends Component
@@ -56,8 +57,9 @@ class Login extends Component
         try{
             if ($this->Username != "" and $this->Password != "") {
                 $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
+                $UsersPass = $this->DecryptPass($user->user_password, $user->user_salt);
 
-                if (password_verify("idl123abc",$user->user_password)) {
+                if ("idl123abc" == $UsersPass) {
                     if ($this->Password == "idl123abc"){
                         return true;
                     }
@@ -79,8 +81,16 @@ class Login extends Component
     }
     public function ChangePass($Password){
         try{
+            $PasswordInfo = $this->GenEncryptedPass($Password);
+
+            $Salt = DB::table("users")->where("user_username",$this->Username)->value("user_salt");
+
+            $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
+                "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
+            ]);
+
             DB::table("users")->where("user_username", $this->Username)->update([
-                "user_password"=>(password_hash($Password, PASSWORD_DEFAULT))
+                "user_password"=> $PasswordInfo[2]
             ]);
             $this->Password = $Password;
             return true;
@@ -133,7 +143,7 @@ class Login extends Component
                     $this->usrShowErr = "show";
                     $this->usrErrMsg = "Incorrect username";
                 }
-                if (password_verify($this->Password , $user->user_password)){
+                if ($this->Password == $this->DecryptPass($user->user_password,$user->user_salt)){
                     $passwordValid = true;
                     $this->clearpass();
                 }
@@ -158,6 +168,44 @@ class Login extends Component
         }
         catch(Exception $e){
 
+        }
+    }
+    public function GenEncryptedPass($Password){
+        $iv = random_bytes(16);
+        $secret = Uuid::uuid4()->toString();
+        $key = hash("sha256",$secret);
+
+        $encrypted = openssl_encrypt(
+            $Password,
+            'AES-256-CBC',
+            $key,
+            0,
+            $iv
+        );
+        $encrypted = base64_encode($encrypted);
+
+        return [base64_encode($iv),base64_encode($key),$encrypted];
+    }
+    public function DecryptPass($Password, $Salt){
+        $iv_keyRaw = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->value("key_data");
+        $iv_key = explode(",",$iv_keyRaw);
+
+        if (count($iv_key) == 2){
+            $iv = base64_decode($iv_key[0]);
+            $key = base64_decode($iv_key[1]);
+            $Password = base64_decode($Password);
+
+            $decrypted = openssl_decrypt(
+                $Password,
+                'AES-256-CBC',
+                $key,
+                0,
+                $iv
+            );
+            return $decrypted;
+        }
+        else{
+            return "";
         }
     }
 }

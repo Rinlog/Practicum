@@ -140,12 +140,18 @@ class UserInfo extends Component
                     if (strtolower($Object->{"USER ID"}) == "will generate automatically"){
                         $Object->{"USER ID"} = Uuid::uuid4()->toString();
                     }
+                    $PassInfo = $this->GenEncryptedPass("idl123abc");
+                    $Salt = $this->GenSalt($Object->{"USER NAME"}, date("Y-m-d"));
+                    $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
+                        "key_id"=>$Salt,
+                        "key_data"=>$PassInfo[0] . ',' . $PassInfo[1]
+                    ]);
                     $result = DB::table("users")->insert([
                         "user_id"=>$Object->{"USER ID"},
                         "organization_id"=> $organizationID,
                         "user_username" => $Object->{"USER NAME"},
-                        "user_password"=> password_hash("idl123abc", PASSWORD_DEFAULT),
-                        "user_salt"=> "NOT USED",
+                        "user_password"=> $PassInfo[2],
+                        "user_salt"=> $Salt,
                         "user_name"=> $Object->{"NAME"},
                         "user_email"=> $Object->{"EMAIL"},
                         "user_phone"=> $Object->{"PHONE NUMBER"},
@@ -160,7 +166,12 @@ class UserInfo extends Component
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
                         "log_activity_desc"=>"Inserted user ". $Object->{"USER ID"}
                     ]);
-                    array_push($Results, $result);
+                    if ($keystore == true && $result == true){
+                        array_push($Results, $result);
+                    }
+                    else{
+                        array_push($Results, false);
+                    }
                 }
                 catch(Exception $e){
                     array_push($Results, false);
@@ -197,8 +208,15 @@ class UserInfo extends Component
                     $ResetPass = $ActionSplit[2];
                     $resetPassResult = 1;
                     if ($ResetPass == "true"){
+                        $PasswordInfo = $this->GenEncryptedPass("idl123abc");
+
+                        $Salt = DB::table("users")->where("user_id",$Object->{"USER ID"})->value("user_salt");
+
+                        $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
+                            "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
+                        ]);
                         $resetPassResult = DB::table("users")->where("user_username",$idToUpdate)->update([
-                            "user_password"=> password_hash("idl123abc", PASSWORD_DEFAULT)
+                            "user_password"=> $PasswordInfo[2]
                         ]);
                     }
                     $result = DB::table("users")->where("user_username", $idToUpdate)->update([
@@ -246,5 +264,27 @@ class UserInfo extends Component
     {
         $this->LoadUserInfo();
         return view('livewire..settings.user-info');
+    }
+
+    public function GenEncryptedPass($Password){
+        $iv = random_bytes(16);
+        $secret = Uuid::uuid4()->toString();
+        $key = hash("sha256",$secret);
+
+        $encrypted = openssl_encrypt(
+            $Password,
+            'AES-256-CBC',
+            $key,
+            0,
+            $iv
+        );
+        $encrypted = base64_encode($encrypted);
+
+        return [base64_encode($iv),base64_encode($key),$encrypted];
+    }
+    public function GenSalt($Username,$DateCreated){
+        $UnhexedSalt = $Username . $DateCreated;
+        $HexSalt = bin2hex($UnhexedSalt);
+        return $HexSalt;
     }
 }
