@@ -58,7 +58,7 @@ class Login extends Component
             if ($this->Username != "" and $this->Password != "") {
                 $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
                 $UsersPass = $this->DecryptPass($user->user_password, $user->user_salt);
-
+                
                 if ("idl123abc" == $UsersPass) {
                     if ($this->Password == "idl123abc"){
                         return true;
@@ -189,7 +189,7 @@ class Login extends Component
     public function DecryptPass($Password, $Salt){
         $iv_keyRaw = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->value("key_data");
         $iv_key = explode(",",$iv_keyRaw);
-
+        
         if (count($iv_key) == 2){
             $iv = base64_decode($iv_key[0]);
             $key = base64_decode($iv_key[1]);

@@ -6,12 +6,14 @@ use App\Livewire\Home;
 use App\Livewire\Login;
 use App\Livewire\Applications;
 use App\Livewire\Logs;
+use App\Livewire\Readings;
 use App\Livewire\Settings;
 
 Route::get('/', Login::class);
 Route::get('/home', Home::class);
 Route::get('/applications', Applications::class);
 Route::get('/dashboard', Dashboard::class);
+Route::get("/readings",Readings::class);
 Route::get('/logs', Logs::class);
 Route::get('/settings/{page}',Settings::class);
 Route::Post("/logout",function(){

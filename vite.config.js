@@ -17,6 +17,8 @@ export default defineConfig({
                 'resources/js/ComponentJS/alertJS.js',
                 'resources/js/ComponentJS/FilterJS.js',
                 'resources/js/ComponentJS/usercontrolnav.js',
+                'resources/js/ComponentJS/deviceList.js',
+                'resources/js/ComponentJS/sensorList.js',
 
             ],
             refresh: true,

@@ -25,7 +25,7 @@
                             <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
                         </svg>
                     </button>
-                    <div id="FilterDropDown" isOpen="false" class="absolute left-0 z-10 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div id="FilterDropDown" isOpen="false" class="absolute left-0 z-3 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="p-4 flex flex-col items-center" role="none">
                             <livewire:components.underline-input id="activityType" text="Activity Type" textColor="text-gray-500" inputColor="text-gray-600"></livewire:components.underline-input>
                             <livewire:components.req-underline-input id="startTime" text="Start Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
@@ -315,17 +315,16 @@
                             let AlreadyAdded = false;
                             $(this).children().each(function(index){
                                 //adding tr to filtered list
-                                if ($(this).text().toLowerCase().includes(searchInput) && AlreadyAdded == false){
+                                if ($(this).text().toLowerCase().includes(searchInput.toLowerCase()) && AlreadyAdded == false){
                                     FilteredTable.push($(this).parent());
                                     AlreadyAdded = true;
                                 }
                                 //highlighting matching bits
-                                if ($(this).text().toLowerCase().includes(searchInput)){
+                                if ($(this).text().toLowerCase().includes(searchInput.toLowerCase())){
 
-                                    let CleanInput = CleanseSearch(searchInput);
+                                    let CleanInput = CleanseSearch(searchInput.toLowerCase());
                                     let Regex = new RegExp(""+CleanInput+"","ig")
                                     let NewText = $(this).text();
-                                    console.log(Regex);
                                     NewText = NewText.replace(Regex,'<span class="bg-yellow-500 text-white">$&</span>');
                                     $(this).html(NewText);
                                 }

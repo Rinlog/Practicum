@@ -25,6 +25,15 @@
                     </span>
                 </a></li>
 
+                <li id="readings" class="slider hover:border-l-4 border-[#49b5d6] cursor-pointer"><a href="/readings">
+                    <span class="flex flex-row items-center gap-6 p-4" >
+                        <svg xmlns="http://www.w3.org/2000/svg" id="Path" viewBox="0 0 26 26" class="fill-[#fff] min-w-[24px] min-h-[24px]" width="24px" height = 24px>
+                            <path id="Readings" class="cls-1" d="M23,4.43v17.13c-.03,1.92-1.58,3.44-3.48,3.44H6.47c-1.88,0-3.44-1.53-3.47-3.43v-8.57c0-.55.45-1,1-1s1,.45,1,1v8.56c.01.79.67,1.44,1.48,1.44h13.01c.86,0,1.5-.64,1.51-1.46V4.44c-.01-.8-.66-1.42-1.5-1.44h-4.5c-.55,0-1-.45-1-1s.45-1,1-1h4.48s.03,0,.05,0c1.88,0,3.44,1.53,3.47,3.43ZM17,6.58h-2c-.55,0-1,.45-1,1s.45,1,1,1h2c.55,0,1-.45,1-1s-.45-1-1-1ZM17,12h-8c-.55,0-1,.45-1,1s.45,1,1,1h8c.55,0,1-.45,1-1s-.45-1-1-1ZM17,17.42h-8c-.55,0-1,.45-1,1s.45,1,1,1h8c.55,0,1-.45,1-1s-.45-1-1-1ZM3.01,4.49c0-1.92,1.57-3.49,3.49-3.49s3.49,1.56,3.49,3.49c0,.6-.17,1.15-.43,1.64l.98.99c.39.39.39,1.02,0,1.41-.2.19-.45.29-.7.29s-.51-.1-.71-.29l-.98-.99c-.49.26-1.05.43-1.64.43-1.92,0-3.49-1.56-3.49-3.49ZM5.01,4.49c0,.82.67,1.49,1.49,1.49s1.49-.67,1.49-1.49-.67-1.49-1.49-1.49-1.49.67-1.49,1.49Z"/>
+                        </svg>
+                        READINGS
+                    </span>
+                </a></li>
+
                 <li id="logs" class="slider hover:border-l-4 border-[#49b5d6] cursor-pointer"><a href="/logs">
                     <span class="flex flex-row items-center gap-6 p-4">
                         <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" width="24px" height="24px" class="min-w-[24px] min-h-[24px]">

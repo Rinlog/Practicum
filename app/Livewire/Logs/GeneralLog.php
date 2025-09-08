@@ -49,7 +49,7 @@ class GeneralLog extends Component
             ->get(DB::raw("split_part(log_activity_time::text,' ',1) AS date, split_part(log_activity_time::text,' ',2) as time, log_activity_type, log_activity_performed_by, log_activity_desc" ));
             foreach($TableInfo as $Row){
                 $this->DisplayTableInfo .= "
-                <tr class= 'cursor-pointer hover:bg-[#f8f8f8]' wire:click='\$js.OpenRowDetails(\"".$Row->date."\",\"".$Row->time."\",\"".$Row->log_activity_type."\",\"".$Row->log_activity_performed_by."\",\"".$Row->log_activity_desc."\")'>
+                <tr class= 'cursor-pointer hover:bg-[#f2f2f2]' wire:click='\$js.OpenRowDetails(\"".$Row->date."\",\"".$Row->time."\",\"".$Row->log_activity_type."\",\"".$Row->log_activity_performed_by."\",\"".$Row->log_activity_desc."\")'>
                 <td></td>
                 <td>".$Row->date."</td>
                 <td>".$Row->time."</td>
