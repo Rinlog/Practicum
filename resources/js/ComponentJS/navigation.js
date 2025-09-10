@@ -16,6 +16,10 @@ $(document).ready(function(e){
         $("#dashboard").removeClass("hover:border-l-4 border-[#49b5d6]");
         $("#dashboard").addClass("border-l-4 border-[#e2c22f] bg-[#00719d]")
     }
+    else if (location.includes("/readings")){
+        $("#readings").removeClass("hover:border-l-4 border-[#49b5d6]");
+        $("#readings").addClass("border-l-4 border-[#e2c22f] bg-[#00719d]")
+    }
     else if (location.includes("/logs")){
         $("#logs").removeClass("hover:border-l-4 border-[#49b5d6]");
         $("#logs").addClass("border-l-4 border-[#e2c22f] bg-[#00719d]")
