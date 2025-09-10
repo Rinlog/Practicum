@@ -28,10 +28,6 @@ $(document).ready(function(e){
         $("#settings").removeClass("hover:border-l-4 border-[#49b5d6]");
         $("#settings").addClass("border-l-4 border-[#e2c22f] bg-[#00719d]")
     }
-    else{
-        $("#home").removeClass("hover:border-l-4 border-[#49b5d6]");
-        $("#home").addClass("border-l-4 border-[#e2c22f] bg-[#00719d]")
-    }
     //this is used to open or close the side navigation bar
     $("#ExpandMenu").on("click",function(e){
         if (e.currentTarget.attributes["isexpanded"].nodeValue == "false"){

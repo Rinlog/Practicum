@@ -81,6 +81,7 @@ class Home extends Component
             ->where("log_activity_time",">=",$StartDate)
             ->where("log_activity_time","<=",$EndDate)
             ->orderBy("log_activity_time","desc")
+            ->limit(10)
             ->get(DB::raw("split_part(log_activity_time::text,' ',1) AS date, split_part(log_activity_time::text,' ',2) as time, log_activity_type, log_activity_performed_by, log_activity_desc" ));
             foreach($TableInfo as $Row){
                 $this->DisplayLogTableInfo .= "

@@ -10,8 +10,8 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
     {{-- main section --}}
     <div class="w-screen flex flex-col flex-wrap">
         <livewire:usercontrols.usercontrolnav></livewire:usercontrols.usercontrolnav>
-        <div class="p-10 h-screen lg:h-[890px] grid grid-cols-2 grid-rows-5 sm:gap-x-10 gap-x-20">
-            <div class="bg-[#00719d] w-full rounded-lg p-10 flex flex-col gap-4 col-1">
+        <div class="p-10 h-screen lg:min-h-[857px] grid grid-cols-2 grid-rows-5 sm:gap-x-10 gap-x-20">
+            <div class="bg-[#00719d] shadow-md w-full rounded-lg p-10 flex flex-col gap-4 col-1">
                 <h1 class="text-white">Hello, <b><?php OutPutIfLoggedIn("UserName");?>!</b></h1>
                 <span class="text-[#48bbe7] text-lg font-semibold">
                     @foreach( $userRoles as $role)

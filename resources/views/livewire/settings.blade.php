@@ -7,7 +7,7 @@
     {{-- main section --}}
     <div class="w-screen flex flex-col flex-wrap">
         <livewire:usercontrols.usercontrolnav></livewire:usercontrols.usercontrolnav>
-        <div class="lg:pb-10 lg:pl-10 md:pb-10 md:pl-10 pb-15 pt-4 lg:h-[857px] w-full overflow-y-hidden">
+        <div class="lg:pb-10 lg:pl-10 md:pb-10 md:pl-10 pb-15 pt-4 lg:min-h-[902px] w-full overflow-y-hidden">
             <h1 class="text-[#7e7e7e] pb-5">Settings</h1>
             {{-- main info --}}
             @if ($settingToDisplay == "deviceInfo")
