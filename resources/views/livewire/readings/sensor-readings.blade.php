@@ -136,7 +136,7 @@
             </span>
         </span>
         {{-- table section --}}
-        <table class="rounded-lg border-2 border-[#f4f4f4] border-separate w-full min-h-[550px] block overflow-y-auto overflow-x-auto border-spacing-[0]">
+        <table class="rounded-lg border-2 border-[#f4f4f4] border-separate w-full min-h-[550px] max-h-[550px] block overflow-y-auto overflow-x-auto border-spacing-[0]">
             <thead class="rounded-lg bg-[#f2f2f2] border-2 border-[#f4f4f4] border-separate">
                 <tr>
                     <th>#</th>

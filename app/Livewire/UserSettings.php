@@ -102,18 +102,19 @@ class UserSettings extends Component
     public function GenEncryptedPass($Password){
         $iv = random_bytes(16);
         $secret = Uuid::uuid4()->toString();
-        $key = hash("sha256",$secret);
-
+        $key = base64_encode(hash("sha256",$secret));
+        $key2 = base64_decode($key);
+        
         $encrypted = openssl_encrypt(
             $Password,
             'AES-256-CBC',
-            $key,
-            0,
+            $key2,
+            OPENSSL_RAW_DATA,
             $iv
         );
         $encrypted = base64_encode($encrypted);
 
-        return [base64_encode($iv),base64_encode($key),$encrypted];
+        return [base64_encode($iv),$key,$encrypted];
     }
     public function DecryptPass($Password, $Salt){
         $iv_keyRaw = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->value("key_data");
@@ -122,13 +123,13 @@ class UserSettings extends Component
         if (count($iv_key) == 2){
             $iv = base64_decode($iv_key[0]);
             $key = base64_decode($iv_key[1]);
-            $Password = base64_decode($Password);
+            $DecryptedPass = base64_decode($Password);
 
             $decrypted = openssl_decrypt(
-                $Password,
+                $DecryptedPass,
                 'AES-256-CBC',
                 $key,
-                0,
+                OPENSSL_RAW_DATA,
                 $iv
             );
             return $decrypted;

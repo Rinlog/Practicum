@@ -269,18 +269,19 @@ class UserInfo extends Component
     public function GenEncryptedPass($Password){
         $iv = random_bytes(16);
         $secret = Uuid::uuid4()->toString();
-        $key = hash("sha256",$secret);
-
+        $key = base64_encode(hash("sha256",$secret));
+        $key2 = base64_decode($key);
+        
         $encrypted = openssl_encrypt(
             $Password,
             'AES-256-CBC',
-            $key,
-            0,
+            $key2,
+            OPENSSL_RAW_DATA,
             $iv
         );
         $encrypted = base64_encode($encrypted);
 
-        return [base64_encode($iv),base64_encode($key),$encrypted];
+        return [base64_encode($iv),$key,$encrypted];
     }
     public function GenSalt($Username,$DateCreated){
         $UnhexedSalt = $Username . $DateCreated;

@@ -58,7 +58,6 @@ class Login extends Component
             if ($this->Username != "" and $this->Password != "") {
                 $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
                 $UsersPass = $this->DecryptPass($user->user_password, $user->user_salt);
-                
                 if ("idl123abc" == $UsersPass) {
                     if ($this->Password == "idl123abc"){
                         return true;
@@ -173,18 +172,19 @@ class Login extends Component
     public function GenEncryptedPass($Password){
         $iv = random_bytes(16);
         $secret = Uuid::uuid4()->toString();
-        $key = hash("sha256",$secret);
-
+        $key = base64_encode(hash("sha256",$secret));
+        $key2 = base64_decode($key); //decoding makes a different key, we use decoded version for encryption so when we decrypt things work smoothly
+        
         $encrypted = openssl_encrypt(
             $Password,
             'AES-256-CBC',
-            $key,
-            0,
+            $key2,
+            OPENSSL_RAW_DATA,
             $iv
         );
         $encrypted = base64_encode($encrypted);
 
-        return [base64_encode($iv),base64_encode($key),$encrypted];
+        return [base64_encode($iv),$key,$encrypted];
     }
     public function DecryptPass($Password, $Salt){
         $iv_keyRaw = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->value("key_data");
@@ -192,13 +192,13 @@ class Login extends Component
         if (count($iv_key) == 2){
             $iv = base64_decode($iv_key[0]);
             $key = base64_decode($iv_key[1]);
-            $Password = base64_decode($Password);
+            $DecodePass = base64_decode($Password);
 
             $decrypted = openssl_decrypt(
-                $Password,
-                'AES-256-CBC',
+                $DecodePass,
+                'aes-256-cbc',
                 $key,
-                0,
+                OPENSSL_RAW_DATA,
                 $iv
             );
             return $decrypted;
