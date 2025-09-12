@@ -13,6 +13,7 @@ class ApplicationLog extends Component
      public $ActivityType = "%";
     public $StartDate = '';
     public $EndDate = '';
+    public $TimeFrame = "LAST 7 DAYS";
     public $StartTime = '00:00';
     public $EndTime = '23:59';
     public $User = "%";

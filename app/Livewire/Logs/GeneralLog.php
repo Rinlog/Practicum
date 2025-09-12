@@ -16,6 +16,7 @@ class GeneralLog extends Component
     public $StartTime = '00:00';
     public $EndTime = '23:59';
     public $User = "%";
+    public $TimeFrame = "LAST 7 DAYS";
     public $headers = [
         "DATE",
         "TIME",

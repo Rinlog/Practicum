@@ -10,7 +10,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
                         <path id="Calendar" class="cls-1" d="M20.5,3h-1.5v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-8v-1c0-.55-.45-1-1-1s-1,.45-1,1v1h-1.5c-1.93,0-3.5,1.57-3.5,3.5v15c0,1.93,1.57,3.5,3.5,3.5h15c1.93,0,3.5-1.57,3.5-3.5V6.5c0-1.93-1.57-3.5-3.5-3.5ZM5.5,5h1.5v2c0,.55.45,1,1,1s1-.45,1-1v-2h8v2c0,.55.45,1,1,1s1-.45,1-1v-2h1.5c.83,0,1.5.67,1.5,1.5v4H4v-4c0-.83.67-1.5,1.5-1.5ZM20.5,23H5.5c-.83,0-1.5-.67-1.5-1.5v-9h18v9c0,.83-.67,1.5-1.5,1.5Z"/>
                     </svg>
-                    <label id="DateRangeText" class="cursor-pointer">LAST 7 DAYS</label>
+                    <label id="DateRangeText" class="cursor-pointer">{{ $TimeFrame }}</label>
                     <svg class="-mr-1 size-6 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon" class="min-h-[26px] min-w-[26px]">
                         <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
                     </svg>
@@ -164,9 +164,8 @@
 
                     setStartDate = JSON.stringify(new Date(NewStartDate));
                     setEndDate = JSON.stringify(new Date(NewEndDate));
-                    await SetTimeFrame();
                     TimeFrame = startDate.format('L') + "-" + endDate.format('L');
-                    $("#DateRangeText").text(startDate.format('L') + "-" + endDate.format('L'))
+                    await SetTimeFrame();
                 }
                 else{
                      let Offset = new Date().getTimezoneOffset();
@@ -177,14 +176,14 @@
 
                     setStartDate = JSON.stringify(new Date(NewStartDate));
                     setEndDate = JSON.stringify(new Date(NewEndDate));
-                    await SetTimeFrame();
                     TimeFrame = label.toUpperCase();
-                    $("#DateRangeText").text(label.toUpperCase());
+                    await SetTimeFrame();
                 }
             });
             async function SetTimeFrame(){
                 await $wire.set("StartDate",setStartDate);
                 await $wire.set("EndDate",setEndDate);
+                await $wire.set("TimeFrame",TimeFrame)
                 await refresh();
             }
             function CurrentDateAsString(){
@@ -227,13 +226,11 @@
 
                 setStartDate = JSON.stringify(new Date(NewStartDate));
                 setEndDate = JSON.stringify(new Date(NewEndDate));
-                await $wire.set("StartDate",setStartDate);
-                await $wire.set("EndDate",setEndDate);
                 await $wire.set("ActivityType", "%");
                 await $wire.set("StartTime", '00:00');
                 await $wire.set("EndTime", '23:59');
                 await $wire.set("User", "%");
-                await refresh();
+                await SetTimeFrame();
             })
             function UpdateShowingCount(){
                 $("#LogCount").text($("#InfoTable").children().length);
@@ -284,12 +281,10 @@
             $js("ResetUser",async function(){
                 $wire.set("User","%")
                 await refresh();
-                $("#DateRangeText").text(TimeFrame);
             })
             $js("ResetActivity",async function(){
                 $wire.set("ActivityType","%")
                 await refresh();
-                $("#DateRangeText").text(TimeFrame);
             })
             $js("Filter",async function(){
                 let vals = PopulateArrayWithVals("FilterDropDown");
@@ -301,7 +296,6 @@
                 await $wire.set("EndTime",vals[2]);
                 await $wire.set("User",vals[3]);
                 await refresh();
-                $("#DateRangeText").text(TimeFrame);
             })
             function SearchThroughTable(searchInput){
                 try{
@@ -451,7 +445,6 @@
                     let result = exportToCsv("GeneralLogInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
-                    $("#DateRangeText").text(TimeFrame);
                     if (result == true){
                         setAlertText("Exported to CSV");
                         displayAlert();

@@ -13,6 +13,7 @@ class DeviceReadings extends Component
     public $EndDate = '';
     public $StartTime = '00:00';
     public $EndTime = '23:59';
+    public $TimeFrame = "LAST 7 DAYS";
     public $device;
     public $deviceInfo;
     public $devices = [];
