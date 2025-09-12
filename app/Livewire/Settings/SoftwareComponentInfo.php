@@ -28,7 +28,7 @@ class SoftwareComponentInfo extends Component
                 $this->DisplayTableInfo = "";
                 foreach ($ComponentInfo as $key => $Component) {
                     $TRID = $this->SpaceToUnderScore($Component->component_name);
-                    $hasAPI = $Component->has_api ? 'true' : 'false';
+                    $hasAPI = $Component->component_has_api ? 'true' : 'false';
                     $this->DisplayTableInfo.=
                     "<tr id='{$TRID}'>
                         <td>

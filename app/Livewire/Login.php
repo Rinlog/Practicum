@@ -189,7 +189,6 @@ class Login extends Component
     public function DecryptPass($Password, $Salt){
         $iv_keyRaw = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->value("key_data");
         $iv_key = explode(",",$iv_keyRaw);
-        
         if (count($iv_key) == 2){
             $iv = base64_decode($iv_key[0]);
             $key = base64_decode($iv_key[1]);

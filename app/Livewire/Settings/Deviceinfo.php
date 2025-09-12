@@ -86,7 +86,7 @@ class Deviceinfo extends Component
                         <td></td>
                         <td>{$device->device_eui}</td>
                         <td>{$device->device_name}</td>
-                        <td>{$device->device_type}</td>
+                        <td>{$device->device_type_id}</td>
                         <td>{$this->organization}</td>
                         <td>{$device->device_model}</td>
                         <td>{$device->device_serial_no}</td>
