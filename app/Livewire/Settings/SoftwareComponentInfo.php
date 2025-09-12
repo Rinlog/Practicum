@@ -76,7 +76,7 @@ class SoftwareComponentInfo extends Component
                     $result = DB::table("software_component")->insert([
                         "component_id"=>$Object->{"SOFTWARE COMPONENT ID"},
                         "component_name" => $Object->{"SOFTWARE COMPONENT NAME"},
-                        "has_api"=>$Object->{"HAS API"},
+                        "component_has_api"=>$Object->{"HAS API"},
                         "component_desc"=>$Object->{"DESCRIPTION"}
                     ]);
                     DB::table("log")->insert([
@@ -120,7 +120,7 @@ class SoftwareComponentInfo extends Component
                     }
                     $result = DB::table("software_component")->where("component_name", $idToUpdate)->update([
                         "component_name" => $Object->{"SOFTWARE COMPONENT NAME"},
-                        "has_api"=>$Object->{"HAS API"},
+                        "component_has_api"=>$Object->{"HAS API"},
                         "component_desc"=>$Object->{"DESCRIPTION"}
                     ]);
                     DB::table("log")->insert([
