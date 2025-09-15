@@ -151,3 +151,9 @@ thead th:last-child{
     width:1%;
     white-space: nowrap;
 }
+.asc span::after{
+    content:"▲";
+}
+.desc span::after{
+    content:"▼";
+}

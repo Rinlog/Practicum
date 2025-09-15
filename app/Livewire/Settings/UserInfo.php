@@ -211,10 +211,19 @@ class UserInfo extends Component
                         $PasswordInfo = $this->GenEncryptedPass("idl123abc");
 
                         $Salt = DB::table("users")->where("user_id",$Object->{"USER ID"})->value("user_salt");
-
-                        $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
-                            "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
-                        ]);
+                        //check if salt exists
+                        $SaltFound = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->exists();
+                        if ($SaltFound == true){
+                            $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
+                                "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
+                            ]);
+                        }
+                        else{
+                            $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
+                                "key_id"=>$Salt,
+                                "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
+                            ]);
+                        }
                         $resetPassResult = DB::table("users")->where("user_username",$idToUpdate)->update([
                             "user_password"=> $PasswordInfo[2]
                         ]);

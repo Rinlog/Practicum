@@ -139,9 +139,17 @@
         <table class="rounded-lg border-2 border-[#f4f4f4] border-separate w-full min-h-[550px] max-h-[550px] block overflow-y-auto overflow-x-auto border-spacing-[0]">
             <thead class="rounded-lg bg-[#f2f2f2] border-2 border-[#f4f4f4] border-separate">
                 <tr>
-                    <th>#</th>
+                    <th class="cursor-pointer hover:bg-[#e6e6e6] select-none">
+                        <span class="flex justify-between">
+                            #
+                        </span>
+                    </th>
                     @foreach ($headers as $header )
-                        <th>{{ $header }}</th>
+                        <th class="cursor-pointer hover:bg-[#e6e6e6] select-none">
+                            <span class="flex justify-between">
+                                {{ $header }}
+                            </span>
+                        </th>
                     @endforeach
                 </tr>
             </thead>
@@ -282,6 +290,52 @@
                 $("#SearchBarLogs").on('input',function(ev){
                     SearchThroughTable($("#SearchBarLogs").val());
                 })
+                $("table thead th").off("click").on("click", function() {
+                    //header the table belongs to
+                    var table = $(this).closest("table");
+                    //getting the element from the table
+                    var tbody = table.find("tbody");
+
+                    //getting all the rows and putting them in an array
+                    var rows = tbody.find("tr").toArray();
+                    //index of the header clicked
+                    var index = $(this).index();
+
+                    //sort and toggle the order. checking to see if it has asc, if this does switch to desc
+                    var asc = !$(this).hasClass("asc");
+
+                    //need to make sure to remove the header class to put in a new one
+                    table.find("th").removeClass("asc desc");
+                    //depending on the 
+                    $(this).toggleClass("asc", asc);
+                    $(this).toggleClass("desc", !asc);
+
+                    //this will sort the tables now
+                    rows.sort((a, b) => {
+
+                        var UP = $(a).children("td").eq(index).text().toUpperCase();
+                        var DOWN = $(b).children("td").eq(index).text().toUpperCase();
+
+                        if ($.isNumeric(UP) && $.isNumeric(DOWN)){
+                            UP = Number(UP)
+                            DOWN = Number(DOWN)
+                        }
+                        
+                        if (UP < DOWN) {
+                            return asc ? -1 : 1;
+                        }
+                        if (UP > DOWN) {
+                            return asc ? 1 : -1;
+                        }
+                        return 0;
+                        
+                    });
+
+                    //place the new rows back into the table (append them)
+                    $.each(rows, (i, row) => {
+                        tbody.append(row);
+                    });
+                 });
             }
             $("#TriggerOpenFilter").click(function(e){
                 OpenCloseFilter()
