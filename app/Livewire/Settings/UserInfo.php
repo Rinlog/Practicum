@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use \Exception;
-
+use \DateTime;
 class UserInfo extends Component
 {
      public $headers = [
@@ -141,7 +141,7 @@ class UserInfo extends Component
                         $Object->{"USER ID"} = Uuid::uuid4()->toString();
                     }
                     $PassInfo = $this->GenEncryptedPass("idl123abc");
-                    $Salt = $this->GenSalt($Object->{"USER NAME"}, date("Y-m-d"));
+                    $Salt = $this->GenSalt($Object->{"USER NAME"}, new DateTime()->format("D M d Y H:i:s T P"));
                     $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
                         "key_id"=>$Salt,
                         "key_data"=>$PassInfo[0] . ',' . $PassInfo[1]
@@ -293,7 +293,7 @@ class UserInfo extends Component
         return [base64_encode($iv),$key,$encrypted];
     }
     public function GenSalt($Username,$DateCreated){
-        $UnhexedSalt = $Username . $DateCreated;
+        $UnhexedSalt = $DateCreated . $Username;
         $HexSalt = bin2hex($UnhexedSalt);
         return $HexSalt;
     }
