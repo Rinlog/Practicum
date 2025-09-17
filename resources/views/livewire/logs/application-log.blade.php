@@ -205,9 +205,9 @@
                 }
             });
             async function SetTimeFrame(){
-                await $wire.set("StartDate",setStartDate);
-                await $wire.set("EndDate",setEndDate);
-                await $wire.set("TimeFrame",TimeFrame)
+                await $wire.set("StartDate",setStartDate,false);
+                await $wire.set("EndDate",setEndDate,false);
+                await $wire.set("TimeFrame",TimeFrame,false);
                 await refresh();
             }
             function CurrentDateAsString(){
@@ -250,10 +250,10 @@
 
                 setStartDate = JSON.stringify(new Date(NewStartDate));
                 setEndDate = JSON.stringify(new Date(NewEndDate));
-                await $wire.set("ActivityType", "%");
-                await $wire.set("StartTime", '00:00');
-                await $wire.set("EndTime", '23:59');
-                await $wire.set("User", "%");
+                await $wire.set("ActivityType", "%",false);
+                await $wire.set("StartTime", '00:00',false);
+                await $wire.set("EndTime", '23:59',false);
+                await $wire.set("User", "%",false);
                 await SetTimeFrame();
             })
             function UpdateShowingCount(){
@@ -349,11 +349,11 @@
                 }
             }
             $js("ResetUser",async function(){
-                $wire.set("User","%")
+                $wire.set("User","%",false)
                 await refresh();
             })
             $js("ResetActivity",async function(){
-                $wire.set("ActivityType","%")
+                $wire.set("ActivityType","%",false)
                 await refresh();
             })
             $js("Filter",async function(){
@@ -361,10 +361,10 @@
                 if (vals[1] == "" || vals[2] == ""){
                     return;
                 }
-                await $wire.set("ActivityType",vals[0]);
-                await $wire.set("StartTime",vals[1]);
-                await $wire.set("EndTime",vals[2]);
-                await $wire.set("User",vals[3]);
+                await $wire.set("ActivityType",vals[0],false);
+                await $wire.set("StartTime",vals[1],false);
+                await $wire.set("EndTime",vals[2]),false;
+                await $wire.set("User",vals[3],false);
                 await refresh();
             })
             $js("ChangeApplication",async function(ev,Application){
@@ -436,8 +436,8 @@
             }
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
-                await $wire.set("StartDate",JSON.stringify(setStartDate));
-                await $wire.set("EndDate",JSON.stringify(setEndDate));
+                await $wire.set("StartDate",JSON.stringify(setStartDate),false);
+                await $wire.set("EndDate",JSON.stringify(setEndDate),false);
                 await $wire.call("LoadApplications");
                 await $wire.call("SetDefaultApplication");
                 await refresh();

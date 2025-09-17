@@ -21,12 +21,12 @@ class Home extends Component
     public $DisplayLogTableInfo = "";
     public function LoadUsersRoles(){
         try{
-            $roleAssoc = DB::table("user_role_association")->where("user_id",$this->user->user_id)->get();
+            $roleAssoc = DB::table("user_role_association")->where("user_id",$this->user->user_id)->get("role_id");
             $roleIds = [];
             foreach ($roleAssoc as $role){
                 array_push($roleIds,$role->role_id);
             }
-            $this->userRoles = DB::table("role")->whereIn("role_id",$roleIds)->get();
+            $this->userRoles = DB::table("role")->whereIn("role_id",$roleIds)->get("role_name");
 
         }
         catch(Exception $e){
@@ -48,7 +48,9 @@ class Home extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = DB::table("application")->get();
+            $applications = DB::table("application")
+            ->select("application_id","application_name")
+            ->get();
             $this->Applications = $applications->toArray();
         }
         catch(Exception $e){

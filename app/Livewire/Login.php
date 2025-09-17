@@ -36,6 +36,7 @@ class Login extends Component
     public $passCustomStyle = "";
     public $passShowErr = "hide";
     public $passErrMsg = "";
+    public $user;
     public function setOpen($open){
         
     }
@@ -56,8 +57,11 @@ class Login extends Component
     public function CheckForDefaultPass(){
         try{
             if ($this->Username != "" and $this->Password != "") {
-                $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
-                $UsersPass = $this->DecryptPass($user->user_password, $user->user_salt);
+                //grabbing user info once
+                $this->user = DB::table("users")
+                ->where("user_username", $this->Username)
+                ->first();
+                $UsersPass = $this->DecryptPass($this->user->user_password, $this->user->user_salt);
                 if ("idl123abc" == $UsersPass) {
                     if ($this->Password == "idl123abc"){
                         return true;
@@ -82,9 +86,7 @@ class Login extends Component
         try{
             $PasswordInfo = $this->GenEncryptedPass($Password);
 
-            $Salt = DB::table("users")->where("user_username",$this->Username)->value("user_salt");
-
-            $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
+            $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$this->user->user_salt)->update([
                 "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
             ]);
 
@@ -119,11 +121,10 @@ class Login extends Component
                 $this->clearpass();
             }
             if ($this->Username != "" and $this->Password != "") {
-                $user = DB::table("users")->where("user_username", $this->Username)->firstOrFail();
 
                 $userNameValid = false;
                 $passwordValid = false;
-                if ($user->user_is_disabled == true){
+                if ($this->user->user_is_disabled == true){
                     $this->usrCustomStyle = $this->errStyle;
                     $this->usrShowErr = "show";
                     $this->usrErrMsg = "User account is disabled";
@@ -133,7 +134,7 @@ class Login extends Component
                     $this->clearusr();
                 }
                 #check to make sure login info is correct
-                if (strcasecmp($this->Username,$user->user_username) == 0) {
+                if (strcasecmp($this->Username,$this->user->user_username) == 0) {
                     $userNameValid = true;
                     $this->clearusr();
                 }   
@@ -142,7 +143,7 @@ class Login extends Component
                     $this->usrShowErr = "show";
                     $this->usrErrMsg = "Incorrect username";
                 }
-                if ($this->Password == $this->DecryptPass($user->user_password,$user->user_salt)){
+                if ($this->Password == $this->DecryptPass($this->user->user_password,$this->user->user_salt)){
                     $passwordValid = true;
                     $this->clearpass();
                 }
@@ -155,7 +156,7 @@ class Login extends Component
                     $this->clear();
                     session_start();
                     $_SESSION["UserName"] = ucfirst(strtolower($this->Username));
-                    $_SESSION["User"] = $user;
+                    $_SESSION["User"] = $this->user;
                     return redirect("/home");
                 }
             }

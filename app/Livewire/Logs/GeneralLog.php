@@ -28,7 +28,9 @@ class GeneralLog extends Component
     public $Users = [];
     public function LoadAllUserInfo(){
         try{
-            $this->Users = DB::table("users")->get();
+            $this->Users = DB::table("users")
+            ->select("user_id","user_username")
+            ->get();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
