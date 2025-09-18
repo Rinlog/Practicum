@@ -4,11 +4,14 @@ namespace App\Livewire\Readings;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use \PDO;
+
 class SensorReadings extends Component
 {
+    private $conn;
+
     public $StartDate = '';
     public $EndDate = '';
     public $StartTime = '00:00';
@@ -33,13 +36,28 @@ class SensorReadings extends Component
     ];
     public $DisplayTableInfo = "";
 
+    public function __construct(){
+        $DB1 = config("database.connections.pgsql");
+        $this->conn = new PDO(
+            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
+            $DB1["username"],
+            $DB1["password"],
+            [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+    }
+
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
+                $stmt = $this->conn->prepare("SELECT * FROM organization WHERE organization_id = :oid");
+                $stmt->execute([":oid" => $_SESSION["User"]->organization_id]);
+                $organizationInfo = $stmt->fetch(PDO::FETCH_OBJ);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -48,16 +66,18 @@ class SensorReadings extends Component
             }
         }
     }
+
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $stmt = $this->conn->query("SELECT * FROM organization");
+            $this->Organizations = $stmt->fetchAll(PDO::FETCH_OBJ);
             $this->dispatch('$refresh');
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function SetOrg($NewOrgID){
         $NewOrg = [];
         foreach ($this->Organizations as $org){
@@ -68,17 +88,24 @@ class SensorReadings extends Component
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
     }
+
     public function LoadDevicesBasedOnOrg(){
         try{
-            $this->devices = DB::table("device")->where("organization_id",$this->OrgInfo->organization_id)->get();
-            $this->device = $this->devices[0]->device_name;
-            $this->deviceInfo = $this->devices[0];
-            $this->LoadSensorsBasedOnDevice();
+            $stmt = $this->conn->prepare("SELECT * FROM device WHERE organization_id = :oid");
+            $stmt->execute([":oid" => $this->OrgInfo->organization_id]);
+            $this->devices = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            if(count($this->devices) > 0){
+                $this->device = $this->devices[0]->device_name;
+                $this->deviceInfo = $this->devices[0];
+                $this->LoadSensorsBasedOnDevice();
+            }
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function SetDevice($NewDeviceEUI){
         try{
             foreach ($this->devices as $device){
@@ -93,27 +120,41 @@ class SensorReadings extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function LoadSensorsBasedOnDevice(){
         try{
-            $SensorAssoc = DB::table("device_sensor_association")->where("device_eui",$this->deviceInfo->device_eui)->get('sensor_id');
+            $stmt = $this->conn->prepare("SELECT sensor_id FROM device_sensor_association WHERE device_eui = :eui");
+            $stmt->execute([":eui" => $this->deviceInfo->device_eui]);
+            $SensorAssoc = $stmt->fetchAll(PDO::FETCH_OBJ);
+
             $ArrayAssoc = [];
             foreach ($SensorAssoc as $Sensor){
-                array_push($ArrayAssoc,$Sensor->sensor_id);
+                $ArrayAssoc[] = $Sensor->sensor_id;
             }
-            $this->sensors = DB::table("sensor")->whereIn('sensor_id',$ArrayAssoc)->get();
+
+            if(count($ArrayAssoc) > 0){
+                $placeholders = str_repeat('?,', count($ArrayAssoc) - 1) . '?';
+                $stmt = $this->conn->prepare("SELECT * FROM sensor WHERE sensor_id IN ($placeholders)");
+                $stmt->execute($ArrayAssoc);
+                $this->sensors = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } else {
+                $this->sensors = [];
+            }
+
             if (count($this->sensors) > 0){
                 $this->sensor = $this->sensors[0]->sensor_name;
                 $this->sensorInfo = $this->sensors[0];
             }
             else{
                 $this->sensor = "NO SENSORS";
-                $this->sensorInfo = $this->sensors[0];
+                $this->sensorInfo = null;
             }
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function SetSensor($NewSensorID){
         try{
             foreach ($this->sensors as $Sensor){
@@ -127,23 +168,41 @@ class SensorReadings extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function LoadInfo(){
         try{
             $this->DisplayTableInfo = '';
             $this->StartDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T00:00:00.000",$this->StartDate);
             $this->EndDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T23:59:00.000",$this->EndDate);
 
-            $TableInfo = DB::table("sensor_reading")
-            ->where("sensor_reading_time",">=",$this->StartDate)
-            ->where("sensor_reading_time","<=",$this->EndDate)
-            ->where(DB::raw("split_part(sensor_reading_time::text,' ',2)"),">=",$this->StartTime)
-            ->where(DB::raw("split_part(sensor_reading_time::text,' ',2)"),"<=",$this->EndTime)
-            ->where("sensor_reading.device_eui", $this->deviceInfo->device_eui)
-            ->where("sensor_reading.sensor_id",$this->sensorInfo->sensor_id)
-            ->join('device','sensor_reading.device_eui','=','device.device_eui')
-            ->join("sensor", 'sensor_reading.sensor_id','=','sensor.sensor_id')
-            ->join('sensor_type','sensor.sensor_type_id','=','sensor_type.sensor_type_id')
-            ->get(DB::raw("split_part(sensor_reading_time::text,' ',1) AS date, split_part(sensor_reading_time::text,' ',2) as time, device.device_name, sensor.sensor_name, sensor_type.sensor_type, sensor_reading_data" ));
+            $sql = "SELECT split_part(sensor_reading_time::text,' ',1) AS date,
+                           split_part(sensor_reading_time::text,' ',2) AS time,
+                           device.device_name,
+                           sensor.sensor_name,
+                           sensor_type.sensor_type,
+                           sensor_reading_data
+                    FROM sensor_reading
+                    JOIN device ON sensor_reading.device_eui = device.device_eui
+                    JOIN sensor ON sensor_reading.sensor_id = sensor.sensor_id
+                    JOIN sensor_type ON sensor.sensor_type_id = sensor_type.sensor_type_id
+                    WHERE sensor_reading_time >= :start
+                      AND sensor_reading_time <= :end
+                      AND split_part(sensor_reading_time::text,' ',2) >= :stime
+                      AND split_part(sensor_reading_time::text,' ',2) <= :etime
+                      AND sensor_reading.device_eui = :eui
+                      AND sensor_reading.sensor_id = :sid";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ":start" => $this->StartDate,
+                ":end" => $this->EndDate,
+                ":stime" => $this->StartTime,
+                ":etime" => $this->EndTime,
+                ":eui" => $this->deviceInfo->device_eui,
+                ":sid" => $this->sensorInfo->sensor_id
+            ]);
+
+            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             foreach($TableInfo as $Row){
                 $this->DisplayTableInfo .= "
@@ -163,20 +222,22 @@ class SensorReadings extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function LogExport(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (!(isset($_SESSION["User"]))) { return null; }
-        DB::table("log")->insert([
-            "log_activity_time"=>now(),
-            "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-            "log_activity_desc"=>"Downloaded CSV of Sensor Reading Info"
+
+        $stmt = $this->conn->prepare("INSERT INTO log (log_activity_time, log_activity_type, log_activity_performed_by, log_activity_desc) VALUES (NOW(), 'REPORT', :by, :desc)");
+        $stmt->execute([
+            ":by" => $_SESSION["User"]->user_username,
+            ":desc" => "Downloaded CSV of Sensor Reading Info"
         ]);
     }
+
     public function render()
     {
-        return view('livewire..readings.sensor-readings');
+        return view('livewire.readings.sensor-readings');
     }
 }

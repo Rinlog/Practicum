@@ -4,30 +4,50 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use \Illuminate\Database\RecordNotFoundException;
 use \Exception;
 use Ramsey\Uuid\Uuid;
 use \PDO;
+
 #[Title("Login | IDL")]
 class Login extends Component
 {
+    private $conn;
+    private $conn2;
+
+    public function __construct(){
+        $DB1 = config("database.connections.pgsql");
+        $this->conn = new PDO(
+            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
+            $DB1["username"],
+            $DB1["password"],
+            [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+
+        $DB2 = config("database.connections.pgsql_2");
+        $this->conn2 = new PDO(
+            $DB2["driver"].":host=".$DB2["host"]." port=".$DB2["port"]." dbname=".$DB2["database"],
+            $DB2["username"],
+            $DB2["password"],
+            [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+    }
+
     public function render()
     {
         return view('livewire.login');
     }
-    public $Username = "";
 
+    public $Username = "";
     public $Password = "";
 
-    #variables required to display a modal
-    #public $open = "hide";
-    #public $message = "Placeholder";
-    #public $title = "Title";
-    #public $ButtonText = "OK";
-
-    #three vars for one error
     private $errStyle = "border-2 border-red-500";
     public $usrCustomStyle = "";
     public $usrShowErr = "hide";
@@ -38,10 +58,9 @@ class Login extends Component
     public $passErrMsg = "";
     public $user;
 
-
     private function clear(){
-            $this->clearusr();
-            $this->clearpass();
+        $this->clearusr();
+        $this->clearpass();
     }
     private function clearusr(){
         $this->usrCustomStyle = "";
@@ -53,36 +72,18 @@ class Login extends Component
         $this->passShowErr = "hide";
         $this->passErrMsg = "";
     }
-    private $conn;
-    public function __construct(){
-        $DB1 = config("database.connections.pgsql");
-        $this->conn = new PDO(
-            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
-        $DB1["username"],
-        $DB1["password"],
-        [
-            PDO::ATTR_PERSISTENT => true, // This enables persistent connections
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Recommended for error handling
-        ]
-    );
-    }
+
     public function CheckForDefaultPass(){
         try{
             if ($this->Username != "" and $this->Password != "") {
-                //grabbing user info once
-                $result = $this->conn->prepare("select * from users where user_username = :name");
+                $result = $this->conn->prepare("SELECT * FROM users WHERE user_username = :name");
                 $result->execute([":name"=>$this->Username]);
                 $this->user = $result->fetch(PDO::FETCH_OBJ);
+
                 $UsersPass = $this->DecryptPass($this->user->user_password, $this->user->user_salt);
                 if ("idl123abc" == $UsersPass) {
-                    if ($this->Password == "idl123abc"){
-                        return true;
-                    }
-                    else{
-                        return false;
-                    }
-                }
-                else{
+                    return $this->Password == "idl123abc";
+                } else {
                     return false;
                 }
             }
@@ -95,17 +96,23 @@ class Login extends Component
             return false;
         }
     }
+
     public function ChangePass($Password){
         try{
             $PasswordInfo = $this->GenEncryptedPass($Password);
 
-            $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$this->user->user_salt)->update([
-                "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
+            $stmt2 = $this->conn2->prepare("UPDATE key_vault SET key_data = :data WHERE key_id = :id");
+            $stmt2->execute([
+                ":data" => $PasswordInfo[0] . ',' . $PasswordInfo[1],
+                ":id" => $this->user->user_salt
             ]);
 
-            DB::connection("pgsql")->table("users")->where("user_username", $this->Username)->update([
-                "user_password"=> $PasswordInfo[2]
+            $stmt1 = $this->conn->prepare("UPDATE users SET user_password = :pass WHERE user_username = :uname");
+            $stmt1->execute([
+                ":pass" => $PasswordInfo[2],
+                ":uname" => $this->Username
             ]);
+
             $this->Password = $Password;
             return true;
         }
@@ -113,15 +120,14 @@ class Login extends Component
             return false;
         }
     }
+
     public function login(){
         try{
-            #check if blank
             if ($this->Username == "") {
                 $this->usrCustomStyle = $this->errStyle;
                 $this->usrShowErr = "show";
                 $this->usrErrMsg = "Username can not be blank";
-            }
-            else{
+            } else {
                 $this->clearusr();
             }
 
@@ -129,42 +135,41 @@ class Login extends Component
                 $this->passCustomStyle = $this->errStyle;
                 $this->passShowErr = "show";
                 $this->passErrMsg = "Password can not be blank";
-            }
-            else{
+            } else {
                 $this->clearpass();
             }
-            if ($this->Username != "" and $this->Password != "") {
 
+            if ($this->Username != "" and $this->Password != "") {
                 $userNameValid = false;
                 $passwordValid = false;
+
                 if ($this->user->user_is_disabled == true){
                     $this->usrCustomStyle = $this->errStyle;
                     $this->usrShowErr = "show";
                     $this->usrErrMsg = "User account is disabled";
                     return;
-                }
-                else{
+                } else {
                     $this->clearusr();
                 }
-                #check to make sure login info is correct
+
                 if (strcasecmp($this->Username,$this->user->user_username) == 0) {
                     $userNameValid = true;
                     $this->clearusr();
-                }   
-                else{
+                } else {
                     $this->usrCustomStyle = $this->errStyle;
                     $this->usrShowErr = "show";
                     $this->usrErrMsg = "Incorrect username";
                 }
+
                 if ($this->Password == $this->DecryptPass($this->user->user_password,$this->user->user_salt)){
                     $passwordValid = true;
                     $this->clearpass();
-                }
-                else{
+                } else {
                     $this->passCustomStyle = $this->errStyle;
                     $this->passShowErr = "show";
                     $this->passErrMsg = "Incorrect password";
                 }
+
                 if ($userNameValid and $passwordValid) {
                     $this->clear();
                     session_start();
@@ -179,16 +184,15 @@ class Login extends Component
             $this->usrShowErr = "show";
             $this->usrErrMsg = "User does not exist";
         }
-        catch(Exception $e){
-
-        }
+        catch(Exception $e){ }
     }
+
     public function GenEncryptedPass($Password){
         $iv = random_bytes(16);
         $secret = Uuid::uuid4()->toString();
         $key = base64_encode(hash("sha256",$secret));
-        $key2 = base64_decode($key); //decoding makes a different key, we use decoded version for encryption so when we decrypt things work smoothly
-        
+        $key2 = base64_decode($key);
+
         $encrypted = openssl_encrypt(
             $Password,
             'AES-256-CBC',
@@ -200,8 +204,12 @@ class Login extends Component
 
         return [base64_encode($iv),$key,$encrypted];
     }
+
     public function DecryptPass($Password, $Salt){
-        $iv_keyRaw = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->value("key_data");
+        $stmt = $this->conn2->prepare("SELECT key_data FROM key_vault WHERE key_id = :id");
+        $stmt->execute([":id"=>$Salt]);
+        $iv_keyRaw = $stmt->fetchColumn();
+
         $iv_key = explode(",",$iv_keyRaw);
         if (count($iv_key) == 2){
             $iv = base64_decode($iv_key[0]);
@@ -216,10 +224,8 @@ class Login extends Component
                 $iv
             );
             return $decrypted;
-        }
-        else{
+        } else {
             return "";
         }
     }
-    
 }

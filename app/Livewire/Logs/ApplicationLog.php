@@ -4,13 +4,13 @@ namespace App\Livewire\Logs;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use \PDO;
 
 class ApplicationLog extends Component
 {
-     public $ActivityType = "%";
+    public $ActivityType = "%";
     public $StartDate = '';
     public $EndDate = '';
     public $TimeFrame = "LAST 7 DAYS";
@@ -30,22 +30,44 @@ class ApplicationLog extends Component
     public $Applications = [];
     public $application = "";
     public $ApplicationInfo;
+
+    private $conn;
+
+    public function __construct(){
+        $DB1 = config("database.connections.pgsql");
+        $this->conn = new PDO(
+            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
+            $DB1["username"],
+            $DB1["password"],
+            [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+    }
+
     public function LoadAllUserInfo(){
         try{
-            $this->Users = DB::table("users")->get();
+            $stmt = $this->conn->prepare("SELECT * FROM users");
+            $stmt->execute();
+            $this->Users = $stmt->fetchAll(PDO::FETCH_OBJ);
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function LoadApplications(){
         try{
-            $this->Applications = DB::table("application")->get();
+            $stmt = $this->conn->prepare("SELECT * FROM application");
+            $stmt->execute();
+            $this->Applications = $stmt->fetchAll(PDO::FETCH_OBJ);
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function SetDefaultApplication(){
         try{
             $this->ApplicationInfo = $this->Applications[0];
@@ -55,6 +77,7 @@ class ApplicationLog extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function SetApplication($ApplicationID){
         foreach ($this->Applications as $Application){
             if ($Application->application_id == $ApplicationID) {
@@ -63,21 +86,42 @@ class ApplicationLog extends Component
             }
         }
     }
+
     public function LoadInfo(){
         try{
             $this->DisplayTableInfo = '';
             $this->StartDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T00:00:00.000",$this->StartDate);
             $this->EndDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T23:59:00.000",$this->EndDate);
-            //dd($this->ActivityType . "\n" . $this->StartDate . "\n" .$this->EndDate ."\n" .$this->StartTime . "\n" . $this->EndTime . "\n" . $this->User);
-            $TableInfo = DB::table("application_log")
-            ->whereLike("applog_activity_type", "%".$this->ActivityType."%")
-            ->where("application_id",$this->ApplicationInfo->application_id)
-            ->where("applog_activity_time",">=",$this->StartDate)
-            ->where("applog_activity_time","<=",$this->EndDate)
-            ->where(DB::raw("split_part(applog_activity_time::text,' ',2)"),">=",$this->StartTime)
-            ->where(DB::raw("split_part(applog_activity_time::text,' ',2)"),"<=",$this->EndTime)
-            ->whereLike("applog_activity_performed_by",$this->User)
-            ->get(DB::raw("application_id, split_part(applog_activity_time::text,' ',1) AS date, split_part(applog_activity_time::text,' ',2) as time, applog_activity_type, applog_activity_performed_by, applog_activity_desc" ));
+
+            $sql = "
+                SELECT application_id,
+                       split_part(applog_activity_time::text,' ',1) AS date,
+                       split_part(applog_activity_time::text,' ',2) as time,
+                       applog_activity_type,
+                       applog_activity_performed_by,
+                       applog_activity_desc
+                FROM application_log
+                WHERE applog_activity_type ILIKE :atype
+                  AND application_id = :appid
+                  AND applog_activity_time >= :sdate
+                  AND applog_activity_time <= :edate
+                  AND split_part(applog_activity_time::text,' ',2) >= :stime
+                  AND split_part(applog_activity_time::text,' ',2) <= :etime
+                  AND applog_activity_performed_by ILIKE :user
+            ";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ":atype" => "%".$this->ActivityType."%",
+                ":appid" => $this->ApplicationInfo->application_id,
+                ":sdate" => $this->StartDate,
+                ":edate" => $this->EndDate,
+                ":stime" => $this->StartTime,
+                ":etime" => $this->EndTime,
+                ":user"  => $this->User
+            ]);
+            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
+
             foreach($TableInfo as $Row){
                 $this->DisplayTableInfo .= "
                 <tr class= 'cursor-pointer hover:bg-[#f2f2f2]' wire:click='\$js.OpenRowDetails(\"".$this->application."\",\"".$Row->date."\",\"".$Row->time."\",\"".$Row->applog_activity_type."\",\"".$Row->applog_activity_performed_by."\",\"".$Row->applog_activity_desc."\")'>
@@ -96,19 +140,28 @@ class ApplicationLog extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function LogExport(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (!(isset($_SESSION["User"]))) { return null; }
-        DB::table("application_log")->insert([
-            "application_id"=>$this->ApplicationInfo->application_id,
-            "applog_activity_time"=>now(),
-            "applog_activity_type"=>"REPORT",
-            "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
-            "applog_activity_desc"=>"Downloaded CSV of Application Log Info"
-        ]);
+
+        try {
+            $stmt = $this->conn->prepare("
+                INSERT INTO application_log (application_id, applog_activity_time, applog_activity_type, applog_activity_performed_by, applog_activity_desc)
+                VALUES (:appid, NOW(), 'REPORT', :user, 'Downloaded CSV of Application Log Info')
+            ");
+            $stmt->execute([
+                ":appid" => $this->ApplicationInfo->application_id,
+                ":user"  => $_SESSION["User"]->user_username
+            ]);
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
     }
+
     public function render()
     {
         return view('livewire.logs.application-log');

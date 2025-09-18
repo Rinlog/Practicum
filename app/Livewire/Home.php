@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Expr\Cast\Object_;
 use Ramsey\Uuid\Uuid;
@@ -16,28 +15,50 @@ use PhpOption\None;
 #[Title("Home | IDL")]
 class Home extends Component
 {
+    private $conn;
     public $user;
     public $Applications = [];
     public $application;
     public $ApplicationInfo;
     public $userRoles = [];
     public $DisplayLogTableInfo = "";
+
+    public function __construct()
+    {
+        $DB1 = config("database.connections.pgsql");
+        $this->conn = new PDO(
+            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
+            $DB1["username"],
+            $DB1["password"],
+            [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+    }
+
     public function LoadUsersRoles(){
         try{
+            $stmt = $this->conn->prepare("SELECT role_id FROM user_role_association WHERE user_id = :uid");
+            $stmt->execute([":uid" => $this->user->user_id]);
+            $roleAssoc = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-            
-            $roleAssoc = DB::table("user_role_association")->where("user_id",$this->user->user_id)->get("role_id");
-            $roleIds = [];
-            foreach ($roleAssoc as $role){
-                array_push($roleIds,$role->role_id);
+            $roleIds = array_map(function($r){ return $r->role_id; }, $roleAssoc);
+
+            if(count($roleIds) > 0){
+                $placeholders = str_repeat('?,', count($roleIds) - 1) . '?';
+                $stmt = $this->conn->prepare("SELECT role_name FROM role WHERE role_id IN ($placeholders)");
+                $stmt->execute($roleIds);
+                $this->userRoles = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } else {
+                $this->userRoles = [];
             }
-            $this->userRoles = DB::table("role")->whereIn("role_id",$roleIds)->get("role_name");
-
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function LoadUserInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -51,24 +72,23 @@ class Home extends Component
             }
         }
     }
+
     public function LoadApplications(){
         try{
-            $applications = DB::table("application")
-            ->select("application_id","application_name")
-            ->get();
-            $this->Applications = $applications->toArray();
+            $stmt = $this->conn->query("SELECT application_id, application_name FROM application");
+            $this->Applications = $stmt->fetchAll(PDO::FETCH_OBJ);
         }
         catch(Exception $e){
-
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function setDefaultApplication(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (isset($_SESSION["User"])) {
             try{
-               
                 $this->application = $this->Applications[0]->application_name;
                 $this->ApplicationInfo = $this->Applications[0];
             }
@@ -77,6 +97,7 @@ class Home extends Component
             }
         }
     }
+
     public function LoadLogInfo(){
         try{
             $this->DisplayLogTableInfo = '';
@@ -84,12 +105,23 @@ class Home extends Component
             $EndDate = new DateTime()->modify("+1 day")->format("Y-m-d");
             $StartDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T00:00:00.000",$StartDate);
             $EndDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T23:59:00.000",$EndDate);
-            $TableInfo = DB::table("log")
-            ->where("log_activity_time",">=",$StartDate)
-            ->where("log_activity_time","<=",$EndDate)
-            ->orderBy("log_activity_time","desc")
-            ->limit(10)
-            ->get(DB::raw("split_part(log_activity_time::text,' ',1) AS date, split_part(log_activity_time::text,' ',2) as time, log_activity_type, log_activity_performed_by, log_activity_desc" ));
+
+            $sql = "SELECT split_part(log_activity_time::text,' ',1) AS date,
+                           split_part(log_activity_time::text,' ',2) AS time,
+                           log_activity_type, log_activity_performed_by, log_activity_desc
+                    FROM log
+                    WHERE log_activity_time >= :start AND log_activity_time <= :end
+                    ORDER BY log_activity_time DESC
+                    LIMIT 10";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ":start" => $StartDate,
+                ":end" => $EndDate
+            ]);
+
+            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
+
             foreach($TableInfo as $Row){
                 $this->DisplayLogTableInfo .= "
                 <tr>
@@ -104,6 +136,7 @@ class Home extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+
     public function render()
     {
         $this->LoadUserInfo();
