@@ -39,7 +39,7 @@
             </label>
             <label class="text-2xl font-semibold">
               Description: <br>
-              <label id="DescriptionDetailsModal" class="font-normal"></label>
+              <label id="DescriptionDetailsModal" class="font-normal text-wrap"></label>
             </label>
         </div>
         <!--Footer-->

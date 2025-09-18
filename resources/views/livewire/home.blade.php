@@ -74,6 +74,7 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
 <script>
 
 $(document).ready(function(e){
+    $wire.call("LoadUsersRoles");
     $wire.call("LoadApplications");
     $wire.call("setDefaultApplication");
     $wire.call("LoadLogInfo");

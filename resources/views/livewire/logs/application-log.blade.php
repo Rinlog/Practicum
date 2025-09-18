@@ -439,7 +439,8 @@
                 await $wire.set("StartDate",JSON.stringify(setStartDate),false);
                 await $wire.set("EndDate",JSON.stringify(setEndDate),false);
                 await $wire.call("LoadApplications");
-                await $wire.call("SetDefaultApplication");
+                $wire.call("SetDefaultApplication");
+                $wire.call("LoadAllUserInfo")
                 await refresh();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------

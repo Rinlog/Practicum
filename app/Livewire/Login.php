@@ -9,7 +9,7 @@ use Livewire\Attributes\Title;
 use \Illuminate\Database\RecordNotFoundException;
 use \Exception;
 use Ramsey\Uuid\Uuid;
-
+use \PDO;
 #[Title("Login | IDL")]
 class Login extends Component
 {
@@ -37,9 +37,8 @@ class Login extends Component
     public $passShowErr = "hide";
     public $passErrMsg = "";
     public $user;
-    public function setOpen($open){
-        
-    }
+
+
     private function clear(){
             $this->clearusr();
             $this->clearpass();
@@ -54,13 +53,26 @@ class Login extends Component
         $this->passShowErr = "hide";
         $this->passErrMsg = "";
     }
+    private $conn;
+    public function __construct(){
+        $DB1 = config("database.connections.pgsql");
+        $this->conn = new PDO(
+            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
+        $DB1["username"],
+        $DB1["password"],
+        [
+            PDO::ATTR_PERSISTENT => true, // This enables persistent connections
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Recommended for error handling
+        ]
+    );
+    }
     public function CheckForDefaultPass(){
         try{
             if ($this->Username != "" and $this->Password != "") {
                 //grabbing user info once
-                $this->user = DB::table("users")
-                ->where("user_username", $this->Username)
-                ->first();
+                $result = $this->conn->prepare("select * from users where user_username = :name");
+                $result->execute([":name"=>$this->Username]);
+                $this->user = $result->fetch(PDO::FETCH_OBJ);
                 $UsersPass = $this->DecryptPass($this->user->user_password, $this->user->user_salt);
                 if ("idl123abc" == $UsersPass) {
                     if ($this->Password == "idl123abc"){
@@ -79,6 +91,7 @@ class Login extends Component
             return false;
         }
         catch(Exception $e){
+            dd($e);
             return false;
         }
     }
@@ -90,7 +103,7 @@ class Login extends Component
                 "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
             ]);
 
-            DB::table("users")->where("user_username", $this->Username)->update([
+            DB::connection("pgsql")->table("users")->where("user_username", $this->Username)->update([
                 "user_password"=> $PasswordInfo[2]
             ]);
             $this->Password = $Password;

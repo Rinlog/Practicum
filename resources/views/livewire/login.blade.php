@@ -67,7 +67,7 @@
 @script
 <script>
     $js("HandleLogin",async function(){
-        let DefaultPass = await $wire.call("CheckForDefaultPass");
+        DefaultPass = await $wire.call("CheckForDefaultPass");
         if (DefaultPass == true){
 
             OpenModal();

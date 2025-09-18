@@ -93,8 +93,13 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
+            'persistent'=>true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            'options' => [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION 
+            ],
         ],
 
         'sqlsrv' => [
@@ -122,9 +127,14 @@ return [
             'password' => env('SECOND_DB_PASSWORD', ''),
             'charset' => env('SECOND_DB_CHARSET', 'utf8'),
             'prefix' => '',
+            'persistent'=>true,
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            'options' => [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION 
+            ],
         ],
 
     ],

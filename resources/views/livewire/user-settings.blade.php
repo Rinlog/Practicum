@@ -258,6 +258,9 @@ if (0){}
             $("#"+svgToShow).removeClass("hide");
         }
     })
+    $(document).ready(async function(){
+        await $wire.call("LoadAccountInfo");
+    })
     function ShowFNameErr(msg){
         let FName = $("#FName");
         let FNameErr = $("#FNameErr");

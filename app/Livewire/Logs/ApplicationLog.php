@@ -111,7 +111,6 @@ class ApplicationLog extends Component
     }
     public function render()
     {
-        $this->LoadAllUserInfo();
-        return view('livewire..logs.application-log');
+        return view('livewire.logs.application-log');
     }
 }

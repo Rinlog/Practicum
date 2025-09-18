@@ -164,28 +164,38 @@
                 },
             },async function(startDate,endDate, label){
                 if (label.toLowerCase() == "custom range"){
-                    let Offset = new Date().getTimezoneOffset();
-                    let HourOffset = Offset/60;
-                    //subtracting offset to have it convert correctly to unix time
-                    let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
-                    let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
+                    try{
+                        let Offset = new Date().getTimezoneOffset();
+                        let HourOffset = Offset/60;
+                        //subtracting offset to have it convert correctly to unix time
+                        let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
+                        let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
 
-                    setStartDate = JSON.stringify(new Date(NewStartDate));
-                    setEndDate = JSON.stringify(new Date(NewEndDate));
-                    TimeFrame = startDate.format('L') + "-" + endDate.format('L');
-                    await SetTimeFrame();
+                        setStartDate = JSON.stringify(new Date(NewStartDate));
+                        setEndDate = JSON.stringify(new Date(NewEndDate));
+                        TimeFrame = startDate.format('L') + "-" + endDate.format('L');
+                        await SetTimeFrame();
+                    }
+                    catch(e){
+                        console.log(e);
+                    }
                 }
                 else{
-                     let Offset = new Date().getTimezoneOffset();
-                    let HourOffset = Offset/60;
-                    //subtracting offset to have it convert correctly to unix time
-                    let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
-                    let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
+                    try{
+                        let Offset = new Date().getTimezoneOffset();
+                        let HourOffset = Offset/60;
+                        //subtracting offset to have it convert correctly to unix time
+                        let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
+                        let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
 
-                    setStartDate = JSON.stringify(new Date(NewStartDate));
-                    setEndDate = JSON.stringify(new Date(NewEndDate));
-                    TimeFrame = label.toUpperCase();
-                    await SetTimeFrame();
+                        setStartDate = JSON.stringify(new Date(NewStartDate));
+                        setEndDate = JSON.stringify(new Date(NewEndDate));
+                        TimeFrame = label.toUpperCase();
+                        await SetTimeFrame();
+                    }
+                    catch(e){
+
+                    }
                 }
             });
             async function SetTimeFrame(){
@@ -247,7 +257,12 @@
                 //reset actions done
                 ActionsDone = [];
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadInfo");
+                try{
+                    await $wire.call("LoadInfo");
+                }
+                catch(e){
+                    console.log(e);
+                }
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[0].textContent = index+1;
@@ -417,6 +432,7 @@
             $(document).ready(async function(){
                 await $wire.set("StartDate",JSON.stringify(setStartDate),false);
                 await $wire.set("EndDate",JSON.stringify(setEndDate),false);
+                $wire.call("LoadAllUserInfo")
                 await refresh();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -519,12 +535,35 @@
                 $("#DisplayMessageMain").removeClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
                 $("#DisplayMessageMain").addClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
             }
-            $js("OpenRowDetails",function(Date,Time,Activity,User,Description){
+            function FindDetailsBasedOnDateTime(Date,Time){
+                GoodTR = [];
+                let Result = $("#InfoTable").children().each(function(){
+                    let DateValid = false;
+                    let TimeValid = false;
+                    $(this).children().each(function(){
+                        if ($(this).text() == Date){
+                            DateValid = true;
+                        }
+                        else if ($(this).text() == Time){
+                            TimeValid = true;
+                        }
+                        if (DateValid == true && TimeValid == true){
+                            let Parent = $(this).parent()
+                            GoodTR.push(Parent);
+                        }
+                    })
+                })
+                return GoodTR[0];
+            }
+            $js("OpenRowDetails",function(Date,Time){
                 $("#DateDetailsModal").text(Date)
                 $("#TimeDetailsModal").text(Time)
-                $("#ActivityDetailsModal").text(Activity)
-                $("#UserDetailsModal").text(User)
-                $("#DescriptionDetailsModal").text(Description)
+                let Result = FindDetailsBasedOnDateTime(Date,Time);
+                let Obj = TRToObject(Result);
+                $("#ActivityDetailsModal").text(Obj["ACTIVITY"])
+                $("#UserDetailsModal").text(Obj["USER"])
+                $("#DescriptionDetailsModal").text(Obj["DESCRIPTION"])
+
                 $("#DisplayMessage").removeClass("hide")
                 setTimeout(function(e){OpenDetailsModal()},50)
                 

@@ -6,14 +6,17 @@ use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PhpParser\Node\Expr\Cast\Object_;
 use Ramsey\Uuid\Uuid;
 use \DateTime;
 use \Exception;
+use \PDO;
+use PhpOption\None;
+
 #[Title("Home | IDL")]
 class Home extends Component
 {
     public $user;
-
     public $Applications = [];
     public $application;
     public $ApplicationInfo;
@@ -21,6 +24,8 @@ class Home extends Component
     public $DisplayLogTableInfo = "";
     public function LoadUsersRoles(){
         try{
+
+            
             $roleAssoc = DB::table("user_role_association")->where("user_id",$this->user->user_id)->get("role_id");
             $roleIds = [];
             foreach ($roleAssoc as $role){
@@ -102,7 +107,6 @@ class Home extends Component
     public function render()
     {
         $this->LoadUserInfo();
-        $this->LoadUsersRoles();
         return view('livewire.home');
     }
 }

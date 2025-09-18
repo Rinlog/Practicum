@@ -73,7 +73,7 @@ class UserSettings extends Component
                     $roleString .= $Role->role_name . ", ";
                 }
                 $this->Role = substr($roleString,0,strlen($roleString)-2);
-
+                $this->LoadGeneralInfo();
             }
         }
         catch(Exception $e){
@@ -174,7 +174,6 @@ class UserSettings extends Component
     public function render()
     {
         $this->LoadAccountInfo();
-        $this->LoadGeneralInfo();
         return view('livewire.user-settings');
     }
 }
