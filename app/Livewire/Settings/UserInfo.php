@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 use \DateTime;
@@ -34,7 +35,8 @@ class UserInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
+                $organizationInfo = collect(Cache::get('organization', collect()))
+                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -58,11 +60,10 @@ class UserInfo extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = Cache::get("organization",collect())->toArray();
         }
         catch(Exception $e){
-
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function SetOrg($NewOrgID){
@@ -81,9 +82,8 @@ class UserInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $UserInfo = DB::table("users")
-                ->where("organization_id", $this->OrgInfo->organization_id)
-                ->get();
+                $UserInfo = Cache::get("users")
+                ->where("organization_id", $this->OrgInfo->organization_id);
                 $this->DisplayTableInfo = "";
                 foreach ($UserInfo as $key => $user) {
                     $TRID = $this->SpaceToUnderScore($user->user_username);
@@ -210,7 +210,7 @@ class UserInfo extends Component
                     if ($ResetPass == "true"){
                         $PasswordInfo = $this->GenEncryptedPass("idl123abc");
 
-                        $Salt = DB::table("users")->where("user_id",$Object->{"USER ID"})->value("user_salt");
+                        $Salt = Cache::get("users")->where("user_id",$Object->{"USER ID"})->pluck("user_salt");
                         //check if salt exists
                         $SaltFound = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->exists();
                         if ($SaltFound == true){
@@ -255,6 +255,8 @@ class UserInfo extends Component
                 }
             }
         }
+        Cache::forget("users");
+        Cache::rememberForever("users", fn() => DB::table("users")->get());
         return $Results;
     }
     public function LogExport(){
@@ -272,7 +274,7 @@ class UserInfo extends Component
     public function render()
     {
         $this->LoadUserInfo();
-        return view('livewire..settings.user-info');
+        return view('livewire.settings.user-info');
     }
 
     public function GenEncryptedPass($Password){

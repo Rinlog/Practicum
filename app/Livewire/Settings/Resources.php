@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class Resources extends Component
@@ -22,7 +23,7 @@ class Resources extends Component
     public $Components = [];
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = DB::table("software_component")->get()->toArray();
+            $this->Components = Cache::get("software_component")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -56,9 +57,8 @@ class Resources extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $RawTableInfo = DB::table("resource")
-                ->where("component_id", $this->ComponentInfo->component_id)
-                ->get();
+                $RawTableInfo = Cache::get("resource")
+                ->where("component_id", $this->ComponentInfo->component_id);
                 $this->DisplayTableInfo = "";
                 foreach ($RawTableInfo as $key => $TableRow) {
                     $TRID = $this->SpaceToUnderScore($TableRow->resource_name) . "_" . $this->SpaceToUnderScore($TableRow->resource_sub_name);
@@ -169,6 +169,8 @@ class Resources extends Component
                 }
             }
         }
+        Cache::forget("resource");
+        Cache::rememberForever("resource", fn() => DB::table("resource")->get());
         return $Results;
     }
     public function LogExport(){

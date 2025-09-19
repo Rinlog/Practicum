@@ -663,8 +663,6 @@
             $js("ChangeOrg",async function(ev,Org){
                 await $wire.call("SetOrg",Org)
                 organization = $wire.organization;
-                await $wire.call("LoadLocations");
-                await $wire.call("setDefaultLocation");
                 location = $wire.Location;
                 await refresh();
                 $("#Locations").val(location);

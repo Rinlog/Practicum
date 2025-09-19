@@ -710,9 +710,6 @@
             })
             $js("ChangeComponent",async function(ev,Component){
                 await $wire.call("setComponent",Component)
-                await $wire.call("LoadApplications");
-                await $wire.call("setDefaultApplication");
-                await $wire.call("LoadRoles");
                 component = $wire.component;
                 application = $wire.application;
                 await refresh();

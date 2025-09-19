@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 
@@ -42,23 +43,22 @@ class DeviceDeployment extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
+                $organizationInfo = collect(Cache::get('organization', collect()))
+                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
             catch(Exception $e){
                 $this->organization = "";
-                Log::channel("customlog")->error("". $e->getMessage());
             }
         }
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = Cache::get("organization",collect())->toArray();
         }
         catch(Exception $e){
-            Log::channel("customlog")->error("". $e->getMessage());
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function SetOrg($NewOrgID){
@@ -73,7 +73,7 @@ class DeviceDeployment extends Component
     }
     public function LoadDevices(){
         try{
-            $this->Devices = DB::table("device")->where("organization_id",$this->OrgInfo->organization_id)->get();
+            $this->Devices = Cache::get("device",collect())->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
         }
         catch(Exception $e){
 
@@ -81,7 +81,7 @@ class DeviceDeployment extends Component
     }
     public function LoadLocations(){
         try{
-            $this->Locations = DB::table("location")->where("organization_id",$this->OrgInfo->organization_id)->get();
+            $this->Locations = Cache::get("location",collect())->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
         }
         catch(Exception $e){
 
@@ -89,9 +89,7 @@ class DeviceDeployment extends Component
     }
     public function LoadSubLocations(){
         try{
-            $this->SubLocations = DB::table("sub_location")
-                ->select(DB::raw("sub_location_id, location_id, sub_location_name, sub_location_civic_address, sub_location_floor, ST_X(sub_location_geo::geometry) as latitude, ST_Y(sub_location_geo::geometry) as longitude, ST_Z(sub_location_geo::geometry) as altitude, sub_location_desc"))
-                ->get();
+            $this->SubLocations = Cache::get("sub_location")->values()->toArray();
         }
         catch(Exception $e){
 
@@ -188,11 +186,9 @@ class DeviceDeployment extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $DeploymentInfo = DB::table("device_deployment")
-                ->select(DB::raw("deploy_id, device.device_eui, deploy_time, location_id, sub_location_id, deploy_ip_address,  ST_X(deploy_geo::geometry) as latitude, ST_Y(deploy_geo::geometry) as longitude, ST_Z(deploy_geo::geometry) as altitude, deploy_deployed_by, deploy_is_latest, deploy_device_data, deploy_data_port, deploy_desc"))
-                ->join("device","device.device_eui","=","device_deployment.device_eui")
-                ->where("device.organization_id", $this->OrgInfo->organization_id)
-                ->get();
+                $DeploymentInfo = Cache::get("device_deployment",collect()
+                ->where("device.organization_id", $this->OrgInfo->organization_id));
+
                 $this->DisplayTableInfo = "";
                 foreach ($DeploymentInfo as $key => $Deployment) {
                     $TRID = $this->SpaceToUnderScore($Deployment->device_eui);
@@ -369,6 +365,13 @@ class DeviceDeployment extends Component
                 }
             }
         }
+        Cache::forget("device_deployment");
+        Cache::rememberForever("device_deployment", fn() => DB::table("device_deployment")
+                    ->select(DB::raw("deploy_id, device.device_eui, deploy_time, location_id, sub_location_id, deploy_ip_address,  ST_X(deploy_geo::geometry) as latitude, ST_Y(deploy_geo::geometry) as longitude, ST_Z(deploy_geo::geometry) as altitude, deploy_deployed_by, deploy_is_latest, deploy_device_data, deploy_data_port, deploy_desc"))
+                    ->join("device","device.device_eui","=","device_deployment.device_eui")
+                    ->get());
+        Cache::forget("device");
+        Cache::rememberForever("device", fn() => DB::table("device")->get());
         return $Results;
     }
     public function LogExport(){

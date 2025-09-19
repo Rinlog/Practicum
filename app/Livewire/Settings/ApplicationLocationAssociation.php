@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 
@@ -42,7 +43,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
+            $organizations = Cache::get("organization");
             $this->Organizations = $organizations->toArray();
         }
         catch(Exception $e){
@@ -51,7 +52,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadLocations(){
         try{
-            $this->Locations = DB::table("location")->get();
+            $this->Locations = Cache::get("location");
         }
         catch(Exception $e){
 
@@ -59,7 +60,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadSubLocations(){
         try{
-            $this->SubLocations = DB::table("sub_location")->get();
+            $this->SubLocations = Cache::get("sub_location");
         }
         catch(Exception $e){
 
@@ -67,8 +68,8 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = DB::table("application")->get();
-            $this->Applications = $applications->toArray();
+            $applications = Cache::get("application")->values()->toArray();
+            $this->Applications = $applications;
         }
         catch(Exception $e){
 
@@ -151,7 +152,8 @@ class ApplicationLocationAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("application_location_association")->where("application_id", $this->ApplicationInfo->application_id)->get();
+                $assocInfo = Cache::get("application_location_association")
+                ->where("application_id", $this->ApplicationInfo->application_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $Location = $this->SearchForLocation($assoc->location_id);
@@ -187,7 +189,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function GetApplicationIDsFromNames($names){
         try{
-            $result = DB::table("application")->wherein("application_name",$names)->get();
+            $result = Cache::get("application")->wherein("application_name",$names);
             $ArrayOfIDs = [];
             foreach ($result as $key => $value) {
                 array_push($ArrayOfIDs, $value->application_id);
@@ -282,6 +284,8 @@ class ApplicationLocationAssociation extends Component
                 }
             }
         }
+        Cache::forget("application_location_association");
+        Cache::rememberForever("application_location_association", fn() => DB::table("application_location_association")->get());
         return $Results;
     }
     public function LogExport(){
@@ -302,6 +306,6 @@ class ApplicationLocationAssociation extends Component
         $this->LoadOrganizations();
         $this->LoadLocations();
         $this->LoadSubLocations();
-        return view('livewire..settings.application-location-association');
+        return view('livewire.settings.application-location-association');
     }
 }

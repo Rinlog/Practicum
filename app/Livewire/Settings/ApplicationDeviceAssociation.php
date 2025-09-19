@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 use SebastianBergmann\Type\TrueType;
@@ -41,16 +42,15 @@ class ApplicationDeviceAssociation extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = Cache::get("organization",collect())->toArray();
         }
         catch(Exception $e){
-
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function LoadDevices(){
         try{
-            $this->Devices = DB::table("device")->get();
+            $this->Devices = Cache::get("device");
         }
         catch(Exception $e){
 
@@ -58,8 +58,8 @@ class ApplicationDeviceAssociation extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = DB::table("application")->get();
-            $this->Applications = $applications->toArray();
+            $applications = Cache::get("application")->values()->toArray();
+            $this->Applications = $applications;
         }
         catch(Exception $e){
 
@@ -104,9 +104,9 @@ class ApplicationDeviceAssociation extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-    public function SetApplication($NewOrgID){
+    public function SetApplication($NewAppID){
         foreach ($this->Applications as $Application){
-            if ($Application->application_id == $NewOrgID) {
+            if ($Application->application_id == $NewAppID) {
                 $this->ApplicationInfo = $Application;
                 $this->application = $Application->application_name;
             }
@@ -118,7 +118,8 @@ class ApplicationDeviceAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("application_device_association")->where("application_id", $this->ApplicationInfo->application_id)->get();
+                $assocInfo = Cache::get("application_device_association")
+                ->where("application_id", $this->ApplicationInfo->application_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $Device = $this->SearchForDevice($assoc->device_eui);
@@ -152,7 +153,7 @@ class ApplicationDeviceAssociation extends Component
     }
     public function GetApplicationIDsFromNames($names){
         try{
-            $result = DB::table("application")->wherein("application_name",$names)->get();
+            $result = Cache::get("application")->wherein("application_name",$names);
             $ArrayOfIDs = [];
             foreach ($result as $key => $value) {
                 array_push($ArrayOfIDs, $value->application_id);
@@ -244,6 +245,8 @@ class ApplicationDeviceAssociation extends Component
                 }
             }
         }
+        Cache::forget("application_device_association");
+        Cache::rememberForever("application_device_association", fn() => DB::table("application_device_association")->get());
         return $Results;
     }
     public function LogExport(){
@@ -263,6 +266,6 @@ class ApplicationDeviceAssociation extends Component
         $this->LoadUserInfo();
         $this->LoadOrganizations();
         $this->LoadDevices();
-        return view('livewire..settings.application-device-association');
+        return view('livewire.settings.application-device-association');
     }
 }

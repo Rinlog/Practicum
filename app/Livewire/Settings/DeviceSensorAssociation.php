@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 
@@ -43,13 +44,14 @@ class DeviceSensorAssociation extends Component
             }
         }
     }
-    public function LoadUsersOrganization(){
+   public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
+                $organizationInfo = collect(Cache::get('organization', collect()))
+                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -60,16 +62,15 @@ class DeviceSensorAssociation extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = Cache::get("organization",collect())->toArray();
         }
         catch(Exception $e){
-
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function LoadSensors(){
         try{
-            $this->Sensors = DB::table("sensor")->get();      
+            $this->Sensors = Cache::get("sensor")->values()->toArray(); 
         }
         catch(Exception $e){
 
@@ -77,7 +78,7 @@ class DeviceSensorAssociation extends Component
     }
     public function LoadSensorTypes(){
         try{
-            $this->SensorTypes = DB::table("sensor_type")->get();      
+            $this->SensorTypes = Cache::get("sensor_type")->values()->toArray();      
         }
         catch(Exception $e){
 
@@ -92,10 +93,12 @@ class DeviceSensorAssociation extends Component
         }
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
+        $this->LoadDevices();
+        $this->SetDefaultDevice();
     }
     public function LoadDevices(){
         try{
-            $this->Devices = DB::table("device")->where("organization_id", $this->OrgInfo->organization_id)->get();
+            $this->Devices = Cache::get("device")->where("organization_id", $this->OrgInfo->organization_id)->values()->toArray();
         }
         catch(Exception $e){
 
@@ -165,7 +168,7 @@ class DeviceSensorAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("device_sensor_association")->where("device_eui", $this->DeviceInfo->device_eui)->get();
+                $assocInfo = Cache::get("device_sensor_association")->where("device_eui", $this->DeviceInfo->device_eui);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $Sensor = $this->searchForSensor($assoc->sensor_id);
@@ -277,6 +280,8 @@ class DeviceSensorAssociation extends Component
                 }
             }
         }
+        Cache::forget("device_sensor_association");
+        Cache::rememberForever("device_sensor_association", fn() => DB::table("device_sensor_association")->get());
         return $Results;
     }
     public function LogExport(){
@@ -296,6 +301,6 @@ class DeviceSensorAssociation extends Component
         $this->LoadUserInfo();
         $this->LoadSensors();
         $this->LoadSensorTypes();
-        return view('livewire..settings.device-sensor-association');
+        return view('livewire.settings.device-sensor-association');
     }
 }

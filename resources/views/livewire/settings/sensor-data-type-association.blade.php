@@ -122,7 +122,7 @@
                         <label class="pl-2 text-lg">Sensor Data Types:</label>
                         <select id="sensorDataTypes" class="w-full pl-2">
                             @foreach ($SensorDataTypeNames as $sensorDataType)
-                                <option class="bg-gray-500" id="{{ $sensorDataType->data_type }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType->data_type }}')">{{ $sensorDataType->data_type}}</option>
+                                <option class="bg-gray-500" id="{{ $sensorDataType }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType }}')">{{ $sensorDataType}}</option>
                             @endforeach
                         </select>
                     </div> 
@@ -164,7 +164,7 @@
                         <label class="pl-2 text-lg">Sensor Data Types:</label>
                         <select id="sensorDataTypes" class="w-full pl-2">
                             @foreach ($SensorDataTypeNames as $sensorDataType)
-                                <option class="bg-gray-500" id="{{ $sensorDataType->data_type }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType->data_type }}')">{{ $sensorDataType->data_type}}</option>
+                                <option class="bg-gray-500" id="{{ $sensorDataType }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType }}')">{{ $sensorDataType}}</option>
                             @endforeach
                         </select>
                     </div> 

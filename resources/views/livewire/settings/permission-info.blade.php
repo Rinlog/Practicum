@@ -611,9 +611,6 @@
             }
             $js("ChangeComponent",async function(ev,Component){
                 await $wire.call("setComponent",Component);
-                await $wire.call("LoadSoftwareComponents");
-                await $wire.call("LoadResources");
-                await $wire.call("setDefaultResource");
                 ComponentID = $wire.ComponentInfo["component_id"];
                 Resource = $wire.Resource;
                 SubResources = $wire.ResourceInfo;
@@ -622,8 +619,6 @@
             })
             $js("ChangeResource",async function(ev,ResourceName){
                 await $wire.call("setResource",ResourceName);
-                await $wire.call("LoadSoftwareComponents");
-                await $wire.call("LoadResources");
                 ComponentID = $wire.ComponentInfo["component_id"];
                 Resource = $wire.Resource;
                 SubResources = $wire.ResourceInfo;

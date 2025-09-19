@@ -5,6 +5,7 @@ namespace App\Livewire\Logs;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Cache;
 use \Exception;
 use \PDO;
 
@@ -44,8 +45,8 @@ class GeneralLog extends Component
 
     public function LoadAllUserInfo(){
         try{
-            $stmt = $this->conn->query("SELECT user_id, user_username FROM users");
-            $this->Users = $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+            $this->Users = Cache::get("users");
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());

@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Cache;
 use \Exception;
 class SoftwareComponentInfo extends Component
 {
@@ -24,7 +25,7 @@ class SoftwareComponentInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $ComponentInfo = DB::table("software_component")->get();
+                $ComponentInfo = Cache::get("software_component");
                 $this->DisplayTableInfo = "";
                 foreach ($ComponentInfo as $key => $Component) {
                     $TRID = $this->SpaceToUnderScore($Component->component_name);
@@ -136,6 +137,8 @@ class SoftwareComponentInfo extends Component
                 }
             }
         }
+        Cache::forget("software_component");
+        Cache::rememberForever("software_component", fn() => DB::table("software_component")->get());
         return $Results;
     }
     public function LogExport(){

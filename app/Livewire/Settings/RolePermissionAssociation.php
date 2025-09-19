@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class RolePermissionAssociation extends Component
@@ -42,7 +43,7 @@ class RolePermissionAssociation extends Component
     }
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = DB::table("software_component")->get()->toArray();
+            $this->Components = Cache::get("software_component")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -72,7 +73,7 @@ class RolePermissionAssociation extends Component
     }
     public function LoadRoles(){
         try{
-            $this->Roles = DB::table("role")->where("component_id", $this->ComponentInfo->component_id)->get()->toArray();
+            $this->Roles = Cache::get("role")->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
         }
         catch(Exception $e){
 
@@ -102,8 +103,11 @@ class RolePermissionAssociation extends Component
     }
     public function LoadPermission(){
         try{
-            $this->Permissions = DB::table("permission")->join("resource","permission.resource_name","=",
-            "resource.resource_name")->where("resource.component_id", $this->ComponentInfo->component_id)->distinct()->get(["permission.permission_id", "permission.permission_name"])->toArray();
+            $this->Permissions = Cache::get("permission")
+            ->where("component_id", $this->ComponentInfo->component_id)
+            ->unique()
+            ->values()
+            ->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error("". $e->getMessage());
@@ -139,7 +143,7 @@ class RolePermissionAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("role_permission_association")->where("role_id", $this->RoleInfo->role_id)->get();
+                $assocInfo = Cache::get("role_permission_association")->where("role_id", $this->RoleInfo->role_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $Permission = $this->SearchForPermission($assoc->permission_id);
@@ -250,6 +254,8 @@ class RolePermissionAssociation extends Component
                 }
             }
         }
+        Cache::forget("role_permission_association");
+        Cache::rememberForever("role_permission_association", fn() => DB::table("role_permission_association")->get());
         return $Results;
     }
     public function LogExport(){

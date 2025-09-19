@@ -569,7 +569,6 @@
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadOrganizations");
                 await $wire.call("LoadInfo");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
@@ -692,8 +691,6 @@
             })
             $js("ChangeOrg",async function(ev,Org){
                 await $wire.call("SetOrg",Org)
-                await $wire.call("LoadDevices");
-                await $wire.call("SetDefaultDevice");
                 organization = $wire.organization;
                 device = $wire.device;
                 await refresh();
@@ -707,6 +704,7 @@
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
                 await $wire.call("LoadUsersOrganization");
+                await $wire.call("LoadOrganizations");
                 await $wire.call("LoadDevices");
                 await $wire.call("SetDefaultDevice");
                 organization = $wire.organization;

@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Cache;
 use \PDO;
 
 class SensorReadings extends Component
@@ -55,9 +56,8 @@ class SensorReadings extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $stmt = $this->conn->prepare("SELECT * FROM organization WHERE organization_id = :oid");
-                $stmt->execute([":oid" => $_SESSION["User"]->organization_id]);
-                $organizationInfo = $stmt->fetch(PDO::FETCH_OBJ);
+                $organizationInfo = collect(Cache::get('organization', collect()))
+                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -69,9 +69,7 @@ class SensorReadings extends Component
 
     public function LoadOrganizations(){
         try{
-            $stmt = $this->conn->query("SELECT * FROM organization");
-            $this->Organizations = $stmt->fetchAll(PDO::FETCH_OBJ);
-            $this->dispatch('$refresh');
+            $this->Organizations = Cache::get("organization",collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -91,15 +89,14 @@ class SensorReadings extends Component
 
     public function LoadDevicesBasedOnOrg(){
         try{
-            $stmt = $this->conn->prepare("SELECT * FROM device WHERE organization_id = :oid");
-            $stmt->execute([":oid" => $this->OrgInfo->organization_id]);
-            $this->devices = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            $this->devices = Cache::get("device")->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
 
             if(count($this->devices) > 0){
                 $this->device = $this->devices[0]->device_name;
                 $this->deviceInfo = $this->devices[0];
-                $this->LoadSensorsBasedOnDevice();
             }
+            $this->LoadSensorsBasedOnDevice();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -123,9 +120,8 @@ class SensorReadings extends Component
 
     public function LoadSensorsBasedOnDevice(){
         try{
-            $stmt = $this->conn->prepare("SELECT sensor_id FROM device_sensor_association WHERE device_eui = :eui");
-            $stmt->execute([":eui" => $this->deviceInfo->device_eui]);
-            $SensorAssoc = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            $SensorAssoc = Cache::get("device_sensor_association")->where("device_eui",$this->deviceInfo->device_eui)->values()->toArray();
 
             $ArrayAssoc = [];
             foreach ($SensorAssoc as $Sensor){
@@ -133,10 +129,8 @@ class SensorReadings extends Component
             }
 
             if(count($ArrayAssoc) > 0){
-                $placeholders = str_repeat('?,', count($ArrayAssoc) - 1) . '?';
-                $stmt = $this->conn->prepare("SELECT * FROM sensor WHERE sensor_id IN ($placeholders)");
-                $stmt->execute($ArrayAssoc);
-                $this->sensors = $stmt->fetchAll(PDO::FETCH_OBJ);
+               
+                $this->sensors = Cache::get("sensor")->whereIn("sensor_id",$ArrayAssoc)->values()->toArray();
             } else {
                 $this->sensors = [];
             }

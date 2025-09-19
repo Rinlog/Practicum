@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class SubLocationInfo extends Component
@@ -29,6 +30,7 @@ class SubLocationInfo extends Component
     public $Location = "";
     public $LocationInfo;
     public $Locations = [];
+    public $AllLocations = [];
     public $DisplayTableInfo = "";
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
@@ -36,29 +38,37 @@ class SubLocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
-                $this->organization = $organizationInfo->organization_name;
-                $this->OrgInfo = $organizationInfo;
+                $organizationInfo = Cache::get('organization', collect())
+                    ->firstWhere('organization_id', $_SESSION["User"]->organization_id);
+
+                if ($organizationInfo) {
+                    $this->organization = $organizationInfo->organization_name;
+                    $this->OrgInfo = $organizationInfo;
+                } else {
+                    $this->organization = "";
+                }
             }
             catch(Exception $e){
                 $this->organization = "";
+                Log::channel("customlog")->error("LoadOrganizations error: " . $e->getMessage());
             }
         }
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = Cache::get('organization', collect())->toArray();
         }
         catch(Exception $e){
-
+            $this->Organizations = [];
+            Log::channel("customlog")->error("LoadOrganizations error: " . $e->getMessage());
         }
     }
     public function LoadLocations(){
         try{
-
-            $locations = DB::table("location")->where("organization_id",$this->OrgInfo->organization_id)->get();
-            $this->Locations = $locations->toArray();
+            $this->Locations = Cache::get('location', collect())
+                ->where('organization_id', $this->OrgInfo->organization_id)
+                ->values()
+                ->toArray();
         }
         catch(Exception $e){
             $this->Locations = "";
@@ -66,8 +76,15 @@ class SubLocationInfo extends Component
     }
     public function setDefaultLocation(){
             //we will set the first location to be default
-            $this->Location = $this->Locations[0]->location_name;
-            $this->LocationInfo = $this->Locations[0];
+            try{
+                if ($this->Locations) {
+                    $this->Location = $this->Locations[0]->location_name;
+                    $this->LocationInfo = $this->Locations[0];
+                }
+            }
+            catch(Exception $e){
+                Log::channel("customlog")->error("LoadLocations error: " . $e->getMessage());
+            }
     }
     public function SetLocation($locationID){
         $NewLoc = [];
@@ -88,6 +105,8 @@ class SubLocationInfo extends Component
         }
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
+        $this->LoadLocations();
+        $this->setDefaultLocation();
     }
     public function LoadInfo(){
         if (session_status() == PHP_SESSION_NONE) {
@@ -95,12 +114,11 @@ class SubLocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $locationInfo = DB::table("sub_location")
-                ->select(DB::raw("sub_location_id, location_id, sub_location_name, sub_location_civic_address, sub_location_floor, ST_X(sub_location_geo::geometry) as latitude, ST_Y(sub_location_geo::geometry) as longitude, ST_Z(sub_location_geo::geometry) as altitude, sub_location_desc"))
-                ->where("location_id", $this->LocationInfo->location_id)
-                ->get();
+               $subLocations  = Cache::get('sub_location', collect())
+                    ->where('location_id', $this->LocationInfo->location_id);
+                    
                 $this->DisplayTableInfo = "";
-                foreach ($locationInfo as $key => $location) {
+                foreach ($subLocations  as $key => $location) {
                     $TRID = $this->SpaceToUnderScore($location->sub_location_name);
                     $this->DisplayTableInfo.=
                     "<tr id={$TRID}>
@@ -237,6 +255,10 @@ class SubLocationInfo extends Component
                 }
             }
         }
+        Cache::forget("sub_location");
+        Cache::rememberForever("sub_location", fn() => DB::table("sub_location")
+        ->select(DB::raw(DB::raw("sub_location_id, location_id, sub_location_name, sub_location_civic_address, sub_location_floor, ST_X(sub_location_geo::geometry) as latitude, ST_Y(sub_location_geo::geometry) as longitude, ST_Z(sub_location_geo::geometry) as altitude, sub_location_desc"))
+        )->get());
         return $Results;
     }
     public function LogExport(){
@@ -253,6 +275,6 @@ class SubLocationInfo extends Component
     }
     public function render()
     {
-        return view('livewire..settings.sub-location-info');
+        return view('livewire.settings.sub-location-info');
     }
 }

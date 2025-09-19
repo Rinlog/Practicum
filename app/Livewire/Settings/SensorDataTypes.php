@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class SensorDataTypes extends Component
@@ -24,7 +25,7 @@ class SensorDataTypes extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $RawTableInfo = DB::table("sensor_data_types")->get();
+                $RawTableInfo = Cache::get("sensor_data_types");
                 $this->DisplayTableInfo = "";
                 foreach ($RawTableInfo as $key => $TableRow) {
                     $TRID = $this->SpaceToUnderScore($TableRow->data_type) . "_" . $this->SpaceToUnderScore($TableRow->data_value_set_type);
@@ -133,6 +134,8 @@ class SensorDataTypes extends Component
                 }
             }
         }
+        Cache::forget("sensor_data_types");
+        Cache::rememberForever("sensor_data_types", fn() => DB::table("sensor_data_types")->get());
         return $Results;
     }
     public function LogExport(){

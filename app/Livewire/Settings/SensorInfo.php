@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class SensorInfo extends Component
@@ -22,7 +23,7 @@ class SensorInfo extends Component
 
     public function LoadSensorTypeInfo(){
         try{
-            $this->SensorTypeInfo = DB::table("sensor_type")->get();
+            $this->SensorTypeInfo = Cache::get("sensor_type")->all("sensor_type_id","sensor_type_name");
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -60,7 +61,7 @@ class SensorInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $SensorInfo = DB::table("sensor")->get();
+                $SensorInfo = Cache::get("sensor");
                 $this->Sensors = "";
                 foreach ($SensorInfo as $key => $Sensor) {
                     $SensorType = $this->SearchForSensorType($Sensor->sensor_type_id);
@@ -171,6 +172,8 @@ class SensorInfo extends Component
                 }
             }
         }
+        Cache::forget("sensor");
+        Cache::rememberForever("sensor", fn() => DB::table("sensor")->get());
         return $Results;
     }
     public function LogExport(){
@@ -187,6 +190,6 @@ class SensorInfo extends Component
     }
     public function render()
     {
-        return view('livewire..settings.sensor-info');
+        return view('livewire.settings.sensor-info');
     }
 }

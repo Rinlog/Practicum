@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class UserRoleAssociation extends Component
@@ -30,6 +31,7 @@ class UserRoleAssociation extends Component
     public $ApplicationInfo;
 
     public $Roles = [];
+    public $FilterUsageRoles;
     public $Organizations = [];
     public $Users = [];
     public function LoadUserInfo(){
@@ -47,7 +49,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = DB::table("software_component")->get()->toArray();
+            $this->Components = Cache::get("software_component")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -70,6 +72,7 @@ class UserRoleAssociation extends Component
                     $this->ComponentInfo = $component;
                 }
             }
+            $this->LoadRoles();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -77,8 +80,8 @@ class UserRoleAssociation extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = DB::table("application")->get();
-            $this->Applications = $applications->toArray();
+            $applications = Cache::get("application")->values()->toArray();
+            $this->Applications = $applications;
         }
         catch(Exception $e){
 
@@ -109,7 +112,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
+            $organizations = Cache::get("organization");
             $this->Organizations = $organizations->toArray();
         }
         catch(Exception $e){
@@ -118,7 +121,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadUsers(){
         try{
-            $this->Users = DB::table("users")->get()->toArray();
+            $this->Users = Cache::get("users")->toArray();
         }
         catch(Exception $e){
 
@@ -127,7 +130,11 @@ class UserRoleAssociation extends Component
     //based on components so load components first before roles
     public function LoadRoles(){
         try{
-            $this->Roles = DB::table("role")->where("component_id", $this->ComponentInfo->component_id)->get()->toArray();
+            $this->Roles = Cache::get("role")->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
+            $this->FilterUsageRoles = Cache::get("role")
+            ->where("component_id", $this->ComponentInfo->component_id)
+            ->pluck("role_id")
+            ->all();
         }
         catch(Exception $e){
 
@@ -187,7 +194,10 @@ class UserRoleAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("user_role_association")->where("application_id", $this->ApplicationInfo->application_id)->get();
+                $assocInfo = Cache::get("user_role_association")
+                ->where("application_id", $this->ApplicationInfo->application_id)
+                ->whereIn("role_id",$this->FilterUsageRoles);
+
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $User = $this->SearchForUser($assoc->user_id);
@@ -212,7 +222,7 @@ class UserRoleAssociation extends Component
                 }
             }
             catch(Exception $e){
-                Log::channel("customlog")->error($e->getMessage());
+                Log::channel("customlog")->error("Loading err: " . $e->getMessage());
             }
         }
     }
@@ -316,6 +326,8 @@ class UserRoleAssociation extends Component
                 }
             }
         }
+        Cache::forget("user_role_association");
+        Cache::rememberForever("user_role_association", fn() => DB::table("user_role_association")->get());
         return $Results;
     }
     public function LogExport(){
@@ -335,6 +347,6 @@ class UserRoleAssociation extends Component
         $this->LoadUserInfo();
         $this->LoadOrganizations();
         $this->LoadUsers();
-        return view('livewire..settings.user-role-association');
+        return view('livewire.settings.user-role-association');
     }
 }

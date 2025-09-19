@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use \Exception;
 use Ramsey\Uuid\Uuid;
 use \PDO;
@@ -12,8 +14,7 @@ use \PDO;
 #[Title("UserSettings | IDL")]
 class UserSettings extends Component
 {
-    private $conn;
-    private $conn2;
+    private $conn2; // ✅ keep only PDO for key_vault
 
     private $errStyle = "border-2 border-red-500";
     public $FName = "";
@@ -32,17 +33,6 @@ class UserSettings extends Component
     public $User;
 
     public function __construct(){
-        $DB1 = config("database.connections.pgsql");
-        $this->conn = new PDO(
-            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
-            $DB1["username"],
-            $DB1["password"],
-            [
-                PDO::ATTR_PERSISTENT => true,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-            ]
-        );
-
         $DB2 = config("database.connections.pgsql_2");
         $this->conn2 = new PDO(
             $DB2["driver"].":host=".$DB2["host"]." port=".$DB2["port"]." dbname=".$DB2["database"],
@@ -58,7 +48,7 @@ class UserSettings extends Component
     public function LoadGeneralInfo(){
         try{
             $this->FName = explode(" ",$this->User->user_name)[0];
-            $this->LName = explode(" ",$this->User->user_name)[1];
+            $this->LName = explode(" ",$this->User->user_name)[1] ?? "";
             $this->Email = $this->User->user_email;
             $this->Phone = $this->User->user_phone;
         }
@@ -73,51 +63,33 @@ class UserSettings extends Component
                 session_start();
             }
             if (isset($_SESSION["User"])){
-                $stmt = $this->conn->prepare("SELECT * FROM users WHERE user_id = :id");
-                $stmt->execute([":id" => $_SESSION["User"]->user_id]);
-                $this->User = $stmt->fetch(PDO::FETCH_OBJ);
+
+                $users = Cache::get("users", collect());
+                $this->User = $users->firstWhere("user_id", $_SESSION["User"]->user_id);
                 $_SESSION["User"] = $this->User;
+                $this->Username = $this->User->user_username;
 
-                $this->Username=$this->User->user_username;
 
-                $stmt = $this->conn->prepare("SELECT organization_name FROM organization WHERE organization_id = :oid");
-                $stmt->execute([":oid" => $this->User->organization_id]);
-                $this->Organization = $stmt->fetchColumn();
+                $organizations = Cache::get("organization", collect());
+                $org = $organizations->firstWhere("organization_id", $this->User->organization_id);
+                $this->Organization = $org ? $org->organization_name : "";
 
-                $stmt = $this->conn->prepare("SELECT * FROM user_role_association WHERE user_id = :uid");
-                $stmt->execute([":uid" => $this->User->user_id]);
-                $RoleAssocs = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-                $ApplicationsArray = [];
-                foreach($RoleAssocs as $RoleAssoc){
-                    $ApplicationsArray[] = $RoleAssoc->application_id;
-                }
-                if(count($ApplicationsArray) > 0){
-                    $placeholders = str_repeat('?,', count($ApplicationsArray) - 1) . '?';
-                    $stmt = $this->conn->prepare("SELECT application_name FROM application WHERE application_id IN ($placeholders)");
-                    $stmt->execute($ApplicationsArray);
-                    $ApplicationNames = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    $appString = "";
-                    foreach($ApplicationNames as $appName){
-                        $appString .= $appName->application_name . ", ";
-                    }
-                    $this->Application = substr($appString,0,strlen($appString)-2);
+                $userRoles = Cache::get("user_role_association", collect())
+                    ->where("user_id", $this->User->user_id);
+
+                $ApplicationsArray = $userRoles->pluck("application_id")->all();
+                if (count($ApplicationsArray) > 0){
+                    $applications = Cache::get("application", collect())
+                        ->whereIn("application_id", $ApplicationsArray);
+                    $this->Application = $applications->pluck("application_name")->implode(", ");
                 }
 
-                $roleIds = [];
-                foreach ($RoleAssocs as $role){
-                    $roleIds[] = $role->role_id;
-                }
-                if(count($roleIds) > 0){
-                    $placeholders = str_repeat('?,', count($roleIds) - 1) . '?';
-                    $stmt = $this->conn->prepare("SELECT * FROM role WHERE role_id IN ($placeholders)");
-                    $stmt->execute($roleIds);
-                    $Roles = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    $roleString = "";
-                    foreach($Roles as $Role){
-                        $roleString .= $Role->role_name . ", ";
-                    }
-                    $this->Role = substr($roleString,0,strlen($roleString)-2);
+                $roleIds = $userRoles->pluck("role_id")->all();
+                if (count($roleIds) > 0){
+                    $roles = Cache::get("role", collect())
+                        ->whereIn("role_id", $roleIds);
+                    $this->Role = $roles->pluck("role_name")->implode(", ");
                 }
 
                 $this->LoadGeneralInfo();
@@ -130,19 +102,24 @@ class UserSettings extends Component
 
     public function SaveGeneralInfo(){
         try{
-            $stmt = $this->conn->prepare("UPDATE users SET user_name = :name, user_email = :email, user_phone = :phone WHERE user_id = :id");
-            $stmt->execute([
-                ":name" => trim($this->FName) . " " . trim($this->LName),
-                ":email" => trim($this->Email),
-                ":phone" => trim($this->Phone),
-                ":id" => $this->User->user_id
+
+            DB::table("users")
+                ->where("user_id", $this->User->user_id)
+                ->update([
+                    "user_name" => trim($this->FName) . " " . trim($this->LName),
+                    "user_email" => trim($this->Email),
+                    "user_phone" => trim($this->Phone),
+                ]);
+
+            DB::table("log")->insert([
+                "log_activity_time" => now(),
+                "log_activity_type" => "UPDATE",
+                "log_activity_performed_by" => $this->User->user_username,
+                "log_activity_desc" => $this->User->user_username . " updated their profile info",
             ]);
 
-            $stmt = $this->conn->prepare("INSERT INTO log (log_activity_time, log_activity_type, log_activity_performed_by, log_activity_desc) VALUES (NOW(), 'UPDATE', :by, :desc)");
-            $stmt->execute([
-                ":by" => $this->User->user_username,
-                ":desc" => $this->User->user_username . " updated their profile info"
-            ]);
+            Cache::forget("users");
+            Cache::rememberForever("users", fn() => DB::table("users")->get());
 
             return true;
         }
@@ -170,6 +147,7 @@ class UserSettings extends Component
     }
 
     public function DecryptPass($Password, $Salt){
+
         $stmt = $this->conn2->prepare("SELECT key_data FROM key_vault WHERE key_id = :id");
         $stmt->execute([":id"=>$Salt]);
         $iv_keyRaw = $stmt->fetchColumn();
@@ -208,9 +186,10 @@ class UserSettings extends Component
         try{
             $PasswordInfo = $this->GenEncryptedPass($this->ConfirmPass);
 
-            $stmt = $this->conn->prepare("SELECT user_salt FROM users WHERE user_id = :id");
-            $stmt->execute([":id" => $this->User->user_id]);
-            $Salt = $stmt->fetchColumn();
+
+            $users = Cache::get("users", collect());
+            $Salt = optional($users->firstWhere("user_id", $this->User->user_id))->user_salt;
+
 
             $stmt2 = $this->conn2->prepare("UPDATE key_vault SET key_data = :data WHERE key_id = :id");
             $stmt2->execute([
@@ -218,11 +197,15 @@ class UserSettings extends Component
                 ":id" => $Salt
             ]);
 
-            $stmt = $this->conn->prepare("UPDATE users SET user_password = :pass WHERE user_username = :uname");
-            $stmt->execute([
-                ":pass" => $PasswordInfo[2],
-                ":uname" => $this->Username
-            ]);
+
+            DB::table("users")
+                ->where("user_username", $this->Username)
+                ->update([
+                    "user_password" => $PasswordInfo[2],
+                ]);
+
+            Cache::forget("users");
+            Cache::rememberForever("users", fn() => DB::table("users")->get());
 
             return true;
         }

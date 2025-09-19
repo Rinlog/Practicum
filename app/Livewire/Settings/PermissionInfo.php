@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class PermissionInfo extends Component
@@ -33,7 +34,7 @@ class PermissionInfo extends Component
     public $Resources = [];
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = DB::table("software_component")->get()->toArray();
+            $this->Components = Cache::get("software_component")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -53,11 +54,10 @@ class PermissionInfo extends Component
             if (count((array)$this->ComponentInfo) == 0){
                 return;
             }
-            $this->Resources = DB::table("resource")
+            $this->Resources = Cache::get("resource")
             ->where("component_id", $this->ComponentInfo->component_id)
-            ->groupBy("resource_name")
-            ->distinct()
-            ->get(["resource_name"])
+            ->unique("resource_name")
+            ->values()
             ->toArray();
         }
         catch(Exception $e){
@@ -67,7 +67,11 @@ class PermissionInfo extends Component
     public function setDefaultResource(){
         try{
             $this->Resource = $this->Resources[0]->resource_name;
-            $this->ResourceInfo = DB::table("resource")->where("resource_name", $this->Resource)->get("resource_sub_name");
+            $this->ResourceInfo = collect(Cache::get("resource", collect()))
+                    ->where("resource_name", $this->Resource)
+                    ->unique("resource_name")
+                    ->values()
+                    ->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -78,7 +82,11 @@ class PermissionInfo extends Component
             foreach($this->Resources as $Resource){
                 if ($Resource->resource_name == $resourceName){
                     $this->Resource = $Resource->resource_name;
-                    $this->ResourceInfo = DB::table("resource")->where("resource_name", $this->Resource)->get("resource_sub_name");
+                    $this->ResourceInfo = collect(Cache::get("resource", collect()))
+                            ->where("resource_name", $this->Resource)
+                            ->unique("resource_name")
+                            ->values()
+                            ->toArray();
                 }
             }
         }
@@ -94,6 +102,9 @@ class PermissionInfo extends Component
                     $this->ComponentInfo = $component;
                 }
             }
+            $this->LoadResources();
+            $this->setDefaultResource();
+            
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -105,10 +116,9 @@ class PermissionInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $RawTableInfo = DB::table("permission")
-                ->where("component_id", $this->ComponentInfo->component_id)
-                ->where("resource_name", $this->Resource)
-                ->get();
+                $RawTableInfo = collect(Cache::get("permission", collect()))
+                    ->where("component_id", $this->ComponentInfo->component_id)
+                    ->where("resource_name", $this->Resource);
                 $this->DisplayTableInfo = "";
                 foreach ($RawTableInfo as $key => $TableRow) {
                     $TRID = $this->SpaceToUnderScore($TableRow->permission_name);
@@ -245,6 +255,8 @@ class PermissionInfo extends Component
                 }
             }
         }
+        Cache::forget("permission");
+        Cache::rememberForever("permission", fn() => DB::table("permission")->get());
         return $Results;
     }
     public function LogExport(){

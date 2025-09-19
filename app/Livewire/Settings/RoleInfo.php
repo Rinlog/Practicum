@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 
@@ -24,7 +25,7 @@ class RoleInfo extends Component
 
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = DB::table("software_component")->get()->toArray();
+            $this->Components = Cache::get("software_component")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -58,9 +59,8 @@ class RoleInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $RawTableInfo = DB::table("role")
-                ->where("component_id", $this->ComponentInfo->component_id)
-                ->get();
+                $RawTableInfo = Cache::get("role")
+                ->where("component_id", $this->ComponentInfo->component_id);
                 $this->DisplayTableInfo = "";
                 foreach ($RawTableInfo as $key => $TableRow) {
                     $TRID = $this->SpaceToUnderScore($TableRow->role_name);
@@ -172,6 +172,8 @@ class RoleInfo extends Component
                 }
             }
         }
+        Cache::forget("role");
+        Cache::rememberForever("role", fn() => DB::table("role")->get());
         return $Results;
     }
     public function LogExport(){

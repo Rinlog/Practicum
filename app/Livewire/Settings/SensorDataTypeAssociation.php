@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 
@@ -45,7 +46,7 @@ class SensorDataTypeAssociation extends Component
     }
     public function LoadSensors(){
         try{
-            $this->Sensors = DB::table("sensor")->get()->toArray();
+            $this->Sensors = Cache::get("sensor")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -75,8 +76,8 @@ class SensorDataTypeAssociation extends Component
     }
     public function LoadSensorDataTypes(){
         try{
-            $this->SensorDataTypes = DB::table("sensor_data_types")->get()->toArray();
-            $this->SensorDataTypeNames = DB::table("sensor_data_types")->groupBy("data_type")->get("data_type")->toArray();
+            $this->SensorDataTypes = Cache::get("sensor_data_types")->values()->toArray();
+            $this->SensorDataTypeNames = Cache::get("sensor_data_types")->pluck("data_type")->unique()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -88,7 +89,7 @@ class SensorDataTypeAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = DB::table("sensor_data_types_association")->where("sensor_id", $this->SensorInfo->sensor_id)->get();
+                $assocInfo = Cache::get("sensor_data_types_association")->where("sensor_id", $this->SensorInfo->sensor_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $DataValueSet = $this->DecodePostGresJson($assoc->data_value_set);
@@ -237,6 +238,8 @@ class SensorDataTypeAssociation extends Component
                 }
             }
         }
+        Cache::forget("sensor_data_types_association");
+        Cache::rememberForever("sensor_data_types_association", fn() => DB::table("sensor_data_types_association")->get());
         return $Results;
     }
     public function LogExport(){

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 use \PDO;
-
+use Illuminate\Support\Facades\Cache;
 class ApplicationLog extends Component
 {
     public $ActivityType = "%";
@@ -48,9 +48,8 @@ class ApplicationLog extends Component
 
     public function LoadAllUserInfo(){
         try{
-            $stmt = $this->conn->prepare("SELECT * FROM users");
-            $stmt->execute();
-            $this->Users = $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+            $this->Users = Cache::get("users");
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -59,9 +58,7 @@ class ApplicationLog extends Component
 
     public function LoadApplications(){
         try{
-            $stmt = $this->conn->prepare("SELECT * FROM application");
-            $stmt->execute();
-            $this->Applications = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $this->Applications = Cache::get("application")->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());

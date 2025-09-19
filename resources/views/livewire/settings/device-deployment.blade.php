@@ -541,7 +541,12 @@
                     $("#EditDeployment #ipAddress").val(Obj["IP ADDRESS"]);
                     $("#EditDeployment #dataPort").val(Obj["DATA PORT"]);
                     $("#EditDeployment #description").val(Obj["DESCRIPTION"]);
-                    $("#EditDeployment #isLatestDeployment").prop("checked",Obj["LATEST DEPLOYMENT"]);
+                    if (Obj["LATEST DEPLOYMENT"] == "false"){
+                        $("#EditDeployment #isLatestDeployment").prop("checked",false);
+                    }
+                    else{
+                        $("#EditDeployment #isLatestDeployment").prop("checked",true);
+                    }
                     
                 }
                 else{

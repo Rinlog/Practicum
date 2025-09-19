@@ -247,8 +247,7 @@
                 //reset actions done
                 ActionsDone = [];
                 //now that everything is unchecked we re-load the table and org
-                $wire.call("LoadOrganizations");
-                await $wire.call("LoadInfo");
+                await $wire.call("Refresh");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[0].textContent = index+1;
@@ -317,6 +316,7 @@
             });
             $js("setDevice",async function(deviceEUI){
                 try{
+                    OpenCloseDevice();
                     await $wire.call("SetDevice",deviceEUI);
                     await refresh();
                 }
@@ -432,16 +432,13 @@
             }
             $js("ChangeOrg",async function(ev,Org){
                 await $wire.call("SetOrg",Org)
-                await $wire.call("LoadDevicesBasedOnOrg");
                 await refresh();
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
                 await $wire.set("StartDate",JSON.stringify(setStartDate),false);
                 await $wire.set("EndDate",JSON.stringify(setEndDate),false);
-                await $wire.call("LoadUsersOrganization");
-                $wire.call("LoadDevicesBasedOnOrg");
-                refresh();
+                await $wire.call("Load");
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
             function SpaceToUnderScore(input){

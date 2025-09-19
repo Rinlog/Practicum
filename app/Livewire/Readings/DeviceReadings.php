@@ -4,9 +4,11 @@ namespace App\Livewire\Readings;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 use \PDO;
+use SebastianBergmann\Type\TrueType;
 
 class DeviceReadings extends Component
 {
@@ -51,9 +53,8 @@ class DeviceReadings extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $stmt = $this->conn->prepare("SELECT * FROM organization WHERE organization_id = :oid");
-                $stmt->execute([":oid" => $_SESSION["User"]->organization_id]);
-                $organizationInfo = $stmt->fetch(PDO::FETCH_OBJ);
+                $organizationInfo = collect(Cache::get('organization', collect()))
+                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -65,9 +66,7 @@ class DeviceReadings extends Component
 
     public function LoadOrganizations(){
         try{
-            $stmt = $this->conn->query("SELECT * FROM organization");
-            $this->Organizations = $stmt->fetchAll(PDO::FETCH_OBJ);
-            $this->dispatch('$refresh');
+            $this->Organizations = Cache::get("organization",collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -83,13 +82,13 @@ class DeviceReadings extends Component
         }
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
+        $this->LoadDevicesBasedOnOrg();
     }
 
     public function LoadDevicesBasedOnOrg(){
         try{
-            $stmt = $this->conn->prepare("SELECT device_eui, device_name FROM device WHERE organization_id = :oid");
-            $stmt->execute([":oid" => $this->OrgInfo->organization_id]);
-            $this->devices = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            $this->devices = Cache::get("device")->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
 
             if(count($this->devices) > 0){
                 $this->device = $this->devices[0]->device_name;
@@ -176,7 +175,25 @@ class DeviceReadings extends Component
             ":desc" => "Downloaded CSV of Device Reading Info"
         ]);
     }
+    public function Load(){
+        try{
+            $this->LoadUsersOrganization();
+            $this->LoadDevicesBasedOnOrg();
+            $this->LoadOrganizations();
+            $this->Refresh();
+        }
+        catch(Exception $e){
 
+        }
+    }
+    public function Refresh(){
+        try{
+            $this->LoadInfo();
+        }
+        catch(Exception $e){
+
+        }
+    }
     public function render()
     {
         return view('livewire.readings.device-readings');

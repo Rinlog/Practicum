@@ -11,6 +11,7 @@ use \DateTime;
 use \Exception;
 use \PDO;
 use PhpOption\None;
+use Illuminate\Support\Facades\Cache;
 
 #[Title("Home | IDL")]
 class Home extends Component
@@ -39,20 +40,21 @@ class Home extends Component
 
     public function LoadUsersRoles(){
         try{
-            $stmt = $this->conn->prepare("SELECT role_id FROM user_role_association WHERE user_id = :uid");
-            $stmt->execute([":uid" => $this->user->user_id]);
-            $roleAssoc = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-            $roleIds = array_map(function($r){ return $r->role_id; }, $roleAssoc);
-
-            if(count($roleIds) > 0){
-                $placeholders = str_repeat('?,', count($roleIds) - 1) . '?';
-                $stmt = $this->conn->prepare("SELECT role_name FROM role WHERE role_id IN ($placeholders)");
-                $stmt->execute($roleIds);
-                $this->userRoles = $stmt->fetchAll(PDO::FETCH_OBJ);
-            } else {
-                $this->userRoles = [];
+            $roleAssocs = Cache::get("user_role_association",collect());
+            $RoleIds = [];
+            foreach ($roleAssocs as $Assoc){
+                if ($Assoc->user_id == $this->user->user_id){
+                    array_push($RoleIds,$Assoc->role_id);
+                }
             }
+            $roleTable = Cache::get("role", collect());
+            $userRoles = [];
+            foreach ($roleTable as $role){
+                if (in_array($role->role_id,$RoleIds)){
+                    array_push($userRoles,$role);
+                }
+            }
+            $this->userRoles = $userRoles;
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -75,8 +77,7 @@ class Home extends Component
 
     public function LoadApplications(){
         try{
-            $stmt = $this->conn->query("SELECT application_id, application_name FROM application");
-            $this->Applications = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $this->Applications = Cache::get("application");
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -140,6 +141,9 @@ class Home extends Component
     public function render()
     {
         $this->LoadUserInfo();
+        $this->LoadUsersRoles();
+        $this->LoadApplications();
+        $this->setDefaultApplication();
         return view('livewire.home');
     }
 }

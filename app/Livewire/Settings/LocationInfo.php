@@ -6,6 +6,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class LocationInfo extends Component
@@ -31,7 +32,9 @@ class LocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
+                $organizationInfo = Cache::get("organization")
+                    ->where("organization_id", $_SESSION["User"]->organization_id)
+                    ->first();
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -42,7 +45,7 @@ class LocationInfo extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
+            $organizations = Cache::get("organization");
             $this->Organizations = $organizations->toArray();
         }
         catch(Exception $e){
@@ -65,10 +68,9 @@ class LocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $locationInfo = DB::table("location")
-                ->select(DB::raw("location_id, organization_id, location_name, location_civic_address, ST_X(location_geo::geometry) as latitude, ST_Y(location_geo::geometry) as longitude, ST_Z(location_geo::geometry) as altitude, location_desc"))
-                ->where("organization_id", $this->OrgInfo->organization_id)
-                ->get();
+                $locationInfo = Cache::get("location")
+                    ->where("organization_id", $this->OrgInfo->organization_id)
+                    ->all();
                 $this->DisplayTableInfo = "";
                 foreach ($locationInfo as $key => $location) {
                     $TRID = $this->SpaceToUnderScore($location->location_name);
@@ -203,6 +205,10 @@ class LocationInfo extends Component
                 }
             }
         }
+        Cache::forget("location");
+        Cache::rememberForever("location", fn() => DB::table("location")
+        ->select(DB::raw(DB::raw("location_id, organization_id, location_name, location_civic_address, ST_X(location_geo::geometry) as latitude, ST_Y(location_geo::geometry) as longitude, ST_Z(location_geo::geometry) as altitude, location_desc"))
+        )->get());
         return $Results;
     }
     public function LogExport(){

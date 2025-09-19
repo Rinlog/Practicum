@@ -579,7 +579,6 @@
                 closeAddMenu();
                 closeEditMenu();
                 DisplayInfoBasedOnOrg(organizations[0]["organization_id"]);//make sure to call this after all $wire calls, since it just modifys js
-                DisplayInfoBasedOnLocation(locations[0]["location_id"]);
                 $("table thead th").off("click").on("click", function() {
                     //header the table belongs to
                     var table = $(this).closest("table");
@@ -705,6 +704,8 @@
                         InfoString+="<option class='bg-gray-500' id="+$(this)[0]["location_id"]+" wire:click=\"$js.DisplayInfoBasedOnLocation('"+$(this)[0]["location_id"]+"')\">"+$(this)[0]["location_name"]+"</option>"
                     })
                     $("#locations").html(InfoString);
+
+                    DisplayInfoBasedOnLocation(DisplayLocations[0][0]["location_id"]);
                 }
                 catch(e){
                     console.log(e);
@@ -719,6 +720,7 @@
                             
                         }
                     })
+
                     
                     $("#subLocations").html("");
                     $(DisplayLocations).each(function(index){

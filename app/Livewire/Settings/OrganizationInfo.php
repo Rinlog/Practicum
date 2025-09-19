@@ -5,6 +5,7 @@ namespace App\Livewire\Settings;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 class OrganizationInfo extends Component
@@ -26,7 +27,7 @@ class OrganizationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $OrgInfo = DB::table("organization")->get();
+                $OrgInfo = Cache::get("organization");
                 $this->DisplayOrgs = "";
                 foreach ($OrgInfo as $key => $Org) {
                     $OrgNameAsID = $this->SpaceToUnderScore($Org->organization_name);
@@ -143,6 +144,8 @@ class OrganizationInfo extends Component
                 }
             }
         }
+        Cache::forget("organization");
+        Cache::rememberForever("organization", fn() => DB::table("organization")->get());
         return $Results;
     }
     public function LogExport(){

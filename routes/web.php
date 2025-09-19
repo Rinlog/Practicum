@@ -9,7 +9,7 @@ use App\Livewire\Logs;
 use App\Livewire\Readings;
 use App\Livewire\Settings;
 use App\Livewire\UserSettings;
-
+use App\Http\Controllers\Precache;
 Route::get('/', Login::class);
 Route::get('/home', Home::class);
 Route::get('/applications', Applications::class);
@@ -23,3 +23,4 @@ Route::Post("/logout",function(){
     session_destroy();
     return redirect("/");
 });
+Route::get("/precache",[Precache::class,'__construct']);

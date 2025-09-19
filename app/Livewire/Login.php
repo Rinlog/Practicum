@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use \Illuminate\Database\RecordNotFoundException;
 use \Exception;
@@ -47,6 +49,7 @@ class Login extends Component
 
     public $Username = "";
     public $Password = "";
+    public $user;
 
     private $errStyle = "border-2 border-red-500";
     public $usrCustomStyle = "";
@@ -56,7 +59,6 @@ class Login extends Component
     public $passCustomStyle = "";
     public $passShowErr = "hide";
     public $passErrMsg = "";
-    public $user;
 
     private function clear(){
         $this->clearusr();
@@ -76,9 +78,13 @@ class Login extends Component
     public function CheckForDefaultPass(){
         try{
             if ($this->Username != "" and $this->Password != "") {
-                $result = $this->conn->prepare("SELECT * FROM users WHERE user_username = :name");
-                $result->execute([":name"=>$this->Username]);
-                $this->user = $result->fetch(PDO::FETCH_OBJ);
+                // ✅ Load users from cache
+                $users = Cache::get("users", collect());
+                $this->user = $users->firstWhere("user_username", $this->Username);
+
+                if (!$this->user) {
+                    return false;
+                }
 
                 $UsersPass = $this->DecryptPass($this->user->user_password, $this->user->user_salt);
                 if ("idl123abc" == $UsersPass) {
@@ -113,6 +119,9 @@ class Login extends Component
                 ":uname" => $this->Username
             ]);
 
+            Cache::forget("users");
+            Cache::rememberForever("users", fn() => DB::table("users")->get());
+            $this->user = null;
             $this->Password = $Password;
             return true;
         }
@@ -142,6 +151,18 @@ class Login extends Component
             if ($this->Username != "" and $this->Password != "") {
                 $userNameValid = false;
                 $passwordValid = false;
+
+                if (!$this->user) {
+                    $users = Cache::get("users", collect());
+                    $this->user = $users->firstWhere("user_username", $this->Username);
+                }
+
+                if (!$this->user) {
+                    $this->usrCustomStyle = $this->errStyle;
+                    $this->usrShowErr = "show";
+                    $this->usrErrMsg = "User does not exist";
+                    return;
+                }
 
                 if ($this->user->user_is_disabled == true){
                     $this->usrCustomStyle = $this->errStyle;
@@ -229,3 +250,4 @@ class Login extends Component
         }
     }
 }
+

@@ -345,6 +345,7 @@
             });
             $js("setDevice",async function(deviceEUI){
                 try{
+                    OpenCloseDevice()
                     await $wire.call("SetDevice",deviceEUI);
                     await refresh();
                 }
@@ -408,6 +409,7 @@
             })
             $js("setSensor",async function(sensor_id){
                 try{
+                    OpenCloseSensor();
                     await $wire.call("SetSensor",sensor_id);
                     await refresh();
                 }

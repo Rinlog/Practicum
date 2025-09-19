@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Cache;
 use \Exception;
 class ApplicationInfo extends Component
 {
@@ -29,7 +30,8 @@ class ApplicationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = DB::table("organization")->where("organization_id", $_SESSION["User"]->organization_id)->firstOrFail();
+                $organizationInfo = collect(Cache::get('organization', collect()))
+                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -53,11 +55,10 @@ class ApplicationInfo extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = DB::table("organization")->get();
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = Cache::get("organization",collect())->toArray();
         }
         catch(Exception $e){
-
+            Log::channel("customlog")->error($e->getMessage());
         }
     }
     public function SetOrg($NewOrgID){
@@ -76,7 +77,7 @@ class ApplicationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $applicationInfo = DB::table("application")->where("organization_id", $this->OrgInfo->organization_id)->get();
+                $applicationInfo = Cache::get("application")->where("organization_id",$this->OrgInfo->organization_id);
                 $this->applications = "";
                 foreach ($applicationInfo as $key => $application) {
                     $ApplicationNameAsID = $this->SpaceToUnderScore($application->application_name);
@@ -111,7 +112,7 @@ class ApplicationInfo extends Component
     }
     public function GetApplicationIDsFromNames($names){
         try{
-            $result = DB::table("application")->wherein("application_name",$names)->get();
+            $result = Cache::get("application")->whereIn("application_name",$names)->values()->toArray();
             $ArrayOfIDs = [];
             foreach ($result as $key => $value) {
                 array_push($ArrayOfIDs, $value->application_id);
@@ -211,6 +212,8 @@ class ApplicationInfo extends Component
                 }
             }
         }
+        Cache::forget("application");
+        Cache::rememberForever("application", fn() => DB::table("application")->get());
         return $Results;
     }
     public function LogExport(){
@@ -229,6 +232,6 @@ class ApplicationInfo extends Component
     public function render()
     {
         $this->LoadUserInfo();
-        return view('livewire..settings.application-info');
+        return view('livewire.settings.application-info');
     }
 }
