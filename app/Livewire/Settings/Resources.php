@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class Resources extends Component
 {
     public $headers = [
@@ -23,7 +24,7 @@ class Resources extends Component
     public $Components = [];
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = Cache::get("software_component")->values()->toArray();
+            $this->Components = Cache::get("software_component", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -57,7 +58,7 @@ class Resources extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $RawTableInfo = Cache::get("resource")
+                $RawTableInfo = Cache::get("resource", collect())
                 ->where("component_id", $this->ComponentInfo->component_id);
                 $this->DisplayTableInfo = "";
                 foreach ($RawTableInfo as $key => $TableRow) {
@@ -187,6 +188,9 @@ class Resources extends Component
     }
     public function render()
     {
+        if (!(Cache::has("resource"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire..settings.resources');
     }
 }

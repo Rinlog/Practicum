@@ -11,7 +11,7 @@ use \Illuminate\Database\RecordNotFoundException;
 use \Exception;
 use Ramsey\Uuid\Uuid;
 use \PDO;
-
+use Illuminate\Support\Facades\Artisan;
 #[Title("Login | IDL")]
 class Login extends Component
 {
@@ -44,6 +44,9 @@ class Login extends Component
 
     public function render()
     {
+        if (!(Cache::has("users"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire.login');
     }
 
@@ -78,7 +81,6 @@ class Login extends Component
     public function CheckForDefaultPass(){
         try{
             if ($this->Username != "" and $this->Password != "") {
-                // ✅ Load users from cache
                 $users = Cache::get("users", collect());
                 $this->user = $users->firstWhere("user_username", $this->Username);
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class OrganizationInfo extends Component
 {
     public $headers = [
@@ -27,7 +28,7 @@ class OrganizationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $OrgInfo = Cache::get("organization");
+                $OrgInfo = Cache::get("organization", collect());
                 $this->DisplayOrgs = "";
                 foreach ($OrgInfo as $key => $Org) {
                     $OrgNameAsID = $this->SpaceToUnderScore($Org->organization_name);
@@ -162,6 +163,9 @@ class OrganizationInfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("organization"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire..settings.organization-info');
     }
 }

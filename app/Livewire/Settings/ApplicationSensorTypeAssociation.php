@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Artisan;
 use \Exception;
 
 class ApplicationSensorTypeAssociation extends Component
@@ -265,6 +266,9 @@ class ApplicationSensorTypeAssociation extends Component
 
     public function render()
     {
+        if (!(Cache::has("application_sensor_type_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadSensorTypeInfo();
         $this->LoadUserInfo();
         return view('livewire.settings.application-sensor-type-association');

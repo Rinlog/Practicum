@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class UserRoleAssociation extends Component
 {
     public $headers = [
@@ -49,7 +50,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = Cache::get("software_component")->values()->toArray();
+            $this->Components = Cache::get("software_component", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -80,7 +81,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = Cache::get("application")->values()->toArray();
+            $applications = Cache::get("application", collect())->values()->toArray();
             $this->Applications = $applications;
         }
         catch(Exception $e){
@@ -112,7 +113,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = Cache::get("organization");
+            $organizations = Cache::get("organization", collect());
             $this->Organizations = $organizations->toArray();
         }
         catch(Exception $e){
@@ -121,7 +122,7 @@ class UserRoleAssociation extends Component
     }
     public function LoadUsers(){
         try{
-            $this->Users = Cache::get("users")->toArray();
+            $this->Users = Cache::get("users", collect())->toArray();
         }
         catch(Exception $e){
 
@@ -130,8 +131,8 @@ class UserRoleAssociation extends Component
     //based on components so load components first before roles
     public function LoadRoles(){
         try{
-            $this->Roles = Cache::get("role")->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
-            $this->FilterUsageRoles = Cache::get("role")
+            $this->Roles = Cache::get("role", collect())->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
+            $this->FilterUsageRoles = Cache::get("role", collect())
             ->where("component_id", $this->ComponentInfo->component_id)
             ->pluck("role_id")
             ->all();
@@ -194,7 +195,7 @@ class UserRoleAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = Cache::get("user_role_association")
+                $assocInfo = Cache::get("user_role_association", collect())
                 ->where("application_id", $this->ApplicationInfo->application_id)
                 ->whereIn("role_id",$this->FilterUsageRoles);
 
@@ -344,6 +345,9 @@ class UserRoleAssociation extends Component
     }
     public function render()
     {
+        if (!(Cache::has("user_role_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         $this->LoadOrganizations();
         $this->LoadUsers();

@@ -52,6 +52,8 @@
                 <livewire:settings.sensor-data-type-association></livewire:settings.sensor-data-type-association>
             @elseif ($settingToDisplay == "deviceDeployement")
                 <livewire:settings.device-deployment></livewire:settings.device-deployment>
+            @elseif ($settingToDisplay == "deviceTypeInfo")
+                <livewire:settings.device-type-info></livewire:settings.device-type-info>
             @endif
         </div>
     </div>

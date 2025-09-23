@@ -70,6 +70,7 @@
             <div id="list" class="flex flex-col gap-2 z-4">
                 <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">INFORMATION</h2>
                 <a href="/settings/deviceInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Devices</h3></button></a>
+                <a href="/settings/deviceTypeInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Device Types</h3></button></a>
                 <a href="/settings/sensorTypeInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensor Types</h3></button></a>
                 <a href="/settings/sensorInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensors</h3></button></a>
                 <a href="/settings/sensorDataTypeInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensor Data Types</h3></button></a>

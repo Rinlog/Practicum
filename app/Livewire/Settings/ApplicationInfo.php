@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\Cache;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class ApplicationInfo extends Component
 {
     public $headers = [
@@ -77,7 +78,7 @@ class ApplicationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $applicationInfo = Cache::get("application")->where("organization_id",$this->OrgInfo->organization_id);
+                $applicationInfo = Cache::get("application", collect())->where("organization_id",$this->OrgInfo->organization_id);
                 $this->applications = "";
                 foreach ($applicationInfo as $key => $application) {
                     $ApplicationNameAsID = $this->SpaceToUnderScore($application->application_name);
@@ -112,7 +113,7 @@ class ApplicationInfo extends Component
     }
     public function GetApplicationIDsFromNames($names){
         try{
-            $result = Cache::get("application")->whereIn("application_name",$names)->values()->toArray();
+            $result = Cache::get("application", collect())->whereIn("application_name",$names)->values()->toArray();
             $ArrayOfIDs = [];
             foreach ($result as $key => $value) {
                 array_push($ArrayOfIDs, $value->application_id);
@@ -231,6 +232,9 @@ class ApplicationInfo extends Component
 
     public function render()
     {
+        if (!(Cache::has("application"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         return view('livewire.settings.application-info');
     }

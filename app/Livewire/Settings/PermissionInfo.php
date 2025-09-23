@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class PermissionInfo extends Component
 {
         public $headers = [
@@ -34,7 +35,7 @@ class PermissionInfo extends Component
     public $Resources = [];
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = Cache::get("software_component")->values()->toArray();
+            $this->Components = Cache::get("software_component", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -54,7 +55,7 @@ class PermissionInfo extends Component
             if (count((array)$this->ComponentInfo) == 0){
                 return;
             }
-            $this->Resources = Cache::get("resource")
+            $this->Resources = Cache::get("resource", collect())
             ->where("component_id", $this->ComponentInfo->component_id)
             ->unique("resource_name")
             ->values()
@@ -273,6 +274,9 @@ class PermissionInfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("permission"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire..settings.permission-info');
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Artisan;
 use \Exception;
 
 class DeviceDeployment extends Component
@@ -89,7 +90,7 @@ class DeviceDeployment extends Component
     }
     public function LoadSubLocations(){
         try{
-            $this->SubLocations = Cache::get("sub_location")->values()->toArray();
+            $this->SubLocations = Cache::get("sub_location", collect())->values()->toArray();
         }
         catch(Exception $e){
 
@@ -388,6 +389,9 @@ class DeviceDeployment extends Component
     }
     public function render()
     {
+        if (!(Cache::has("device_deployment"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadSubLocations();
         $this->LoadUserInfo();
         return view('livewire..settings.device-deployment');

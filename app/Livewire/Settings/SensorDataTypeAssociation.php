@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
-
+use Illuminate\Support\Facades\Artisan;
 class SensorDataTypeAssociation extends Component
 {
     public $headers = [
@@ -46,7 +46,7 @@ class SensorDataTypeAssociation extends Component
     }
     public function LoadSensors(){
         try{
-            $this->Sensors = Cache::get("sensor")->values()->toArray();
+            $this->Sensors = Cache::get("sensor", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -76,8 +76,8 @@ class SensorDataTypeAssociation extends Component
     }
     public function LoadSensorDataTypes(){
         try{
-            $this->SensorDataTypes = Cache::get("sensor_data_types")->values()->toArray();
-            $this->SensorDataTypeNames = Cache::get("sensor_data_types")->pluck("data_type")->unique()->toArray();
+            $this->SensorDataTypes = Cache::get("sensor_data_types", collect())->values()->toArray();
+            $this->SensorDataTypeNames = Cache::get("sensor_data_types", collect())->pluck("data_type")->unique()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -89,7 +89,7 @@ class SensorDataTypeAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = Cache::get("sensor_data_types_association")->where("sensor_id", $this->SensorInfo->sensor_id);
+                $assocInfo = Cache::get("sensor_data_types_association", collect())->where("sensor_id", $this->SensorInfo->sensor_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $DataValueSet = $this->DecodePostGresJson($assoc->data_value_set);
@@ -256,6 +256,9 @@ class SensorDataTypeAssociation extends Component
     }
     public function render()
     {
+        if (!(Cache::has("sensor_data_types_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         $this->LoadSensorDataTypes();
         return view('livewire..settings.sensor-data-type-association');

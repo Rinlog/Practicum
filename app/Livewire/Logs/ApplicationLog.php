@@ -4,7 +4,6 @@ namespace App\Livewire\Logs;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
 use \Exception;
 use \PDO;
 use Illuminate\Support\Facades\Cache;
@@ -30,7 +29,7 @@ class ApplicationLog extends Component
     public $Applications = [];
     public $application = "";
     public $ApplicationInfo;
-
+    public $TableInfo = [];
     private $conn;
 
     public function __construct(){
@@ -49,7 +48,7 @@ class ApplicationLog extends Component
     public function LoadAllUserInfo(){
         try{
             
-            $this->Users = Cache::get("users");
+            $this->Users = Cache::get("users", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -58,7 +57,7 @@ class ApplicationLog extends Component
 
     public function LoadApplications(){
         try{
-            $this->Applications = Cache::get("application")->values()->toArray();
+            $this->Applications = Cache::get("application", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -117,21 +116,7 @@ class ApplicationLog extends Component
                 ":etime" => $this->EndTime,
                 ":user"  => $this->User
             ]);
-            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-            foreach($TableInfo as $Row){
-                $this->DisplayTableInfo .= "
-                <tr class= 'cursor-pointer hover:bg-[#f2f2f2]' wire:click='\$js.OpenRowDetails(\"".$this->application."\",\"".$Row->date."\",\"".$Row->time."\",\"".$Row->applog_activity_type."\",\"".$Row->applog_activity_performed_by."\",\"".$Row->applog_activity_desc."\")'>
-                <td></td>
-                <td>".$this->application."</td>
-                <td>".$Row->date."</td>
-                <td>".$Row->time."</td>
-                <td>".$Row->applog_activity_type."</td>
-                <td>".$Row->applog_activity_performed_by."</td>
-                <td>".$Row->applog_activity_desc."</td>
-                </tr>
-                ";
-            }
+            $this->TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());

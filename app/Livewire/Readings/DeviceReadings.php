@@ -5,11 +5,10 @@ namespace App\Livewire\Readings;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
-use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\DB;
 use \Exception;
 use \PDO;
-use SebastianBergmann\Type\TrueType;
-
+use \DateTime;
 class DeviceReadings extends Component
 {
     private $conn;
@@ -18,13 +17,14 @@ class DeviceReadings extends Component
     public $EndDate = '';
     public $StartTime = '00:00';
     public $EndTime = '23:59';
-    public $TimeFrame = "LAST 7 DAYS";
+    public $TimeFrame = "TODAY";
     public $device;
     public $deviceInfo;
     public $devices = [];
     public $organization = "";
     public $Organizations = [];
     public $OrgInfo;
+    public $TableInfo = [];
     public $headers = [
         "DEVICE NAME",
         "DATE",
@@ -32,7 +32,6 @@ class DeviceReadings extends Component
         "DEPLOYMENT DATA",
         "READING"
     ];
-    public $DisplayTableInfo = "";
 
     public function __construct(){
         $DB1 = config("database.connections.pgsql");
@@ -46,7 +45,6 @@ class DeviceReadings extends Component
             ]
         );
     }
-
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -88,7 +86,7 @@ class DeviceReadings extends Component
     public function LoadDevicesBasedOnOrg(){
         try{
 
-            $this->devices = Cache::get("device")->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
+            $this->devices = Cache::get("device", collect())->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
 
             if(count($this->devices) > 0){
                 $this->device = $this->devices[0]->device_name;
@@ -116,23 +114,22 @@ class DeviceReadings extends Component
 
     public function LoadInfo(){
         try{
-            $this->DisplayTableInfo = '';
             $this->StartDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T00:00:00.000",$this->StartDate);
             $this->EndDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T23:59:00.000",$this->EndDate);
-
-            $sql = "SELECT split_part(device_reading_time::text,' ',1) AS date,
+           $sql = "SELECT split_part(device_reading_time::text,' ',1) AS date,
                            split_part(device_reading_time::text,' ',2) AS time,
-                           device.device_name,
-                           device_deployment.deploy_device_data,
-                           device_reading_data
+                           device_reading.device_eui,
+                           device_reading_data,
+                           device_deployment.deploy_device_data
                     FROM device_reading
-                    JOIN device ON device_reading.device_eui = device.device_eui
-                    JOIN device_deployment ON device_reading.deploy_id = device_deployment.deploy_id
-                    WHERE device_reading_time >= :start
+                    inner JOIN device_deployment on device_reading.deploy_id = device_deployment.deploy_id
+                    WHERE 
+                      device_reading_time >= :start
                       AND device_reading_time <= :end
                       AND split_part(device_reading_time::text,' ',2) >= :stime
                       AND split_part(device_reading_time::text,' ',2) <= :etime
-                      AND device_reading.device_eui = :eui";
+                      AND device_reading.device_eui = :device
+                      ";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
@@ -140,29 +137,16 @@ class DeviceReadings extends Component
                 ":end" => $this->EndDate,
                 ":stime" => $this->StartTime,
                 ":etime" => $this->EndTime,
-                ":eui" => $this->deviceInfo->device_eui
+                ":device" => $this->deviceInfo->device_eui
             ]);
 
-            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-            foreach($TableInfo as $Row){
-                $this->DisplayTableInfo .= "
-                <tr>
-                <td></td>
-                <td>".$Row->device_name."</td>
-                <td>".$Row->date."</td>
-                <td>".$Row->time."</td>
-                <td>".$Row->deploy_device_data."</td>
-                <td>".$Row->device_reading_data."</td>
-                </tr>
-                ";
-            }
+            $this->TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
+            
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-
     public function LogExport(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -175,23 +159,14 @@ class DeviceReadings extends Component
             ":desc" => "Downloaded CSV of Device Reading Info"
         ]);
     }
-    public function Load(){
-        try{
+    public function LoadSmallStuff(){
+        try{    
             $this->LoadUsersOrganization();
             $this->LoadDevicesBasedOnOrg();
             $this->LoadOrganizations();
-            $this->Refresh();
         }
         catch(Exception $e){
-
-        }
-    }
-    public function Refresh(){
-        try{
-            $this->LoadInfo();
-        }
-        catch(Exception $e){
-
+            
         }
     }
     public function render()

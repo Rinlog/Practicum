@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class Deviceinfo extends Component
 {
     public $headers = [
@@ -35,6 +36,7 @@ class Deviceinfo extends Component
     public $Organizations = [];
     public $OrgInfo;
     public $devices = "";
+    public $deviceTypeInfo = [];
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -69,16 +71,51 @@ class Deviceinfo extends Component
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
     }
+    public function LoadDeviceTypeInfo(){
+        try{
+            $this->deviceTypeInfo = Cache::get("device_type",collect());
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
+    public function GetDeviceTypeFromId($id){
+        try{
+            foreach ($this->deviceTypeInfo as $deviceType){
+                if ($deviceType->device_type_id == $id){
+                    return $deviceType->device_type;
+                }
+            }
+            return "NONE";
+        }
+        catch (Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
+    public function GetDeviceTypeFromName($name){
+        try{
+            foreach ($this->deviceTypeInfo as $deviceType){
+                if ($deviceType->device_type == $name){
+                    return $deviceType;
+                }
+            }
+            return "NONE";
+        }
+        catch (Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
     public function LoadDeviceInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         if (isset($_SESSION["User"])) {
             try{
-                $deviceInfo = Cache::get("device")->where("organization_id",$this->OrgInfo->organization_id);
+                $deviceInfo = Cache::get("device", collect())->where("organization_id",$this->OrgInfo->organization_id);
                 $this->devices = "";
                 foreach ($deviceInfo as $key => $device) {
                     $deviceDeployed = $device->device_is_deployed ? 'true' : 'false';
+                    $deviceType = $this->GetDeviceTypeFromId($device->device_type_id);
                     $this->devices.=
                     "<tr id={$device->device_eui}>
                         <td>
@@ -87,7 +124,7 @@ class Deviceinfo extends Component
                         <td></td>
                         <td>{$device->device_eui}</td>
                         <td>{$device->device_name}</td>
-                        <td>{$device->device_type_id}</td>
+                        <td>{$deviceType}</td>
                         <td>{$this->organization}</td>
                         <td>{$device->device_model}</td>
                         <td>{$device->device_serial_no}</td>
@@ -127,11 +164,12 @@ class Deviceinfo extends Component
             if (str_contains(strtolower($Query),"insert")) {
                 $Object = json_decode($Value);
                 try{
+                    $DeviceType = $this->GetDeviceTypeFromName($Object->{"TYPE"});
                     $result = DB::table("device")->insert([
                         "device_eui"=>$Object->{"DEVICE EUI"},
                         "organization_id"=> $organizationID,
                         "device_name" => $Object->{"DEVICE NAME EUI"},
-                        "device_type_id"=>$Object->{"TYPE"},
+                        "device_type_id"=>$DeviceType->device_type_id,
                         "device_model"=> $Object->{"MODEL"},
                         "device_serial_no"=> $Object->{"SERIAL NO."},
                         "device_manufacturer"=> $Object->{"MANUFACTURER"},
@@ -183,12 +221,12 @@ class Deviceinfo extends Component
                     $bracketloc = strpos($Query,"[");
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
-
+                    $DeviceType = $this->GetDeviceTypeFromName($Object->{"TYPE"});
                     $result = DB::table("device")->where("device_eui", $idToUpdate)->update([
                         "device_eui"=>$Object->{"DEVICE EUI"},
                         "organization_id"=> $organizationID,
                         "device_name" => $Object->{"DEVICE NAME EUI"},
-                        "device_type_id"=>$Object->{"TYPE"},
+                        "device_type_id"=>$DeviceType->device_type_id,
                         "device_model"=> $Object->{"MODEL"},
                         "device_serial_no"=> $Object->{"SERIAL NO."},
                         "device_manufacturer"=> $Object->{"MANUFACTURER"},
@@ -244,6 +282,10 @@ class Deviceinfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("device"))){
+            Artisan::call("precache:tables");
+        }
+        $this->LoadDeviceTypeInfo();
         return view('livewire.settings.deviceinfo');
     }
 }

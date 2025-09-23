@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class SensorDataTypes extends Component
 {
     public $headers = [
@@ -25,7 +26,7 @@ class SensorDataTypes extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $RawTableInfo = Cache::get("sensor_data_types");
+                $RawTableInfo = Cache::get("sensor_data_types", collect());
                 $this->DisplayTableInfo = "";
                 foreach ($RawTableInfo as $key => $TableRow) {
                     $TRID = $this->SpaceToUnderScore($TableRow->data_type) . "_" . $this->SpaceToUnderScore($TableRow->data_value_set_type);
@@ -153,6 +154,9 @@ class SensorDataTypes extends Component
 
     public function render()
     {
+        if (!(Cache::has("sensor_data_types"))){
+            Artisan::call("precache:tables");
+        }
         $this->ComboBoxOptions = [(object)["DataType"=>"Enumeration"],(object)["DataType"=>"Range"],(object)["DataType"=>"Other"]];
         return view('livewire..settings.sensor-data-types');
     }

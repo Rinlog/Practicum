@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class RolePermissionAssociation extends Component
 {
     public $headers = [
@@ -43,7 +44,7 @@ class RolePermissionAssociation extends Component
     }
     public function LoadSoftwareComponents(){
         try{
-            $this->Components = Cache::get("software_component")->values()->toArray();
+            $this->Components = Cache::get("software_component", collect())->values()->toArray();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -73,7 +74,7 @@ class RolePermissionAssociation extends Component
     }
     public function LoadRoles(){
         try{
-            $this->Roles = Cache::get("role")->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
+            $this->Roles = Cache::get("role", collect())->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
         }
         catch(Exception $e){
 
@@ -103,7 +104,7 @@ class RolePermissionAssociation extends Component
     }
     public function LoadPermission(){
         try{
-            $this->Permissions = Cache::get("permission")
+            $this->Permissions = Cache::get("permission", collect())
             ->where("component_id", $this->ComponentInfo->component_id)
             ->unique()
             ->values()
@@ -143,7 +144,7 @@ class RolePermissionAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = Cache::get("role_permission_association")->where("role_id", $this->RoleInfo->role_id);
+                $assocInfo = Cache::get("role_permission_association", collect())->where("role_id", $this->RoleInfo->role_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $Permission = $this->SearchForPermission($assoc->permission_id);
@@ -272,6 +273,9 @@ class RolePermissionAssociation extends Component
     }
     public function render()
     {
+        if (!(Cache::has("role_permission_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         return view('livewire..settings.role-permission-association');
     }

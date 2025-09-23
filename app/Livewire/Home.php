@@ -12,6 +12,7 @@ use \Exception;
 use \PDO;
 use PhpOption\None;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 
 #[Title("Home | IDL")]
 class Home extends Component
@@ -77,7 +78,7 @@ class Home extends Component
 
     public function LoadApplications(){
         try{
-            $this->Applications = Cache::get("application");
+            $this->Applications = Cache::get("application", collect());
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -140,6 +141,9 @@ class Home extends Component
 
     public function render()
     {
+        if (!(Cache::has("users"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         $this->LoadUsersRoles();
         $this->LoadApplications();

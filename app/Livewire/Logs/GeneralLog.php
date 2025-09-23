@@ -4,11 +4,9 @@ namespace App\Livewire\Logs;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\Cache;
 use \Exception;
 use \PDO;
-
 class GeneralLog extends Component
 {
     private $conn;
@@ -20,6 +18,7 @@ class GeneralLog extends Component
     public $EndTime = '23:59';
     public $User = "%";
     public $TimeFrame = "LAST 7 DAYS";
+    public $TableInfo = [];
     public $headers = [
         "DATE",
         "TIME",
@@ -46,7 +45,7 @@ class GeneralLog extends Component
     public function LoadAllUserInfo(){
         try{
             
-            $this->Users = Cache::get("users");
+            $this->Users = Cache::get("users", collect());
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -82,22 +81,8 @@ class GeneralLog extends Component
                 ":user" => $this->User
             ]);
 
-            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $this-> TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-            foreach($TableInfo as $Row){
-                $this->DisplayTableInfo .= "
-                <tr class= \"cursor-pointer hover:bg-[#f2f2f2]\" wire:click=\$js.OpenRowDetails(\"".
-                $Row->date."\",\"".
-                $Row->time."\")>
-                <td></td>
-                <td>".$Row->date."</td>
-                <td>".$Row->time."</td>
-                <td>".$Row->log_activity_type."</td>
-                <td>".$Row->log_activity_performed_by."</td>
-                <td>".$Row->log_activity_desc."</td>
-                </tr>
-                ";
-            }
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());

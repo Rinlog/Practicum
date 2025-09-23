@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class SensorTypeInfo extends Component
 {
     public $headers = [
@@ -23,7 +24,7 @@ class SensorTypeInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $SensorTypeInfo = Cache::get("sensor_type")->all();
+                $SensorTypeInfo = Cache::get("sensor_type", collect())->all();
                 $this->SensorTypes = "";
                 foreach ($SensorTypeInfo as $key => $SensorType) {
                     $SensorTypeAsID = $this->SpaceToUnderScore($SensorType->sensor_type);
@@ -146,6 +147,9 @@ class SensorTypeInfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("sensor_type"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire.settings.sensor-type-info');
     }
 }

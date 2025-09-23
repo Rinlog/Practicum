@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
 use \DateTime;
+use Illuminate\Support\Facades\Artisan;
 class UserInfo extends Component
 {
      public $headers = [
@@ -82,7 +83,7 @@ class UserInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $UserInfo = Cache::get("users")
+                $UserInfo = Cache::get("users", collect())
                 ->where("organization_id", $this->OrgInfo->organization_id);
                 $this->DisplayTableInfo = "";
                 foreach ($UserInfo as $key => $user) {
@@ -210,7 +211,7 @@ class UserInfo extends Component
                     if ($ResetPass == "true"){
                         $PasswordInfo = $this->GenEncryptedPass("idl123abc");
 
-                        $Salt = Cache::get("users")->where("user_id",$Object->{"USER ID"})->pluck("user_salt");
+                        $Salt = Cache::get("users", collect())->where("user_id",$Object->{"USER ID"})->pluck("user_salt");
                         //check if salt exists
                         $SaltFound = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->exists();
                         if ($SaltFound == true){
@@ -273,6 +274,9 @@ class UserInfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("users"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         return view('livewire.settings.user-info');
     }

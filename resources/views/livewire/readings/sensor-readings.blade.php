@@ -154,7 +154,24 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $DisplayTableInfo !!}
+                    @if (isset($sensorInfo) && isset($deviceInfo) && isset($sensorTypeInfo))
+                        @foreach($TableInfo as $Row)
+                            <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $deviceInfo->device_name }}</td>
+                            <td>{{ $sensorTypeInfo->sensor_type }}</td>
+                            <td>{{ $sensorInfo->sensor_name }}</td>
+                            <td>{{ $Row->date }}</td>
+                            <td>{{ $Row->time }}</td>
+                            <td>{{ $Row->sensor_reading_data }}</td>
+                            </tr>
+                        @endforeach
+                    @endif
+                    <td id="LoadingIcon" class="relative align-center h-[490px] hide" colspan="6" wire:loading.class.remove="hide">
+                        <span class="absolute top-[35%] left-[45%]" wire:loading>
+                            <img src="/images/Loading_2.gif">
+                        </span>
+                    </td>
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -174,15 +191,17 @@
             let application = "";
             let ActionsDone = [];
             let TableObjects = [];
-            let setStartDate = moment().subtract(6,"days");
-            let setEndDate = moment().subtract(0,"day");
-            let TimeFrame = "LAST 7 DAYS";
+            let Offset = new Date().getTimezoneOffset();
+            let HourOffset = Offset/60;
+            let setStartDate = JSON.stringify(new Date(new Date(moment().subtract(0,"day")).setHours(0 + (-1 * HourOffset),0,0)));
+            let setEndDate = JSON.stringify(new Date(new Date(moment().subtract(0,"day")).setHours(23 + (-1 * HourOffset),59,59)));
+            let TimeFrame = "TODAY";
             let OGTable = [];
             let picker = new DateRangePicker("#DateRangePicker",{
                 minDate:moment().subtract(12,"months"),
                 maxDate:new Date(),
                 endDate: moment().subtract(0,"day"),
-                startDate: moment().subtract(6,"days"),
+                startDate: moment().subtract(0,"days"),
                 ranges:{
                     "Today":[moment().subtract(0,"day"),moment().subtract(0,"day")],
                     "Yesterday": [moment().subtract(1,"day"),moment().subtract(1,"day")],
@@ -195,8 +214,6 @@
                 },
             },async function(startDate,endDate, label){
                 if (label.toLowerCase() == "custom range"){
-                    let Offset = new Date().getTimezoneOffset();
-                    let HourOffset = Offset/60;
                     //subtracting offset to have it convert correctly to unix time
                     let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
                     let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
@@ -207,8 +224,6 @@
                     await SetTimeFrame();
                 }
                 else{
-                     let Offset = new Date().getTimezoneOffset();
-                    let HourOffset = Offset/60;
                     //subtracting offset to have it convert correctly to unix time
                     let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
                     let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
@@ -251,14 +266,15 @@
                 return FormVals;
             }
             $js("refresh",async function(){
-                TimeFrame = "LAST 7 DAYS";
-                picker.startDate = moment().subtract(6,"days");
+                ShowLoading();
+                TimeFrame = "TODAY";
+                picker.startDate = moment().subtract(0,"days");
                 picker.endDate = moment().subtract(0,"day");
                 
                 let Offset = new Date().getTimezoneOffset();
                 let HourOffset = Offset/60;
                 //subtracting offset to have it convert correctly to unix time
-                let NewStartDate = new Date(moment().subtract(6,"days")).setHours(0 + (-1 * HourOffset),0,0);
+                let NewStartDate = new Date(moment().subtract(0,"days")).setHours(0 + (-1 * HourOffset),0,0);
                 let NewEndDate = new Date(moment().subtract(0,"day")).setHours(23 + (-1 * HourOffset),59,59)
                 
                 setStartDate = JSON.stringify(new Date(NewStartDate));
@@ -269,18 +285,13 @@
                 await SetTimeFrame();
             })
             function UpdateShowingCount(){
-                $("#LogCount").text($("#InfoTable").children().length);
+                $("#LogCount").text($("#InfoTable").children().length-1);
             }
             async function refresh(){
                 //reset actions done
                 ActionsDone = [];
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadOrganizations");
                 await $wire.call("LoadInfo");
-                //re-gen sequence nums
-                $("#InfoTable").children().each(function(index){
-                    $(this).children()[0].textContent = index+1;
-                })
                 UpdateShowingCount();
                 PrepFileForExport();
                 OGTable = [];
@@ -345,6 +356,7 @@
             });
             $js("setDevice",async function(deviceEUI){
                 try{
+                    ShowLoading()
                     OpenCloseDevice()
                     await $wire.call("SetDevice",deviceEUI);
                     await refresh();
@@ -409,6 +421,7 @@
             })
             $js("setSensor",async function(sensor_id){
                 try{
+                    ShowLoading()
                     OpenCloseSensor();
                     await $wire.call("SetSensor",sensor_id);
                     await refresh();
@@ -418,6 +431,8 @@
                 }
             })
             $js("Filter",async function(){
+                ShowLoading()
+                OpenCloseFilter();
                 let vals = PopulateArrayWithVals("FilterDropDown");
                 if (vals[1] == "" || vals[2] == ""){
                     return;
@@ -426,6 +441,14 @@
                 await $wire.set("EndTime",vals[1],false);
                 await refresh();
             })
+            function ShowLoading(){
+                let LoadingTD = $("#InfoTable #LoadingIcon");
+                LoadingTD.html(
+                    "<span class=\"absolute top-[35%] left-[45%]\" wire:loading><img src=\"/images/Loading_2.gif\"></span>"
+                )
+                $("#InfoTable").text(""); //clearing current Info
+                $("#InfoTable").append(LoadingTD);
+            }
             function SearchThroughTable(searchInput){
                 try{
                     let FilteredTable = []
@@ -489,6 +512,7 @@
                 }
             }
             $js("ChangeOrg",async function(ev,Org){
+                ShowLoading()
                 await $wire.call("SetOrg",Org)
                 await $wire.call("LoadDevicesBasedOnOrg");
                 await refresh();
@@ -497,8 +521,7 @@
             $(document).ready(async function(){
                 await $wire.set("StartDate",JSON.stringify(setStartDate),false);
                 await $wire.set("EndDate",JSON.stringify(setEndDate),false);
-                await $wire.call("LoadUsersOrganization");
-                $wire.call("LoadDevicesBasedOnOrg");
+                await $wire.call("LoadSmallStuff");
                 await refresh();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -532,7 +555,7 @@
                     let OBJ = TRToObject($(this))
                     TableObjects.push(OBJ);
                 });
-                
+                TableObjects.pop();
             }
             function exportToCsv(filename, rows) {
                 try{

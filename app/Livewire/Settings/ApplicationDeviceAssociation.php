@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 use SebastianBergmann\Type\TrueType;
 
 class ApplicationDeviceAssociation extends Component
@@ -50,7 +51,7 @@ class ApplicationDeviceAssociation extends Component
     }
     public function LoadDevices(){
         try{
-            $this->Devices = Cache::get("device");
+            $this->Devices = Cache::get("device", collect());
         }
         catch(Exception $e){
 
@@ -58,7 +59,7 @@ class ApplicationDeviceAssociation extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = Cache::get("application")->values()->toArray();
+            $applications = Cache::get("application", collect())->values()->toArray();
             $this->Applications = $applications;
         }
         catch(Exception $e){
@@ -118,7 +119,7 @@ class ApplicationDeviceAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = Cache::get("application_device_association")
+                $assocInfo = Cache::get("application_device_association", collect())
                 ->where("application_id", $this->ApplicationInfo->application_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
@@ -153,7 +154,7 @@ class ApplicationDeviceAssociation extends Component
     }
     public function GetApplicationIDsFromNames($names){
         try{
-            $result = Cache::get("application")->wherein("application_name",$names);
+            $result = Cache::get("application", collect())->wherein("application_name",$names);
             $ArrayOfIDs = [];
             foreach ($result as $key => $value) {
                 array_push($ArrayOfIDs, $value->application_id);
@@ -263,6 +264,9 @@ class ApplicationDeviceAssociation extends Component
     }
     public function render()
     {
+        if (!(Cache::has("application_device_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         $this->LoadOrganizations();
         $this->LoadDevices();

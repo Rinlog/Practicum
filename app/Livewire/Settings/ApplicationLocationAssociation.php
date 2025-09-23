@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Artisan;
 use \Exception;
 
 class ApplicationLocationAssociation extends Component
@@ -43,7 +44,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = Cache::get("organization");
+            $organizations = Cache::get("organization", collect());
             $this->Organizations = $organizations->toArray();
         }
         catch(Exception $e){
@@ -52,7 +53,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadLocations(){
         try{
-            $this->Locations = Cache::get("location");
+            $this->Locations = Cache::get("location", collect());
         }
         catch(Exception $e){
 
@@ -60,7 +61,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadSubLocations(){
         try{
-            $this->SubLocations = Cache::get("sub_location");
+            $this->SubLocations = Cache::get("sub_location", collect());
         }
         catch(Exception $e){
 
@@ -68,7 +69,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = Cache::get("application")->values()->toArray();
+            $applications = Cache::get("application", collect())->values()->toArray();
             $this->Applications = $applications;
         }
         catch(Exception $e){
@@ -152,7 +153,7 @@ class ApplicationLocationAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = Cache::get("application_location_association")
+                $assocInfo = Cache::get("application_location_association", collect())
                 ->where("application_id", $this->ApplicationInfo->application_id);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
@@ -189,7 +190,7 @@ class ApplicationLocationAssociation extends Component
     }
     public function GetApplicationIDsFromNames($names){
         try{
-            $result = Cache::get("application")->wherein("application_name",$names);
+            $result = Cache::get("application", collect())->wherein("application_name",$names);
             $ArrayOfIDs = [];
             foreach ($result as $key => $value) {
                 array_push($ArrayOfIDs, $value->application_id);
@@ -302,6 +303,9 @@ class ApplicationLocationAssociation extends Component
     }
     public function render()
     {
+        if (!(Cache::has("application_location_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         $this->LoadOrganizations();
         $this->LoadLocations();

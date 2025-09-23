@@ -4,11 +4,10 @@ namespace App\Livewire\Readings;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
 use \Exception;
 use Illuminate\Support\Facades\Cache;
 use \PDO;
-
+use \DateTime;
 class SensorReadings extends Component
 {
     private $conn;
@@ -17,16 +16,18 @@ class SensorReadings extends Component
     public $EndDate = '';
     public $StartTime = '00:00';
     public $EndTime = '23:59';
-    public $TimeFrame = "LAST 7 DAYS";
+    public $TimeFrame = "TODAY";
     public $device;
     public $deviceInfo;
     public $devices = [];
     public $sensor;
     public $sensorInfo;
+    public $sensorTypeInfo;
     public $sensors = [];
     public $organization = "";
     public $Organizations = [];
     public $OrgInfo;
+    public $TableInfo = [];
     public $headers = [
         "DEVICE NAME",
         "SENSOR TYPE",
@@ -90,7 +91,7 @@ class SensorReadings extends Component
     public function LoadDevicesBasedOnOrg(){
         try{
 
-            $this->devices = Cache::get("device")->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
+            $this->devices = Cache::get("device", collect())->where("organization_id",$this->OrgInfo->organization_id)->values()->toArray();
 
             if(count($this->devices) > 0){
                 $this->device = $this->devices[0]->device_name;
@@ -117,11 +118,18 @@ class SensorReadings extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-
+    public function LoadSensorTypeInfo(){
+        try{
+            $this->sensorTypeInfo = Cache::get("sensor_type", collect())->where("sensor_type_id",$this->sensorInfo->sensor_type_id)->values()->toArray()[0];
+        }
+        catch(Exception $e){
+            Log::channel("customlog")->error($e->getMessage());
+        }
+    }
     public function LoadSensorsBasedOnDevice(){
         try{
 
-            $SensorAssoc = Cache::get("device_sensor_association")->where("device_eui",$this->deviceInfo->device_eui)->values()->toArray();
+            $SensorAssoc = Cache::get("device_sensor_association", collect())->where("device_eui",$this->deviceInfo->device_eui)->values()->toArray();
 
             $ArrayAssoc = [];
             foreach ($SensorAssoc as $Sensor){
@@ -130,7 +138,7 @@ class SensorReadings extends Component
 
             if(count($ArrayAssoc) > 0){
                
-                $this->sensors = Cache::get("sensor")->whereIn("sensor_id",$ArrayAssoc)->values()->toArray();
+                $this->sensors = Cache::get("sensor", collect())->whereIn("sensor_id",$ArrayAssoc)->values()->toArray();
             } else {
                 $this->sensors = [];
             }
@@ -143,6 +151,7 @@ class SensorReadings extends Component
                 $this->sensor = "NO SENSORS";
                 $this->sensorInfo = null;
             }
+            $this->LoadSensorTypeInfo();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -165,52 +174,35 @@ class SensorReadings extends Component
 
     public function LoadInfo(){
         try{
-            $this->DisplayTableInfo = '';
             $this->StartDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T00:00:00.000",$this->StartDate);
             $this->EndDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T23:59:00.000",$this->EndDate);
+            $this->StartDate = preg_replace("/\"/","",$this->StartDate);
+            $this->EndDate = preg_replace("/\"/","",$this->EndDate);
 
-            $sql = "SELECT split_part(sensor_reading_time::text,' ',1) AS date,
-                           split_part(sensor_reading_time::text,' ',2) AS time,
-                           device.device_name,
-                           sensor.sensor_name,
-                           sensor_type.sensor_type,
-                           sensor_reading_data
-                    FROM sensor_reading
-                    JOIN device ON sensor_reading.device_eui = device.device_eui
-                    JOIN sensor ON sensor_reading.sensor_id = sensor.sensor_id
-                    JOIN sensor_type ON sensor.sensor_type_id = sensor_type.sensor_type_id
-                    WHERE sensor_reading_time >= :start
-                      AND sensor_reading_time <= :end
-                      AND split_part(sensor_reading_time::text,' ',2) >= :stime
-                      AND split_part(sensor_reading_time::text,' ',2) <= :etime
-                      AND sensor_reading.device_eui = :eui
-                      AND sensor_reading.sensor_id = :sid";
+            $sql = "SELECT 
+                sensor_reading_data,
+                split_part(sensor_reading_time::text,' ', 1) as date,
+                split_part(sensor_reading_time::text,' ', 2) as time
+            from sensor_reading
+            WHERE 
+            device_eui = :eui
+            AND sensor_id = :sid
+            AND sensor_reading_time >= :start
+            AND sensor_reading_time <= :end
+            AND split_part(sensor_reading_time::text,' ',2) >= :stime
+            AND split_part(sensor_reading_time::text,' ',2) <= :etime";
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([
+            $stmnt = $this->conn->prepare($sql);
+
+            $stmnt->execute([
+                ":eui" => $this->deviceInfo->device_eui,
+                ":sid" => $this->sensorInfo->sensor_id,
                 ":start" => $this->StartDate,
                 ":end" => $this->EndDate,
                 ":stime" => $this->StartTime,
-                ":etime" => $this->EndTime,
-                ":eui" => $this->deviceInfo->device_eui,
-                ":sid" => $this->sensorInfo->sensor_id
+                ":etime" => $this->EndTime
             ]);
-
-            $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-            foreach($TableInfo as $Row){
-                $this->DisplayTableInfo .= "
-                <tr>
-                <td></td>
-                <td>".$Row->device_name."</td>
-                <td>".$Row->sensor_type."</td>
-                <td>".$Row->sensor_name."</td>
-                <td>".$Row->date."</td>
-                <td>".$Row->time."</td>
-                <td>".$Row->sensor_reading_data."</td>
-                </tr>
-                ";
-            }
+            $this->TableInfo = $stmnt->fetchAll(PDO::FETCH_OBJ);
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -229,7 +221,16 @@ class SensorReadings extends Component
             ":desc" => "Downloaded CSV of Sensor Reading Info"
         ]);
     }
-
+    public function LoadSmallStuff(){
+        try{    
+            $this->LoadUsersOrganization();
+            $this->LoadDevicesBasedOnOrg();
+            $this->LoadOrganizations();
+        }
+        catch(Exception $e){
+            
+        }
+    }
     public function render()
     {
         return view('livewire.readings.sensor-readings');

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 
 class DeviceSensorAssociation extends Component
 {
@@ -70,7 +71,7 @@ class DeviceSensorAssociation extends Component
     }
     public function LoadSensors(){
         try{
-            $this->Sensors = Cache::get("sensor")->values()->toArray(); 
+            $this->Sensors = Cache::get("sensor", collect())->values()->toArray(); 
         }
         catch(Exception $e){
 
@@ -78,7 +79,7 @@ class DeviceSensorAssociation extends Component
     }
     public function LoadSensorTypes(){
         try{
-            $this->SensorTypes = Cache::get("sensor_type")->values()->toArray();      
+            $this->SensorTypes = Cache::get("sensor_type", collect())->values()->toArray();      
         }
         catch(Exception $e){
 
@@ -98,7 +99,7 @@ class DeviceSensorAssociation extends Component
     }
     public function LoadDevices(){
         try{
-            $this->Devices = Cache::get("device")->where("organization_id", $this->OrgInfo->organization_id)->values()->toArray();
+            $this->Devices = Cache::get("device", collect())->where("organization_id", $this->OrgInfo->organization_id)->values()->toArray();
         }
         catch(Exception $e){
 
@@ -168,7 +169,7 @@ class DeviceSensorAssociation extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $assocInfo = Cache::get("device_sensor_association")->where("device_eui", $this->DeviceInfo->device_eui);
+                $assocInfo = Cache::get("device_sensor_association", collect())->where("device_eui", $this->DeviceInfo->device_eui);
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $Sensor = $this->searchForSensor($assoc->sensor_id);
@@ -298,6 +299,9 @@ class DeviceSensorAssociation extends Component
     }
     public function render()
     {
+        if (!(Cache::has("device_sensor_association"))){
+            Artisan::call("precache:tables");
+        }
         $this->LoadUserInfo();
         $this->LoadSensors();
         $this->LoadSensorTypes();

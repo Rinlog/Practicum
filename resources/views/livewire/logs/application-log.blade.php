@@ -105,7 +105,24 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $DisplayTableInfo !!}
+                @if (isset($application))
+                    @foreach($TableInfo as $Row)
+                        <tr class= 'cursor-pointer hover:bg-[#f2f2f2]' wire:click="$js.OpenRowDetails('{{ $Row->date }}','{{ $Row->time }}')">
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $ApplicationInfo->application_name }}</td>
+                        <td>{{ $Row->date }}</td>
+                        <td>{{ $Row->time }}</td>
+                        <td>{{ $Row->applog_activity_type }}</td>
+                        <td>{{ $Row->applog_activity_performed_by }}</td>
+                        <td>{{ $Row->applog_activity_desc }}</td>
+                        </tr>
+                    @endforeach
+                @endif
+                    <td id="LoadingIcon" class="relative align-center h-[490px] hide" colspan="6" wire:loading.class.remove="hide">
+                        <span class="absolute top-[35%] left-[45%]" wire:loading>
+                            <img src="/images/Loading_2.gif">
+                        </span>
+                    </td>
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -159,8 +176,10 @@
             let application = "";
             let ActionsDone = [];
             let TableObjects = [];
-            let setStartDate = moment().subtract(6,"days");
-            let setEndDate = moment().subtract(0,"day");
+            let Offset = new Date().getTimezoneOffset();
+            let HourOffset = Offset/60;
+            let setStartDate = JSON.stringify(new Date(new Date(moment().subtract(6,"day")).setHours(0 + (-1 * HourOffset),0,0)));
+            let setEndDate = JSON.stringify(new Date(new Date(moment().subtract(0,"day")).setHours(23 + (-1 * HourOffset),59,59)));
             let TimeFrame = "LAST 7 DAYS";
             let OGTable = [];
             let picker = new DateRangePicker("#DateRangePicker",{
@@ -180,8 +199,6 @@
                 },
             },async function(startDate,endDate, label){
                 if (label.toLowerCase() == "custom range"){
-                    let Offset = new Date().getTimezoneOffset();
-                    let HourOffset = Offset/60;
                     //subtracting offset to have it convert correctly to unix time
                     let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
                     let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
@@ -192,8 +209,6 @@
                     await SetTimeFrame();
                 }
                 else{
-                     let Offset = new Date().getTimezoneOffset();
-                    let HourOffset = Offset/60;
                     //subtracting offset to have it convert correctly to unix time
                     let NewStartDate = new Date(startDate).setHours(0 + (-1 * HourOffset),0,0);
                     let NewEndDate = new Date(endDate).setHours(23 + (-1 * HourOffset),59,59)
@@ -205,6 +220,7 @@
                 }
             });
             async function SetTimeFrame(){
+                ShowLoading();
                 await $wire.set("StartDate",setStartDate,false);
                 await $wire.set("EndDate",setEndDate,false);
                 await $wire.set("TimeFrame",TimeFrame,false);
@@ -238,6 +254,7 @@
                 return FormVals;
             }
             $js("refresh",async function(){
+                ShowLoading();
                 TimeFrame = "LAST 7 DAYS";
                 picker.startDate = moment().subtract(6,"days");
                 picker.endDate = moment().subtract(0,"day");
@@ -257,17 +274,13 @@
                 await SetTimeFrame();
             })
             function UpdateShowingCount(){
-                $("#LogCount").text($("#InfoTable").children().length);
+                $("#LogCount").text($("#InfoTable").children().length-1);
             }
             async function refresh(){
                 //reset actions done
                 ActionsDone = [];
                 //now that everything is unchecked we re-load the table and org
                 await $wire.call("LoadInfo");
-                //re-gen sequence nums
-                $("#InfoTable").children().each(function(index){
-                    $(this).children()[0].textContent = index+1;
-                })
                 UpdateShowingCount();
                 PrepFileForExport();
                 OGTable = [];
@@ -349,25 +362,37 @@
                 }
             }
             $js("ResetUser",async function(){
+                ShowLoading();
                 $wire.set("User","%",false)
                 await refresh();
             })
             $js("ResetActivity",async function(){
+                ShowLoading();
                 $wire.set("ActivityType","%",false)
                 await refresh();
             })
             $js("Filter",async function(){
+                ShowLoading();
                 let vals = PopulateArrayWithVals("FilterDropDown");
                 if (vals[1] == "" || vals[2] == ""){
                     return;
                 }
                 await $wire.set("ActivityType",vals[0],false);
                 await $wire.set("StartTime",vals[1],false);
-                await $wire.set("EndTime",vals[2]),false;
+                await $wire.set("EndTime",vals[2],false);
                 await $wire.set("User",vals[3],false);
                 await refresh();
             })
+            function ShowLoading(){
+                let LoadingTD = $("#InfoTable #LoadingIcon");
+                LoadingTD.html(
+                    "<span class=\"absolute top-[35%] left-[45%]\" wire:loading><img src=\"/images/Loading_2.gif\"></span>"
+                )
+                $("#InfoTable").text(""); //clearing current Info
+                $("#InfoTable").append(LoadingTD);
+            }
             $js("ChangeApplication",async function(ev,Application){
+                ShowLoading();
                 await $wire.call("SetApplication",Application)
                 application = $wire.application;
                 await refresh();
@@ -474,7 +499,7 @@
                     let OBJ = TRToObject($(this))
                     TableObjects.push(OBJ);
                 });
-                
+                TableObjects.pop();
             }
             function exportToCsv(filename, rows) {
                 try{
@@ -543,13 +568,36 @@
                 $("#DisplayMessageMain").removeClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
                 $("#DisplayMessageMain").addClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
             }
-            $js("OpenRowDetails",function(Application,Date,Time,Activity,User,Description){
-                $("#ApplicationDetailsModal").text(Application)
+            function FindDetailsBasedOnDateTime(Date,Time){
+                GoodTR = [];
+                let Result = $("#InfoTable").children().each(function(){
+                    let DateValid = false;
+                    let TimeValid = false;
+                    $(this).children().each(function(){
+                        if ($(this).text() == Date){
+                            DateValid = true;
+                        }
+                        else if ($(this).text() == Time){
+                            TimeValid = true;
+                        }
+                        if (DateValid == true && TimeValid == true){
+                            let Parent = $(this).parent()
+                            GoodTR.push(Parent);
+                        }
+                    })
+                })
+                return GoodTR[0];
+            }
+            $js("OpenRowDetails",function(Date,Time){
                 $("#DateDetailsModal").text(Date)
                 $("#TimeDetailsModal").text(Time)
-                $("#ActivityDetailsModal").text(Activity)
-                $("#UserDetailsModal").text(User)
-                $("#DescriptionDetailsModal").text(Description)
+                let Result = FindDetailsBasedOnDateTime(Date,Time);
+                let Obj = TRToObject(Result);
+                $("#ApplicationDetailsModal").text(Obj["APPLICATION"]);
+                $("#ActivityDetailsModal").text(Obj["ACTIVITY"])
+                $("#UserDetailsModal").text(Obj["USER"])
+                $("#DescriptionDetailsModal").text(Obj["DESCRIPTION"])
+
                 $("#DisplayMessage").removeClass("hide")
                 setTimeout(function(e){OpenDetailsModal()},50)
                 

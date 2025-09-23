@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class LocationInfo extends Component
 {
     public $headers = [
@@ -32,7 +33,7 @@ class LocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $organizationInfo = Cache::get("organization")
+                $organizationInfo = Cache::get("organization", collect())
                     ->where("organization_id", $_SESSION["User"]->organization_id)
                     ->first();
                 $this->organization = $organizationInfo->organization_name;
@@ -45,7 +46,7 @@ class LocationInfo extends Component
     }
     public function LoadOrganizations(){
         try{
-            $organizations = Cache::get("organization");
+            $organizations = Cache::get("organization", collect());
             $this->Organizations = $organizations->toArray();
         }
         catch(Exception $e){
@@ -68,7 +69,7 @@ class LocationInfo extends Component
         }
         if (isset($_SESSION["User"])) {
             try{
-                $locationInfo = Cache::get("location")
+                $locationInfo = Cache::get("location", collect())
                     ->where("organization_id", $this->OrgInfo->organization_id)
                     ->all();
                 $this->DisplayTableInfo = "";
@@ -225,6 +226,9 @@ class LocationInfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("location"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire..settings.location-info');
     }
 }

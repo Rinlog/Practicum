@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 use \Exception;
+use Illuminate\Support\Facades\Artisan;
 class SubLocationInfo extends Component
 {
     public $headers = [
@@ -275,6 +276,9 @@ class SubLocationInfo extends Component
     }
     public function render()
     {
+        if (!(Cache::has("sub_location"))){
+            Artisan::call("precache:tables");
+        }
         return view('livewire.settings.sub-location-info');
     }
 }

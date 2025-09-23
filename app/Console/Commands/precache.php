@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Support\Facades\Artisan;
 
 class precache extends Command
 {
@@ -37,6 +38,7 @@ class precache extends Command
         "device",
         "device_deployment",
         "device_sensor_association",
+        "device_type",
         "location",
         "sub_location",
         "permission",
