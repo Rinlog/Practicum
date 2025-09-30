@@ -11,10 +11,15 @@
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
             </button>
-            <h1 class="text-[#00719d]"><b>Log Details</b></h1>
+            @if ($apiPage == "false")
+              <h1 class="text-[#00719d]"><b>Log Details</b></h1>
+            @elseif ($apiPage == "true")
+              <h1 class="text-[#00719d]"><b>Decrypted Token</b></h1>
+            @endif
         </div>
         <!--Content-->
         <div class="flex flex-col items-start justify-start pb-2 text-[#737373] flex-wrap text-start px-10 gap-2">
+          @if ($apiPage == "false")
             @if ($application == "true")
             <label class="text-2xl font-semibold">
               Application: 
@@ -41,6 +46,28 @@
               Description: <br>
               <label id="DescriptionDetailsModal" class="font-normal text-wrap"></label>
             </label>
+          @elseif ($apiPage == "true")
+            <label class="text-2xl font-semibold">
+              Username: <br>
+              <label id="API_Username" class="font-normal text-wrap"></label>
+            </label>
+            <label class="text-2xl font-semibold">
+              User ID: <br>
+              <label id="API_UserId" class="font-normal text-wrap"></label>
+            </label>
+            <label class="text-2xl font-semibold">
+              Application ID: <br>
+              <label id="API_Application_id" class="font-normal text-wrap"></label>
+            </label>
+            <label class="text-2xl font-semibold">
+              Role ID: <br>
+              <label id="API_Role_id" class="font-normal text-wrap"></label>
+            </label>
+            <label class="text-2xl font-semibold">
+              Time Created: <br>
+              <label id="API_DateCreated" class="font-normal text-wrap"></label>
+            </label>
+          @endif
         </div>
         <!--Footer-->
         <div class="bg-gray-50 px-4 py-4 justify-center items-center flex">

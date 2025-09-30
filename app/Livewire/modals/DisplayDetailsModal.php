@@ -7,6 +7,7 @@ use Livewire\Component;
 class DisplayDetailsModal extends Component
 {
     public $application = "false";
+    public $apiPage = "false";
 
     public function render()
     {

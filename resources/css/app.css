@@ -15,8 +15,15 @@
 }
 html, body{
     overflow-x:  hidden;
+    padding-left:2rem;
+    padding-top:1.9rem;
+    background-color: #f2f2f2;
 }
-
+.NoPadding{
+    padding: 0;
+    padding-left: 0%;
+    padding-top: 0%;
+}
 .open-sans-soft-regular {
   font-family: "Open Sans", sans-serif;
   font-optical-sizing: auto;

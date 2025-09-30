@@ -142,7 +142,7 @@ class UserInfo extends Component
                         $Object->{"USER ID"} = Uuid::uuid4()->toString();
                     }
                     $PassInfo = $this->GenEncryptedPass("idl123abc");
-                    $Salt = $this->GenSalt($Object->{"USER NAME"}, new DateTime()->format("D M d Y H:i:s T P"));
+                    $Salt = $this->GenSalt($Object->{"USER NAME"}, (new DateTime())->format("D M d Y H:i:s T P"));
                     $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
                         "key_id"=>$Salt,
                         "key_data"=>$PassInfo[0] . ',' . $PassInfo[1]

@@ -41,10 +41,6 @@ $(document).ready(function(e){
             $("#NavButton").addClass("left-57");
             $("#InnerSettingsMenu").addClass("left-64");
 
-            if (location.includes("/settings")){
-                SettingsMenuCustom("small");
-            }
-            UserControlCorrection("left");
             $("#NavButtonText").text("<<");
             $("#ExpandMenu").attr("isexpanded",true);
         }
@@ -59,10 +55,6 @@ $(document).ready(function(e){
             $("#NavButton").removeClass("left-57");
             $("#InnerSettingsMenu").removeClass("left-64");
 
-            if (location.includes("/settings")){
-                SettingsMenuCustom("big");
-            }
-            UserControlCorrection("normal");
             $("#NavButtonText").text(">>");
 
             $("#ExpandMenu").attr("isexpanded",false);
@@ -99,32 +91,6 @@ $(document).ready(function(e){
             $("#InnerSettingsMenu").removeClass("p-4 w-80 opacity-100");
         }
     })
-    function SettingsMenuCustom(smallBig){
-        if (smallBig == "small"){
-            $("#MainWindowSettings").removeClass("lg:w-[1750px]");
-            $("#MainWindowSettings").addClass("lg:w-[1500px]");
-        }
-        else if (smallBig == "big"){
-            setTimeout(function(){
-                $("#MainWindowSettings").addClass("lg:w-[1750px]");
-                $("#MainWindowSettings").removeClass("lg:w-[1500px]");
-            },170);
-        }
-    }
-    function UserControlCorrection(leftNorm){
-        if (leftNorm == "left"){
-            $("#UserControlDiv").removeClass("pr-25");
-            $("#UserDropDown").removeClass('right-25');
-            $("#UserControlDiv").addClass("pr-70");
-            $("#UserDropDown").addClass('right-70');
-        }
-        else if (leftNorm == "normal"){
-            $("#UserControlDiv").addClass("pr-25");
-            $("#UserDropDown").addClass('right-25');
-            $("#UserControlDiv").removeClass("pr-70");
-            $("#UserDropDown").removeClass('right-70');
-        }
-    }
     $("#SettingSearchBar").on("input",function(e){
         let search = e.target.value;
         let regex = new RegExp("^"+search+".*","i")

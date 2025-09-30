@@ -1,6 +1,44 @@
 <div id="MainWindowSettings" class="flex flex-col lg:flex-row lg:w-[1750px] gap-10">
     {{-- LEFT SIDE --}}
     <div class="relative w-[90%] md:w-[80%] lg:w-[70%]">
+        <div class="flex">
+            <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
+                <div id="OrganizationSelector" class="w-full flex items-center lg:flex-row md:flex-row flex-col">
+                    <div class="flex w-full">
+                        <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Component Name</label>
+                        <div class="selectWrapperLG w-full">
+                            <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                                @foreach ($Components as $Component)
+                                    @if (isset($ComponentInfo))
+                                        @if($Component->component_id == $ComponentInfo->component_id)
+                                            <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                        @else
+                                            <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                        @endif
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex w-full">
+                        <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Applications</label>
+                        <div class="selectWrapperLG w-full">
+                            <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                                @foreach($Applications as $application)
+                                    @if (isset($ApplicationInfo))
+                                        @if ($application->application_id == $ApplicationInfo->application_id)
+                                            <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                        @else
+                                            <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                        @endif
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     {{-- info selection --}}
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
@@ -11,7 +49,7 @@
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">Device Type Information</label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Api Access Information</label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -41,7 +79,7 @@
                 </tr>
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
-                    {!! $DeviceTypes !!}
+                    {!! $DisplayTableInfo !!}
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -65,9 +103,11 @@
                         </svg>
                     </div>
                 </button>
-                <button id="Add" wire:click="$js.CloseOpenAdd">
-                    <div id="AddFrame" class="bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl hover:bg-[#368fb3] cursor-pointer">
-                        +
+                <button disabled id="Inspect" wire:click="$js.CloseOpenInspect">
+                    <div id="InspectFrame" class="bg-[#f2f2f2] flex items-center justify-center text-white rounded-full py-4 px-4 text-5xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 30 30" stroke="#FFFFFF" fill="#FFFFFF">
+                            <path d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z"></path>
+                        </svg>
                     </div>
                 </button>
                 <button wire:click="$js.saveToDB" id="save" class="save flex text-[#4fbce7] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center hover:text-[#3c8fb0] cursor-pointer">
@@ -83,34 +123,6 @@
     </div>
     </div>
     {{-- RIGHT SIDE --}}
-    {{-- AddOption --}}
-    <div id="AddMenu" class="hide relative transition-all duration-100">
-        {{-- top of add --}}
-        <button id="Add">
-            <div class="absolute">
-                <div class="absolute left-[-25px] top-17 lg:z-3 md:z-3 bg-[#42bee4] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl">
-                    +
-                </div>
-            </div>
-        </button>
-        <div class="text-white bg-[#00719d] z-2 top-8 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
-            <h1 class="absolute top-14">Add Row</h1>       
-        </div>
-        <div class="absolute text-white lg:right-18 left-85 top-10">
-            <button type="button" wire:click="$js.CloseOpenAdd" class="absolute z-2 hover:bg-[#015c80] p-2 rounded-lg cursor-pointer text-2xl">✕</button>
-        </div>
-        {{-- form --}}  
-        <form>
-            <div id="AddDeviceType" class="pt-24 pb-10 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.req-underline-input id="DeviceTypeName" placeholder="Device Type" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
-            </div>
-            {{-- Confirm Section --}}
-            <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
-                    <button id="AddConfirm" type="submit" wire:click="$js.AddConfirm($event)" class="absolute left-22 top-8 bg-white text-[#74bec9] p-4 rounded-full font-semibold pl-20 pr-20 cursor-pointer hover:bg-neutral-100">CONFIRM</button>
-            </div>
-        </form>
-    </div>
     {{-- Edit Option --}}
     <div id="EditMenu" class="hide relative transition-all duration-100">
         {{-- top of edit --}}
@@ -124,16 +136,46 @@
             </div>
         </button>
         <div class="text-white bg-[#00719d] z-2 top-8 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
-            <h1 class="absolute top-14">Edit Row</h1>       
+            <h1 class="absolute top-14">Edit Token</h1>       
         </div>
         <div class="absolute text-white right-18 top-10">
             <button type="button" wire:click="$js.CloseOpenEdit" class="absolute z-2 hover:bg-[#015c80] p-2 rounded-lg cursor-pointer text-2xl">✕</button>
         </div>
         {{-- form --}}  
         <form>
-            <div id="EditDeviceType" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.req-underline-input id="DeviceTypeName" placeholder="Device Type" type="text"></livewire:components.req-underline-input>
-                    <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
+            <div id="EditToken" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-2 text-white h-[640px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Username:</label>
+                    <b class="text-lg" id="userName"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Application:</label>
+                    <b class="text-lg" id="application"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Role:</label>
+                    <b class="text-lg" id="role"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Current Api Token:</label>
+                    <b class="text-lg wrap-anywhere" id="cApiToken"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>New Api Token:</label>
+                    <b class="text-lg wrap-anywhere" id="nApiToken"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Creation Time:</label>
+                    <b class="text-lg" id="creationTime"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Created By:</label>
+                    <b class="text-lg" id="createdBy"></b>
+                </div>
+                <div class="mt-6 pl-2 text-lg flex flex-col">
+                    <label>Description:</label>
+                    <b class="text-lg wrap-anywhere" id="description"></b>
+                </div>
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-140 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -143,13 +185,13 @@
     </div>
     <livewire:modals.confirm-delete-modal key="{{ Str::random() }}"></livewire:modals.confirm-delete-modal>
     <livewire:alert.notification key="{{ Str::random() }}"></livewire:alert.notification>
+    <livewire:modals.display-details-modal apiPage="true" key="{{ Str::random() }}"></livewire:modals.display-details-modal>
 </div>
         @script
         <script>
             
             let ItemsSelected = [];
 
-            let AddMenuStatus = false;
             let EditMenuStatus = false;
             let DeleteMenuStatus = false;
             let EditItem = ""; //used to pre-populate an edit
@@ -165,10 +207,18 @@
                     $("#EditFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
                     EditItem = ItemsSelected[0];
                     
-                    //enable
-                    $("#DeleteFrame").removeClass("bg-[#f2f2f2]");
-                    $("#Delete").prop("disabled",false);
-                    $("#DeleteFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+                    
+                    if (ValidToken(ItemsSelected)){
+                        //enable
+                        $("#DeleteFrame").removeClass("bg-[#f2f2f2]");
+                        $("#Delete").prop("disabled",false);
+                        $("#DeleteFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+                        
+                        //enable
+                        $("#InspectFrame").removeClass("bg-[#f2f2f2]");
+                        $("#Inspect").prop("disabled",false);
+                        $("#InspectFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+                    }
                 }
                 else if (ItemsSelected.length > 1){
                     //disable
@@ -178,11 +228,17 @@
                     if (EditMenuStatus == false){
                         EditItem = "";
                     }
+                    //disable
+                    $("#InspectFrame").addClass("bg-[#f2f2f2]");
+                    $("#Inspect").prop("disabled",true);
+                    $("#InspectFrame").removeClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
 
-                    //enable
-                    $("#DeleteFrame").removeClass("bg-[#f2f2f2]");
-                    $("#Delete").prop("disabled",false);
-                    $("#DeleteFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+                    if (ValidToken(ItemsSelected)){
+                        //enable
+                        $("#DeleteFrame").removeClass("bg-[#f2f2f2]");
+                        $("#Delete").prop("disabled",false);
+                        $("#DeleteFrame").addClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+                    }
                 }
                 else{
                     //full disable
@@ -196,16 +252,33 @@
                     $("#DeleteFrame").addClass("bg-[#f2f2f2]");
                     $("#Delete").prop("disabled",true);
                     $("#DeleteFrame").removeClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+
+                    $("#InspectFrame").addClass("bg-[#f2f2f2]");
+                    $("#Inspect").prop("disabled",true);
+                    $("#InspectFrame").removeClass("bg-[#42bee4] hover:bg-[#368fb3] cursor-pointer");
+                }
+            }
+            function ValidToken(array){
+                try{
+                    let isValid = true;
+                    $.each(array,function(k,v){
+                        if ($("#"+v).children()[6].textContent === ""){
+                            isValid = false;
+                        }
+                    });
+                    return isValid;
+                }
+                catch(e){
+                    console.log(e);
                 }
             }
             //select box stuff 
-            $js('DeviceTypeChecked',function(e,id){
+            $js('ItemChecked',function(e,id){
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
                         $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
                         closeEditMenu();
-                        closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
@@ -213,7 +286,6 @@
                         $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
-                        closeAddMenu();
                         EnableDisableEditDelete();
                     }
                 }
@@ -233,7 +305,6 @@
                         $(CheckBoxes[i].parentNode.parentNode).addClass("bg-[#f8c200]");
                     }
                     closeEditMenu();
-                    closeAddMenu();
                     EnableDisableEditDelete();
                 }
                 else{
@@ -247,80 +318,24 @@
                         $(CheckBoxes[i].parentNode.parentNode).removeClass("bg-[#f8c200]");
                     }
                     closeEditMenu();
-                    closeAddMenu();
                     EnableDisableEditDelete();
                 }
             });
-
-            //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(IDName, Mode){
-                let result = "";
-                let NameDupeCount = 0;
-                $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[3].textContent;
-                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
-                        NameDupeCount+=1
-                    }
-                });
-                if (Mode == "add"){
-                    if (NameDupeCount >= 1){
-                        return "Device Type Name must be unique";
-                    }
-                }
-                else if (Mode == "edit"){
-                    if (NameDupeCount > 1){
-                        return "Device Type Name must be unique";
-                    }
-                }
-                return "";
-            }
-            //used for adding items
-            $js("AddConfirm",function(e){
-                if ($("#AddDeviceType #DeviceTypeName").val() == ""){
-                    return;
-                }
-                e.preventDefault();
-                let FormVals = PopulateArrayWithVals("AddDeviceType");
-                let result = ValidateIfUnique(FormVals[0],"add");
-                if (result != ""){
-                    setAlertText(result);
-                    displayAlert();
-                    return;
-                }
-                //adding checkbox
-                let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[0]);
-                let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.DeviceTypeChecked($event,'"+FormVals[0]+"')\">"
-                tr.appendChild(checkboxTD);
-
-                //adding sequence
-                let SequenceTD = document.createElement("td");
-                SequenceTD.textContent = ($("#InfoTable").children().length + 1)
-                tr.appendChild(SequenceTD);
-                    
-                //adding sensor type id placeholder
-                let DeviceTypeID = document.createElement("td");
-                DeviceTypeID.textContent = "Will generate automatically";
-                tr.appendChild(DeviceTypeID);
-
-                //adding regular values
-                FormVals.forEach(function(value,index){
-                    let td = document.createElement("td");
-                    td.textContent = value.toString().trim();
-                    tr.appendChild(td)
-                })
-                ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
-                console.log(ActionsDone);
-                $("#InfoTable").append(tr);
-                setAlertText("Successfully added Sensor Type");
-                displayAlert();
-                closeAddMenu()
-            });
+            $js("ChangeComponent",async function(ev,Component){
+                await $wire.call("setComponent",Component)
+                await $wire.call("LoadRoles");
+                await refresh();
+                EnableDisableEditDelete();
+            })
+            $js("ChangeApplication",async function(ev,Application){
+                await $wire.call("SetApplication",Application)
+                await $wire.call("LoadRoles");
+                await refresh();
+                EnableDisableEditDelete();
+            })
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #DeviceTypeName`).val());
-                FormVals.push($(`#${EditAdd} #description`).val());
+                FormVals.push($(`#${EditAdd} #nApiToken`).text());
                 return FormVals;
             }
             function SpaceToUnderScore(input){
@@ -328,41 +343,26 @@
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditDeviceType #DeviceTypeName").val() == ""){
-                    return;
-                }
                 e.preventDefault();
-                let FormVals = PopulateArrayWithVals("EditDeviceType");
+                let FormVals = PopulateArrayWithVals("EditToken");
                 let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
                 $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
                     
-                    //we exclude the checkbox, sequence num, Sensor Type ID
-                    if (index >=3){
-                        $(this).text(FormVals[index-3]);
+                    //we exclude the checkbox, sequence num, etc
+                    if (index ==6){
+                        $(this).text(FormVals[0]);
                     }
                 });
-                let Result = ValidateIfUnique(FormVals[0],"edit");
-                if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
-                    $("#"+SpaceToUnderScore(EditItem)).remove();
-                    setAlertText(Result);
-                    displayAlert();
-                }
-                else{
                     ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
                     console.log(ActionsDone);
-                    $("#"+SpaceToUnderScore(EditItem)).attr("id",SpaceToUnderScore(FormVals[0])); //updates the id
-                    EditItem = FormVals[0]; //update EditItem
-                    $("#"+SpaceToUnderScore(EditItem)).children().first().first().html("<input type='checkbox' wire:click=\"$js.DeviceTypeChecked($event,'"+FormVals[0]+"')\">");
-                    $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox used to keep the updated checkbox clicked
                     setTimeout(function(){
                         $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated Sensor Type");
+                    setAlertText("Successfully generated API Token");
                     displayAlert();
                     closeEditMenu();
-                }
+                
             });
             function closeEditMenu(){
                 EditMenuStatus = false;
@@ -371,30 +371,39 @@
                     $("#EditMenu").addClass("hide");
                 },110);       
             }
-            function closeAddMenu(){
-                AddMenuStatus = false;
-                $("#AddMenu").addClass("opacity-0");
-                setTimeout(function(){
-                    $("#AddMenu").addClass("hide");
-                },110);
+            function OpenDetailsModal(){
+                $("#DisplayMessageFrame").removeClass("opacity-0 ease-in duration-200");
+                $("#DisplayMessageFrame").addClass("opacity-100 ease-out duration-300");
+                $("#DisplayMessageMain").removeClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
+                $("#DisplayMessageMain").addClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
             }
             //used to open and close the add menu
-            $js("CloseOpenAdd",function(){
+            $js("CloseOpenInspect",async function(){
                 if (EditMenuStatus == true || DeleteMenuStatus == true){
                     return;
                 }
-                if (AddMenuStatus == false){
-                    AddMenuStatus = true;
-                    $("#AddMenu").removeClass("hide");
-                    $("#AddMenu").removeClass("opacity-0");
+                //fine to use edit item since only one api key can be inspected at a time
+                let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
+                let Decrypted = await $wire.call("DecryptMessage",Obj["API TOKEN"], Obj["USERNAME"])
+                if (Decrypted !== false){
+                    let Info = Decrypted.split(",");
+                    $("#API_Username").text(Obj["USERNAME"]);
+                    $("#API_UserId").text(Info[0]);
+                    $("#API_Application_id").text(Info[1]);
+                    $("#API_Role_id").text(Info[2]);
+                    $("#API_DateCreated").text(Info[3]);
+                    $("#DisplayMessage").removeClass("hide")
+                    setTimeout(function(e){OpenDetailsModal()},50)
+                    $("#"+EditItem).children().first().children().click();
                 }
                 else{
-                    closeAddMenu();     
+                    setAlertText("Please save before inspecting token");
+                    displayAlert();
                 }
             });
             //used to open and close edit menu
             $js("CloseOpenEdit",function(){
-                if (AddMenuStatus == true || DeleteMenuStatus == true){
+                if (DeleteMenuStatus == true){
                     return;
                 }
                 if (EditMenuStatus == false){
@@ -402,21 +411,28 @@
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
-                    $("#EditDeviceType #DeviceTypeName").val(Obj["DEVICE TYPE"]);
-                    $("#EditDeviceType #description").val(Obj["DESCRIPTION"]);
+                    $("#EditToken #userName").text(Obj["USERNAME"]);
+                    $("#EditToken #application").text(Obj["APPLICATION"]);
+                    $("#EditToken #role").text(Obj["ROLE"]);
+                    $("#EditToken #cApiToken").text(Obj["API TOKEN"]);
+                    $("#EditToken #nApiToken").text("Will generate automatically");
+                    $("#EditToken #creationTime").text(Obj["CREATION TIME"]);
+                    $("#EditToken #expiryDate").text(Obj["EXPIRY DATE"]);
+                    $("#EditToken #createdBy").text(Obj["CREATED BY"]);
+                    $("#EditToken #description").text(Obj["DESCRIPTION"]);
                 }
                 else{
                     closeEditMenu();
                 }
             });
             $js("OpenDeleteModal",async function(){
-                if (EditMenuStatus == true || AddMenuStatus == true){
+                if (EditMenuStatus == true){
                     return;
                 }
-                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[3].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[6].innerHTML;
                 if (ItemsSelected.length == 1){
-                    $("#DeleteMessage").text("Are you sure you want to delete,")
-                    $("#ItemToDelete").text(name);
+                    $("#DeleteMessage").text("Are you sure you want to delete the token starting with,")
+                    $("#ItemToDelete").text(name.substr(0,8));
                     $("#DeleteModal").removeClass("hide");
                     OpenDeleteModal();
                 }
@@ -458,7 +474,7 @@
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
-                await $wire.call("LoadDeviceTypeInfo");
+                await $wire.call("LoadInfo");
                 //re-gen sequence nums
                 $("#InfoTable").children().each(function(index){
                     $(this).children()[1].textContent = index+1;
@@ -472,18 +488,19 @@
                     });
                     ItemsToDelete.forEach(function(item){
                         $("#"+SpaceToUnderScore(item)).children().first().children().click();
-                        $("#"+SpaceToUnderScore(item)).remove();
+                        $("#"+SpaceToUnderScore(item)).children()[6].textContent = "";
                     })
+                    //NOTE this is not an actual delete but im differentiating it from the update.
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
                     console.log(ActionsDone);
                     CloseDeleteModal();
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Sensor Type(s)");
+                    setAlertText("Successfully deleted Api Token(s)");
                     displayAlert();
                 });
-                closeAddMenu();
+
                 closeEditMenu();
                 $("table thead th").off("click").on("click", function() {
                     //header the table belongs to
@@ -546,20 +563,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update DeviceType \"" + Obj["DEVICE TYPE"] + "\"<br>";
+                                ErrorMsg += "Failed to update Api Access Token \"" + Obj["TOKEN"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert DeviceType \"" + Obj["DEVICE TYPE"] + "\"<br>";
+                                ErrorMsg += "Failed to insert Api Access Token \"" + Obj["TOKEN"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete DeviceType(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete Api Access Token(s) " + ItemInfo + "<br>";
                             }
                         }
                     }
@@ -580,6 +597,12 @@
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
+                //this could be improved by simply lowering the amount of wire.calls to reduce network traffic. leaving like this for now.
+                await $wire.call("LoadSoftwareComponents");
+                await $wire.call("setDefaultComponent");
+                await $wire.call("LoadApplications");
+                await $wire.call("setDefaultApplication");
+                await $wire.call("LoadRoles");
                 await refresh();
                 EnableDisableEditDelete();
             })
@@ -656,7 +679,7 @@
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("DeviceTypeInfo.csv",TableObjects);
+                    let result = exportToCsv("ApiAccessInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){

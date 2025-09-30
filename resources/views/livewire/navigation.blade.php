@@ -1,4 +1,4 @@
-<nav id="SideNav" class="relative w-16 transition-all duration-300 ease-in-out">
+<nav id="SideNav" class="fixed top-0 left-0 w-16 h-screen transition-all duration-300 ease-in-out z-5">
         @vite(['resources/css/navigation.css','resources/js/ComponentJS/navigation.js'])
         {{-- left side navbar --}}
         <div id="SideNavFrame" class="w-16 bg-gradient-to-b from-[#00709e] to-[#003a50] transition-all duration-300 ease-in-out text-white lg:min-h-[955px] h-full">
@@ -83,6 +83,7 @@
                 <a href="/settings/permissionInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Permissions</h3></button></a>
                 <a href="/settings/roleInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Roles</h3></button></a>
                 <a href="/settings/userInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Users</h3></button></a>
+                <a href="/settings/apiAccessToken"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Api Access Token</h3></button></a>
                 <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">ASSOCIATIONS</h2>
                 <a href="/settings/applicationSensorTypeAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Sensor Type</h3></button></a>
                 <a href="/settings/applicationDeviceAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Device</h3></button></a>

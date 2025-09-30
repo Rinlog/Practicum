@@ -1,6 +1,6 @@
 <?php session_start(); ?>
 <div>
-    <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="NoPadding">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +10,7 @@
                 <script>window.location = "/home";</script>
             @endif
         </head>
-        <body class="bg-[#FDFDFC] text-[#1b1b18] flex items-center items-center min-h-screen flex-col">
+        <body class="NoPadding bg-[#FDFDFC] text-[#1b1b18] flex items-center items-center min-h-screen flex-col">
             {{--
             commenting for later reference
             @if ($open == "show")

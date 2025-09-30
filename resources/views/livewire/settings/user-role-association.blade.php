@@ -6,7 +6,7 @@
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
             <div id="OrganizationSelector" class="w-full flex items-center lg:flex-row md:flex-row flex-col">
                 <div class="flex w-full">
-                    <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Software Component Name</label>
+                    <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Component Name</label>
                     <div class="selectWrapperLG w-full">
                         <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
                             @foreach ($Components as $Component)
