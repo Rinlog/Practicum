@@ -124,11 +124,13 @@ class ApiAccessToken extends Component
     }
     public function LoadRoles(){
         try{
-            $this->Roles = Cache::get("role", collect())->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
-            $this->FilterUsageRoles = Cache::get("role", collect())
+            $RawRole = Cache::get("role", collect());
+            $this->Roles = $RawRole->where("component_id", $this->ComponentInfo->component_id)->values()->toArray();
+            $this->FilterUsageRoles = $RawRole
             ->where("component_id", $this->ComponentInfo->component_id)
             ->pluck("role_id")
-            ->all();
+            ->values()
+            ->toArray();
         }
         catch(Exception $e){
 

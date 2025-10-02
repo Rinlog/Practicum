@@ -71,6 +71,8 @@ class DeviceDeployment extends Component
         }
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
+        $this->LoadDevices();
+        $this->LoadLocations();
     }
     public function LoadDevices(){
         try{

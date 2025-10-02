@@ -86,6 +86,7 @@
                 <a href="/settings/apiAccessToken"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Api Access Token</h3></button></a>
                 <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">ASSOCIATIONS</h2>
                 <a href="/settings/applicationSensorTypeAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Sensor Type</h3></button></a>
+                <a href="/settings/applicationDeviceTypeAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Device Type</h3></button></a>
                 <a href="/settings/applicationDeviceAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Device</h3></button></a>
                 <a href="/settings/applicationLocationAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Location</h3></button></a>
                 <a href="/settings/deviceSensorAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Device-Sensor</h3></button></a>

@@ -58,6 +58,11 @@
             </thead>
             <tbody id="InfoTable" class="bg-white rounded-lg">
                     {!! $DisplayTableInfo !!}
+                    <td id="LoadingIcon" class="relative align-center h-[220px] hide" colspan="999" wire:loading.class.remove="hide">
+                        <span class="absolute top-[35%] left-[41%]" wire:loading>
+                            <img src="/images/Loading_2.gif">
+                        </span>
+                    </td>
             </tbody>
         </table>
         {{-- bottom section --}}
@@ -274,9 +279,11 @@
                 let result = "";
                 let NameDupeCount = 0;
                 $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[4].textContent;
-                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
-                        NameDupeCount+=1
+                    if ($(this).children()[4] !== undefined){
+                        let name = $(this).children()[4].textContent;
+                        if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
+                            NameDupeCount+=1
+                        }
                     }
                 });
                 if (Mode == "add"){
@@ -463,6 +470,7 @@
             }
             $js("refresh",refresh)
             async function refresh(){
+                ShowLoading()
                 //reset actions done
                 ActionsDone = [];
                 //uncheck everything
@@ -480,9 +488,14 @@
                 //now that everything is unchecked we re-load the table and org
                 await $wire.call("LoadInfo")
                 //re-gen sequence nums
-                $("#InfoTable").children().each(function(index){
-                    $(this).children()[1].textContent = index+1;
-                })
+                try{
+                    $("#InfoTable").children().each(function(index){
+                        $(this).children()[1].textContent = index+1;
+                    })
+                }
+                catch(e){
+
+                }
                 PrepFileForExport();
                 //re-set confirm delete listener
                 $("#ConfirmDelete").click(function(e){
@@ -552,14 +565,25 @@
                     });
                  });
             }
+            function ShowLoading(){
+                let LoadingTD = $("#InfoTable #LoadingIcon");
+                LoadingTD.html(
+                    "<span class=\"absolute top-[35%] left-[41%]\" wire:loading colspan=\"999\"><img src=\"/images/Loading_2.gif\"></span>"
+                )
+                $("#InfoTable").text(""); //clearing current Info
+                $("#InfoTable").append(LoadingTD);
+            }
             $js("ChangeComponent",async function(ev,Component){
+                ShowLoading()
                 await $wire.call("setComponent",Component);
+                ShowLoading()
                 await $wire.call("LoadSoftwareComponents");
                 ComponentID = $wire.ComponentInfo["component_id"];
                 await refresh();
                 EnableDisableEditDelete();
             })
             $js("saveToDB",async function(ev){
+                ShowLoading()
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
                 let Errors = false;
                 let ErrorMsg = "";

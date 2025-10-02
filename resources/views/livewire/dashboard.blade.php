@@ -1,4 +1,3 @@
-<?php session_start()?>
     <div class="bg-[#f2f2f2] flex flex-row">
         @if (empty($_SESSION["UserName"]))
             <script>window.location = "/";</script>
@@ -39,6 +38,10 @@
                 <div class="lg:p-10 md:p-10 pb-10 pr-10 pl-2 pt-2 bg-white shadow-md rounded-rlb-lg w-full">
                     @if ($option == "allSensorReadings")
                         <livewire:dashboard.all-sensor-readings></livewire:dashboard.all-sensor-readings>
+                    @elseif ($option == "dailySensorReadings")
+                        <livewire:dashboard.average-daily-readings></livewire:dashboard.average-daily-readings>
+                    @elseif ($option == "hourlySensorReadings")
+                        <livewire:dashboard.hourly-readings></livewire:dashboard.hourly-readings>
                     @endif
                 </div>
             </div>

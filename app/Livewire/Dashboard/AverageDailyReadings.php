@@ -7,14 +7,12 @@ use Illuminate\Support\Facades\Log;
 use \Exception;
 use Illuminate\Support\Facades\Cache;
 use \PDO;
-class AllSensorReadings extends Component
+class AverageDailyReadings extends Component
 {
     private $conn;
     public $StartDate = '';
     public $EndDate = '';
-    public $StartTime = '00:00';
-    public $EndTime = '23:59';
-    public $TimeFrame = "TODAY";
+    public $TimeFrame = "LAST 30 DAYS";
     public $devices = [];
     public $deviceTypes = [];
     public $sensorRaw;
@@ -29,7 +27,6 @@ class AllSensorReadings extends Component
     public $deviceSensorAssoc = [];
     public $headers = [
         "DATE",
-        "TIME",
     ];
     public $groupedJsonReadings = [];
     public function __construct(){
@@ -45,7 +42,7 @@ class AllSensorReadings extends Component
         );
     }
     public function LoadOptions(){
-        //getting locations from application + device types
+        //getting locations from application
         $this->applications = Cache::get("application",collect())->values()->toArray(); //loading applications
         $this->applicationLocationAssoc = Cache::get("application_location_association",collect())->values()->toArray();
         $this->applicationDeviceTypeAssoc = Cache::get("application_device_type_association",collect())->values()->toArray();
@@ -72,28 +69,24 @@ class AllSensorReadings extends Component
         $this->deviceSensorAssoc = Cache::get("device_sensor_association",collect())->values()->toArray();
         $this->sensorRaw = Cache::get("sensor",collect());
         $this->sensors = $this->sensorRaw->values()->toArray();
-        array_unshift($this->sensors,json_decode('{"sensor_id":"all","sensor_name":"All Sensors"}'));
     }
     public function LoadInfo($Input){
         $device = $Input[0];
         $sensor = $Input[1];
         $this->headers = [
             "DATE",
-            "TIME",
         ];
         $sql = "SELECT 
                 sensor_id,
-                sensor_reading_data,
-                split_part(sensor_reading_time::text,' ', 1) as date,
-                split_part(sensor_reading_time::text,' ', 2) as time
-            from sensor_reading
+                daily_readings_counter,
+                daily_readings_data,
+                daily_readings_date as date
+            from daily_sensor_readings
             WHERE 
             device_eui = :eui
             ".($sensor=="all"?"":"AND sensor_id = :sid\n").
-            "AND sensor_reading_time >= :start
-            AND sensor_reading_time <= :end
-            AND split_part(sensor_reading_time::text,' ',2) >= :stime
-            AND split_part(sensor_reading_time::text,' ',2) <= :etime";
+            "AND daily_readings_date >= :start
+            AND daily_readings_date <= :end";
 
         $stmnt = $this->conn->prepare($sql);
         if ($sensor == "all"){
@@ -101,8 +94,6 @@ class AllSensorReadings extends Component
                 ":eui" => $device,
                 ":start" => $this->StartDate,
                 ":end" => $this->EndDate,
-                ":stime" => $this->StartTime,
-                ":etime" => $this->EndTime
             ]);
         }
         else{
@@ -111,35 +102,37 @@ class AllSensorReadings extends Component
                 ":sid" => $sensor,
                 ":start" => $this->StartDate,
                 ":end" => $this->EndDate,
-                ":stime" => $this->StartTime,
-                ":etime" => $this->EndTime
             ]);
         }
         $this->tableInfo = $stmnt->fetchAll(PDO::FETCH_OBJ);
         $this->groupedJsonReadings = [];
         $JsonData = [];
         foreach ($this->tableInfo as $SensorInfo){
-            $ReadingInfo = json_decode($SensorInfo->sensor_reading_data);
+            $ReadingInfo = json_decode($SensorInfo->daily_readings_data);
             array_push($JsonData,$ReadingInfo); //storing json data for later use
-            if (array_key_exists($SensorInfo->date . $SensorInfo->time,$this->groupedJsonReadings)){
-                array_push($this->groupedJsonReadings[$SensorInfo->date . $SensorInfo->time][1],$ReadingInfo);
+            if (array_key_exists($SensorInfo->date,$this->groupedJsonReadings)){
+                array_push($this->groupedJsonReadings[$SensorInfo->date][1],$ReadingInfo);
             }
             else{
-                $this->groupedJsonReadings += [$SensorInfo->date . $SensorInfo->time => [[$SensorInfo->date,$SensorInfo->time],[$ReadingInfo]]];
+                $this->groupedJsonReadings += [$SensorInfo->date=> [[$SensorInfo->date,$SensorInfo->daily_readings_counter],[$ReadingInfo]]];
             }
         }
         foreach ($JsonData as $Reading){
             $Keys = array_keys((array) $Reading);
             foreach ($Keys as $Key){
-                if (!(in_array(strtoupper($Key),$this->headers))){
-                    array_push($this->headers,strtoupper($Key));
+                
+                if (!(in_array(strtoupper($Key . " Average"),$this->headers))){
+                    array_push($this->headers,strtoupper($Key . " Average"));
+                    array_push($this->headers,strtoupper("Maximum " . $Key . " Time"));
+                    array_push($this->headers,strtoupper("Maximum " . $Key . " Value"));
+                    array_push($this->headers,strtoupper("Minimum " . $Key . " Time"));
+                    array_push($this->headers,strtoupper("Minimum " . $Key . " Value"));
                 }
             }
         }
-
     }
     public function render()
     {
-        return view('livewire.dashboard.all-sensor-readings');
+        return view('livewire..dashboard.average-daily-readings');
     }
 }

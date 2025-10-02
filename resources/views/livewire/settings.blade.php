@@ -56,6 +56,8 @@
                 <livewire:settings.device-type-info></livewire:settings.device-type-info>
             @elseif ($settingToDisplay == "apiAccessToken")
                 <livewire:settings.api-access-token></livewire:settings.api-access-token>
+            @elseif ($settingToDisplay == "applicationDeviceTypeAssociation")
+                <livewire:settings.application-device-type-association></livewire:settings.application-device-type-association>
             @endif
         </div>
     </div>

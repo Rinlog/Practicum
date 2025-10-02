@@ -12,17 +12,28 @@ use \PDO;
 class Dashboard extends Component
 {
     public $option = "allSensorReadings";
+    public $SessionOption;
     public function render()
     {
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        $this->option = session()->get("SensorReadingPage","allSensorReadings");
         return view('livewire.dashboard');
     }
+    public function SaveSession(){
+        session()->put("SensorReadingPage",$this->option);
+    }
     public function SwitchToHourlyReadings(){
-        $this->option = "hourlySensorReadings";
+        $this->option ="hourlySensorReadings";
+        $this->SaveSession();
     }
     public function SwitchToDailyReadings(){
-        $this->option = "dailySensorReadings";
+        $this->option ="dailySensorReadings";
+        $this->SaveSession();
     }
     public function SwitchToAllReadings(){
-        $this->option = "allSensorReadings";
+        $this->option ="allSensorReadings";
+        $this->SaveSession();
     }
 }

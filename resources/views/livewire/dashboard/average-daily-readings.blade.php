@@ -11,31 +11,6 @@
                 <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
             </svg>
         </button>
-        {{-- TimePicker --}}
-        <div id="FilterContainer" class="relative mt-6">                
-                    <button id="Filter" class="flex justify-between bg-[#0071a0] p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[240px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 6V12" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M16.24 16.24L12 12" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <label id="TimeRange" class="cursor-pointer">{{$StartTime}} - {{ $EndTime }}</label>
-                        <svg class="-mr-1 size-6 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon" class="min-h-[26px] min-w-[26px]">
-                            <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                    <div id="FilterDropDown" isOpen="false" class="absolute right-0 z-3 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                        <div class="p-4 flex flex-col items-center" role="none">
-                            <livewire:components.req-underline-input id="startTime" text="Start Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
-                            <livewire:components.req-underline-input id="endTime" text="End Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
-                        </div>
-                        <span class="flex flex-row justify-center items-center p-4">
-                            <button wire:click="$js.Filter" class="bg-white border-2 border-[#46c0e5] p-3 rounded-full text-[#46c0e5] font-semibold hover:text-[#3c8fb0] hover:border-[#3c8fb0] cursor-pointer w-full">
-                                CONFIRM
-                            </button>
-                        </span>
-                    </div>
-        </div>
         {{-- Application --}}
         <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
             <label class="pl-2 text-lg">Application:</label>
@@ -68,9 +43,9 @@
         <div class="DeviceContainer"> 
             <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                 <label class="pl-2 text-lg">Device Types:</label>
-                <select id="deviceTypes" class="w-full pl-2" wire:model="deviceTypeName">
+                <select id="deviceTypes" class="w-full pl-2" wire:model="deviceTypeName" wire:click="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType()">
                     @foreach ($deviceTypes as $type)
-                        <option wire:click="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType" id={{ $type->device_type_id }}>{{ $type->device_type }}</option>
+                        <option id={{ $type->device_type_id }}>{{ $type->device_type }}</option>
                     @endforeach
                 </select>
             </div> 
@@ -127,12 +102,21 @@
                             <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $Row[0][0] }}</td>
-                            <td>{{ $Row[0][1] }}</td>
                             @foreach($Row[1] as $Readings)
                                 @foreach ($Readings as $key=>$Reading)
-                                    <td>
-                                        {{ $Reading }}
-                                    </td>
+                                    @foreach ($Reading as $DeepKey=>$DeepReading)
+                                        @if (strtolower($DeepKey) == "total")
+                                            <td>
+                                                {{ round($DeepReading/$Row[0][1],2) }}
+                                            </td>
+                                        @else
+                                            @foreach ($DeepReading as $MinMaxKey=>$MinMaxVal)
+                                            <td>
+                                                {{ $MinMaxVal }}
+                                            </td>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
                                 @endforeach
                             @endforeach
                             </tr>
@@ -154,7 +138,7 @@
             let TableObjects = [];
             let Offset = new Date().getTimezoneOffset();
             let HourOffset = Offset/60;
-            let setStartDate = JSON.stringify(new Date(new Date(moment().subtract(0,"day")).setHours(0 + (-1 * HourOffset),0,0)));
+            let setStartDate = JSON.stringify(new Date(new Date(moment().subtract(29,"day")).setHours(0 + (-1 * HourOffset),0,0)));
             let setEndDate = JSON.stringify(new Date(new Date(moment().subtract(0,"day")).setHours(23 + (-1 * HourOffset),59,59)));
             let TimeFrame = "TODAY";
             let OGTable = [];
@@ -163,10 +147,10 @@
             let locations;
             let sublocations;
             let appLocationsAssoc;
+            let appDeviceTypeAssoc;
             let deviceDeploymentInfo;
             let devices;
             let deviceTypes;
-            let appDeviceTypeAssoc;
             let deviceSensorAssoc;
             let sensors;
             let groupedJsonReadings;
@@ -174,7 +158,7 @@
                 minDate:moment().subtract(12,"months"),
                 maxDate:new Date(),
                 endDate: moment().subtract(0,"day"),
-                startDate: moment().subtract(0,"days"),
+                startDate: moment().subtract(29,"days"),
                 ranges:{
                     "Today":[moment().subtract(0,"day"),moment().subtract(0,"day")],
                     "Yesterday": [moment().subtract(1,"day"),moment().subtract(1,"day")],
@@ -238,10 +222,11 @@
                 FormVals.push($(`#${Log} #endTime`).val());
                 return FormVals;
             }
+            //this refresh function is not being used, it's just here in case it is needed at some point
             $js("refresh",async function(){
                 ShowLoading();
-                TimeFrame = "TODAY";
-                picker.startDate = moment().subtract(0,"days");
+                TimeFrame = "LAST 30 DAYS";
+                picker.startDate = moment().subtract(29,"days");
                 picker.endDate = moment().subtract(0,"day");
                 
                 let Offset = new Date().getTimezoneOffset();
@@ -252,8 +237,6 @@
                 
                 setStartDate = JSON.stringify(new Date(NewStartDate));
                 setEndDate = JSON.stringify(new Date(NewEndDate));
-                await $wire.set("StartTime", '00:00',false);
-                await $wire.set("EndTime", '23:59',false);
                 await SetTimeFrame();
             });
             function UpdateShowingCount(){
@@ -647,6 +630,7 @@
                             return Location.includes(item.location_id)
                         }
                     });
+                    
                     $("#subLocations").html("");
                     let InfoString = "";
                     $(SubLocationsDetailed).each(function(index){
@@ -802,14 +786,39 @@
                 $.each(groupedJsonReadings,function(key,value){
                     $.each(value[1],function(k,v){
                         $.each(v,function(ReadingName,ReadingValue){
-                            if (Charts[ReadingName] !== undefined){
-                                Charts[ReadingName].push(ReadingValue);
-                            }
-                            else{
-                                if (!(isNaN(ReadingValue))){
-                                    Charts[ReadingName] = [ReadingValue];
+                            $.each(ReadingValue,function(DeepReadingKey,DeepReadingVal){
+                                //first we are checking for the average based on the total field
+                                if (Charts[ReadingName + " Average"] !== undefined && DeepReadingKey.toLowerCase() == "total"){
+                                    Charts[ReadingName + " Average"].push(Math.round(DeepReadingVal/value[0][1] * 100)/100);
                                 }
-                            }
+                                else if (Charts[ReadingName + " Average"] === undefined){
+                                    if (!(isNaN(DeepReadingVal))){
+                                        Charts[ReadingName + " Average"] = [Math.round(DeepReadingVal/value[0][1] * 100)/100];
+                                    }
+                                }
+                                //next we check all the maximum and minimum vals and add them to charts
+                                if (DeepReadingKey.toLowerCase() !== "total"){
+                                    $.each(DeepReadingVal,function(MinMaxKey,MinMaxVal){
+                                        if (Charts["Maximum value"] !== undefined && !(isNaN(MinMaxVal)) && DeepReadingKey.toLowerCase() !== "minimum"){
+                                            Charts["Maximum value"].push(MinMaxVal);
+                                        }   
+                                        else if (Charts["Minimum value"] !== undefined && !(isNaN(MinMaxVal)) && DeepReadingKey.toLowerCase() !== "maximum"){
+                                            Charts["Minimum value"].push(MinMaxVal);
+                                        }
+                                        else{
+                                            if (!(isNaN(MinMaxVal))){
+                                                if (DeepReadingKey.toLowerCase() == "minimum"){
+                                                    Charts["Minimum value"] = [MinMaxVal];
+                                                }
+                                                else if (DeepReadingKey.toLowerCase() == "maximum"){
+                                                    Charts["Maximum value"] = [MinMaxVal];
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            })
+                            
                         })
                     });
                 })

@@ -4,48 +4,30 @@
     {{-- info selection --}}
     <div class="flex">
         <div class="relative inline-block text-left w-full pr-4 lg:pr-0 md:pr-0">
-            <div id="OrganizationSelector" class="w-full flex items-center lg:flex-row md:flex-row flex-col">
-                <div class="flex w-full">
-                    <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Component Name</label>
-                    <div class="selectWrapperLG w-full">
-                        <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                            @foreach ($Components as $Component)
-                                @if (isset($ComponentInfo))
-                                    @if($Component->component_id == $ComponentInfo->component_id)
-                                        <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
-                                    @else
-                                        <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
-                                    @endif
+            <div id="OrganizationSelector" class="w-full flex items-center">
+                <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Application</label>
+                <div class="selectWrapperLG w-full">
+                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        @foreach($Applications as $application)
+                            @if (isset($ApplicationInfo))
+                                @if ($application->application_id == $ApplicationInfo->application_id)
+                                    <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                @else
+                                    <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
                                 @endif
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="flex w-full">
-                    <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Applications</label>
-                    <div class="selectWrapperLG w-full">
-                        <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                            @foreach($Applications as $application)
-                                @if (isset($ApplicationInfo))
-                                    @if ($application->application_id == $ApplicationInfo->application_id)
-                                        <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
-                                    @else
-                                        <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
-                                    @endif
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
+                            @endif
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>
     </div>
-    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-screen lg:h-[645px] md:h-[645px]">
+    <div class="lg:p-10 md:p-10 pb-15 pr-10 pl-2 pt-2 bg-white shadow-md mt-8 rounded-lg h-screen md:h-[645px] lg:h-[645px]">
         <span class="flex items-center justify-between mb-4">
             {{-- top half --}}
             {{-- refresh button --}}
             <span class="flex gap-4 items-center">
-                <label class="text-[#1c648c] font-semibold text-3xl">User Role Association </label>
+                <label class="text-[#1c648c] font-semibold text-3xl">Application Device Type Association </label>
                 <button wire:click="$js.refresh" class="text-[#1c648c] text-5xl hover:bg-gray-100 rounded-lg hover:outline-hidden cursor-pointer p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" fill="#00719d" width="36px" height="36px">
                         <path id="Refresh" class="cls-1" d="M22.96,12.07c-.25-2.66-1.52-5.07-3.58-6.78-.04-.03-.08-.06-.12-.09-.44-.27-1.01-.21-1.39.14-.23.21-.36.5-.37.81-.01.31.1.6.31.83.03.03.06.06.09.08,1.06.88,1.87,2.02,2.34,3.32.7,1.93.6,4.02-.27,5.88-.87,1.86-2.42,3.27-4.35,3.96-4,1.44-8.42-.63-9.86-4.62-.44-1.23-.57-2.55-.36-3.84.56-3.47,3.37-6.01,6.7-6.4l-1.18,1.18c-.39.39-.39,1.02,0,1.41.2.2.45.29.71.29s.51-.1.71-.29l2.77-2.77s.01,0,.02,0c.03-.02.04-.05.06-.07l.15-.15s.04-.07.07-.1c0,0,.01-.01.01-.02.29-.39.28-.94-.08-1.29l-3-3c-.39-.39-1.02-.39-1.41,0-.39.39-.39,1.02,0,1.41l1.11,1.11c-3.48.35-6.59,2.49-8.1,5.68-.62,1.31-.94,2.78-.95,4.23,0,2.67,1.03,5.19,2.92,7.08s4.4,2.94,7.07,2.94h0c2.98,0,5.79-1.32,7.69-3.61,1.71-2.06,2.51-4.65,2.27-7.31Z"/>
@@ -141,17 +123,7 @@
         {{-- form --}}  
         <form>
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
-                        <label class="pl-2 text-lg">Organizations:</label>
-                        <select id="organizations" class="w-full pl-2">
-                            @foreach ($Organizations as $org)
-                                <option class="bg-gray-500" id="{{ $org->organization_id }}" wire:click="$js.DisplayUsersBasedOnOrg('{{ $org->organization_id }}')">{{ $org->organization_name }}</option>
-                            @endforeach
-                        </select>
-                    </div> 
-                    <livewire:components.frm-select-box selectMessage="Users:" id="users" key="{{ Str::random() }}"></livewire:components.frm-select-box>
-                    <livewire:components.frm-select-box selectMessage="Roles:" id="roles" key="{{ Str::random() }}" :options="$Roles" optionName="role_name" optionId="role_id"></livewire:components.frm-select-box>
-                    <livewire:components.req-underline-input text="Expiry Date:" id="expiryDate" placeholder="" type="date"></livewire:components.req-underline-input>
+                    <livewire:components.frm-select-box selectMessage="Device Type:" id="DeviceType" key="{{ Str::random() }}" optionName="device_type" optionId="device_type_id" :options="$DeviceTypeInfo"></livewire:components.frm-select-box>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -182,16 +154,12 @@
         <form>
             <div id="EditAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                 <div class="mt-6 pl-2 text-lg flex flex-col">
-                    <label>UserName:</label>
-                    <b class="text-lg" id="userName"></b>
-                </div>
-                <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Application: </label>
+                    <label>Application:</label>
                     <b class="text-lg" id="application"></b>
                 </div>
                 <div class="mt-4 pl-2 text-lg flex flex-col">
-                    <label>Role: </label>
-                    <b class="text-lg" id="role"></b>
+                    <label>device Type: </label>
+                    <b class="text-lg" id="DeviceType"></b>
                 </div>
                 <div class="mt-4 pl-2 text-lg flex flex-col">
                     <label>Creation Time: </label>
@@ -201,7 +169,6 @@
                     <label>Created By: </label>
                     <b class="text-lg" id="createdBy"></b>
                 </div>
-                <livewire:components.req-underline-input text="Expiry Date:" id="expiryDate" placeholder="" type="date"></livewire:components.req-underline-input>
                 <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -224,15 +191,9 @@
             let EditItem = ""; //used to pre-populate an edit
             let headers = $wire.headers;
             let application = "";
-            let component = "";
-            let users = $wire.Users;
             let user = $wire.user;
             let ActionsDone = [];
             let TableObjects = [];
-            let organizations = $wire.Organizations;
-            function CustomSplitterToUnderScore(input){
-                return input.replaceAll("-!-","_");
-            }
             function EnableDisableEditDelete(){
                 console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
@@ -281,14 +242,14 @@
                 if (e.target.type == "checkbox"){
                     if (e.target.checked == true){
                         ItemsSelected.push(id);
-                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(id))).addClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).addClass("bg-[#f8c200]");
                         closeEditMenu();
                         closeAddMenu();
                         EnableDisableEditDelete();
                     }
                     else{
                         let index = ItemsSelected.indexOf(id);
-                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(id))).removeClass("bg-[#f8c200]");
+                        $("#"+SpaceToUnderScore(id)).removeClass("bg-[#f8c200]");
                         ItemsSelected.splice(index,1);
                         closeEditMenu();
                         closeAddMenu();
@@ -331,45 +292,37 @@
             });
 
             //used to make sure the primary key being added is a unique key
-            function ValidateIfUnique(ID, ID2, Mode){
+            function ValidateIfUnique(ID, Mode){
 
                 let result = "";
                 let IDDupeCount = 0;
-                let ID2DupeCount = 0;
                 let IDAsName = $("option[id='"+ID.toString().trim()+"']").val();
-                let ID2AsName = $("option[id='"+ID2.toString().trim()+"']").val();
                 $("#InfoTable").children().each(function(index){
-                    if ($(this).children()[2] !== undefined && $(this).children()[3] !== undefined){
-                        let id = $(this).children()[2].textContent;
+                    if ($(this).children()[3] !== undefined){
+                        let id = $(this).children()[3].textContent;
                         if (id.toString() == IDAsName.toString()){
-                            IDDupeCount+=1
-                        }
-                        let id2 = $(this).children()[3].textContent
-                        if (id2.toString() == ID2AsName.toString()){
-                            ID2DupeCount+=1
-                        }
+                        IDDupeCount+=1
+                    }
                     }
                 });
                 if (Mode == "add"){
-                    if (IDDupeCount >= 1 && ID2DupeCount >= 1){
-                        return "User role associatian already exists";
+                    if (IDDupeCount >= 1){
+                        return "Application device associatian already exists";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (IDDupeCount > 1  && ID2DupeCount > 1){
-                        return "User role associatian already exists";
+                    if (IDDupeCount > 1){
+                        return "Application device associatian already exists";
                     }
                 }
                 return "";
             }
             //used for adding items
             $js("AddConfirm",function(e){
-                if ($("#AddAssoc #expiryDate").val() == ""){
-                    return;
-                }
+                
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("AddAssoc");
-                let result = ValidateIfUnique(FormVals[0], FormVals[1],"add");
+                let result = ValidateIfUnique(FormVals[0],"add");
                 if (result != ""){
                     setAlertText(result);
                     displayAlert();
@@ -378,9 +331,9 @@
 
                 //chk
                 let tr = document.createElement("tr");
-                tr.id=SpaceToUnderScore(FormVals[0]) + "_" + SpaceToUnderScore(FormVals[1]);
+                tr.id=SpaceToUnderScore(FormVals[0]);
                 let checkboxTD = document.createElement("td")
-                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0] + "-!-" + FormVals[1] +"')\">"
+                checkboxTD.innerHTML = "<input type='checkbox' wire:click=\"$js.ItemChecked($event,'"+FormVals[0]+"')\">"
                 tr.appendChild(checkboxTD);
 
                 //sequence
@@ -391,38 +344,22 @@
                 //normal vals
                 FormVals.forEach(function(value,index){
                     if (index == 0){
+                        let td2 = document.createElement("td");
+                        td2.textContent = application;
+                        tr.appendChild(td2);
                         //putting value of option instead of id
                         let td = document.createElement("td");
                         td.textContent = $("option[id='"+value.toString().trim()+"']").val();
                         tr.appendChild(td)
                     }
                     else if (index == 1){
-                        //just role, application, and component
-                        //putting value of option instead of id
-                        let td = document.createElement("td");
-                        td.textContent = $("option[id='"+value.toString().trim()+"']").val();
-                        tr.appendChild(td)
-                        let td3 = document.createElement("td");
-                        td3.textContent = application;
-                        tr.appendChild(td3);
-                        let td2 = document.createElement("td");
-                        td2.textContent = component;
-                        tr.appendChild(td2);
-                    }
-                    else if (index == 2){
-                        //creation time
+                        //just appending current date plus who made Application device assoc
                         let td2 = document.createElement("td");
                         td2.textContent = CurrentDateTimeAsString();
                         tr.appendChild(td2);
-                        //created by
                         let td3 = document.createElement("td");
                         td3.textContent = user["user_username"];
                         tr.appendChild(td3);
-                        let td = document.createElement("td");
-                        td.textContent = value.toString().trim();
-                        tr.appendChild(td)
-                    }
-                    else{
                         let td = document.createElement("td");
                         td.textContent = value.toString().trim();
                         tr.appendChild(td)
@@ -431,7 +368,7 @@
                 ActionsDone.push("INSERT~!~"+JSON.stringify(TRToObject($(tr))));
                 console.log(ActionsDone);
                 $("#InfoTable").append(tr);
-                setAlertText("Successfully added user role association");
+                setAlertText("Successfully added application device type association");
                 displayAlert();
                 closeAddMenu()
             });
@@ -456,42 +393,40 @@
             }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #users`).find('option:selected').attr("id"));
-                FormVals.push($(`#${EditAdd} #roles`).find('option:selected').attr("id"));
-                FormVals.push($(`#${EditAdd} #expiryDate`).val());
+                FormVals.push($(`#${EditAdd} #DeviceType`).find('option:selected').attr("id"));
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
             //used for editing
             $js("EditConfirm",function(e){
-                if ($("#EditAssoc #expiryDate").val() == ""){
+                if ($("#EditAssoc #applicationName").val() == ""){
                     return;
                 }
                 e.preventDefault();
                 let FormVals = PopulateArrayWithVals("EditAssoc");
-                let OGCopy = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).clone(false);
-                $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().each(function(index){
+                let OGCopy = $("#"+SpaceToUnderScore(EditItem)).clone(false);
+                $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
                     //we exclude the checkbox, sequence num, exclude org name
-                    if (index >=8){
-                        $(this).text(FormVals[index-6]); //only minus six to skip the first two properties
+                    if (index >=6){
+                        $(this).text(FormVals[FormVals.length-1]);
                     }
                 });
                 
                 Result = ""; //setting to default since no need to validate for uniqueness
                 if (Result != ""){
-                    $(OGCopy).insertAfter($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
-                    $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).remove();
+                    $(OGCopy).insertAfter($("#"+SpaceToUnderScore(EditItem)));
+                    $("#"+SpaceToUnderScore(EditItem)).remove();
                     setAlertText(Result);
                     displayAlert();
                 }
                 else{
-                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))))))
+                    ActionsDone.push("UPDATE["+EditItem+"]~!~"+JSON.stringify(TRToObject($("#"+SpaceToUnderScore(EditItem)))))
                     console.log(ActionsDone);
                     setTimeout(function(){
-                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().first().children().click(); //clicks the checkbox
+                        $("#"+SpaceToUnderScore(EditItem)).children().first().children().click(); //clicks the checkbox
                     },100);
                     //now we close the menu
-                    setAlertText("Successfully updated user role association");
+                    setAlertText("Successfully updated application device type association");
                     displayAlert();
                     closeEditMenu();
                 }
@@ -533,13 +468,11 @@
                     EditMenuStatus = true;
                     $("#EditMenu").removeClass("hide");
                     $("#EditMenu").removeClass("opacity-0");
-                    let Obj = TRToObject($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
-                    $("#EditAssoc #userName").text(Obj["USERNAME"]);
+                    let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
                     $("#EditAssoc #application").text(Obj["APPLICATION"]);
-                    $("#EditAssoc #role").text(Obj["ROLE"]);
+                    $("#EditAssoc #DeviceType").text(Obj["DEVICE TYPE"]);
                     $("#EditAssoc #creationTime").text(Obj["CREATION TIME"]);
                     $("#EditAssoc #createdBy").text(Obj["CREATED BY"]);
-                    $("#EditAssoc #expiryDate").val(Obj["EXPIRY DATE"]);
                     $("#EditAssoc #description").val(Obj["DESCRIPTION"]);
                 }
                 else{
@@ -550,9 +483,9 @@
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
                 }
-                let name = "User: "+ $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[2].innerHTML + " Role:" + $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(ItemsSelected[0]))).children()[3].innerHTML;
+                let name = $("#"+SpaceToUnderScore(ItemsSelected[0])).children()[3].innerHTML;
                 if (ItemsSelected.length == 1){
-                    $("#DeleteMessage").text("Are you sure you want to delete the association,")
+                    $("#DeleteMessage").text("Are you sure you want to delete,")
                     $("#ItemToDelete").text(name);
                     $("#DeleteModal").removeClass("hide");
                     OpenDeleteModal();
@@ -589,7 +522,7 @@
                     ItemsToUnCheck.push(item);
                 });
                 ItemsToUnCheck.forEach(function(item){
-                    $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
+                    $("#"+SpaceToUnderScore(item)).children().first().children().click();
                 })
                 ItemsSelected = [];
                 //update buttons
@@ -614,20 +547,19 @@
                         ItemsToDelete.push(item);
                     });
                     ItemsToDelete.forEach(function(item){
-                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).children().first().children().click();
-                        $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(item))).remove();
+                        $("#"+SpaceToUnderScore(item)).children().first().children().click();
+                        $("#"+SpaceToUnderScore(item)).remove();
                     })
                     ActionsDone.push("DELETE~!~"+ItemsToDelete);
                     CloseDeleteModal();
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted device associations");
+                    setAlertText("Successfully deleted device type associations");
                     displayAlert();
                 });
                 closeAddMenu();
                 closeEditMenu();
-                DisplayUsersBasedOnOrg(organizations[0]["organization_id"]);
                 $("table thead th").off("click").on("click", function() {
                     //header the table belongs to
                     var table = $(this).closest("table");
@@ -684,7 +616,7 @@
                 $("#InfoTable").append(LoadingTD);
             }
             $js("saveToDB",async function(ev){
-                ShowLoading();
+                ShowLoading()
                 let Result = await $wire.call("SaveToDb",JSON.stringify(ActionsDone));
                 let Errors = false;
                 let ErrorMsg = "";
@@ -698,14 +630,14 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update association for user \"" + Obj["USERNAME"] + "\"<br>";
+                                ErrorMsg += "Failed to update association for\"" + Obj["DEVICE TYPE"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert association for user \"" + Obj["USERNAME"] + "\"<br>";
+                                ErrorMsg += "Failed to insert association for\"" + Obj["DEVICE TYPE"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
@@ -730,61 +662,21 @@
                     displayAlert();
                 }
             })
-            $js("ChangeComponent",async function(ev,Component){
-                ShowLoading()
-                await $wire.call("setComponent",Component)
-                component = $wire.component;
-                application = $wire.application;
-                await refresh();
-                EnableDisableEditDelete();
-            })
             $js("ChangeApplication",async function(ev,Application){
                 ShowLoading()
                 await $wire.call("SetApplication",Application)
-                ShowLoading()
-                await $wire.call("LoadRoles");
-                component = $wire.component;
                 application = $wire.application;
                 await refresh();
-                EnableDisableEditDelete();
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
-                await $wire.call("LoadSoftwareComponents");
-                await $wire.call("setDefaultComponent");
                 await $wire.call("LoadApplications");
                 await $wire.call("setDefaultApplication");
-                await $wire.call("LoadRoles");
-                component = $wire.component;
                 application = $wire.application;
                 await refresh();
                 EnableDisableEditDelete();
             })
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
-            $js("DisplayUsersBasedOnOrg",DisplayUsersBasedOnOrg);
-            function DisplayUsersBasedOnOrg(Org){
-                try{
-                    let DisplayUsers = [];
-                    $(users).each(function(index){
-                        if (Org == $(this)[0]["organization_id"]){
-                            DisplayUsers.push($(this));
-                            
-                        }
-                    })
-                    
-                    $("#users").html("");
-                    $(DisplayUsers).each(function(index){
-                        let Option = document.createElement("option");
-                        Option.id = $(this)[0]["user_id"];
-                        $(Option).addClass("bg-gray-500")
-                        Option.textContent = $(this)[0]["user_username"];
-                        $("#users").append(Option);
-                    })
-                }
-                catch(e){
-                    console.log(e);
-                }
-            }
             function SpaceToUnderScore(input){
                 return input.replaceAll(" ","_");
             }
@@ -854,10 +746,11 @@
                 catch(ex){
                     return false;
                 }
+                
             }
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
-                    let result = exportToCsv("User-RoleAssocInfo.csv",TableObjects);
+                    let result = exportToCsv("Application-DeviceTypeAssocInfo.csv",TableObjects);
                     await $wire.call("LogExport");
                     await refresh();
                     if (result == true){

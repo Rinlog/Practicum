@@ -67,6 +67,9 @@ class RolePermissionAssociation extends Component
                     $this->ComponentInfo = $component;
                 }
             }
+            $this->LoadRoles();
+            $this->SetDefaultRole();
+            $this->LoadPermission();
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());

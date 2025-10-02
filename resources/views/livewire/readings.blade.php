@@ -42,10 +42,10 @@
     if (0){}
 
     $js("SwitchToDeviceReading",function(){
-        $wire.set("readingPage","deviceReadings")
+        $wire.call("ShowDeviceReadings")
     })
     $js("SwitchToSensorReading",function(){
-        $wire.set("readingPage","sensorPage")
+        $wire.call("ShowSensorReadings")
     })
 
 </script>

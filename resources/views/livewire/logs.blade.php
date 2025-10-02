@@ -39,10 +39,10 @@
     if (0){}
 
     $js("SwitchToGeneralLog",function(){
-        $wire.set("LogPage","generalLog")
+        $wire.call("ShowGeneralLog")
     })
     $js("SwitchToApplicationLog",function(){
-        $wire.set("LogPage","applicationLog")
+        $wire.call("ShowAppLog")
     })
 
 </script>

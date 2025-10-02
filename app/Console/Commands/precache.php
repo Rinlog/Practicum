@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
-use Illuminate\Support\Facades\Artisan;
 
 class precache extends Command
 {
@@ -35,6 +34,7 @@ class precache extends Command
         "application_device_association",
         "application_location_association",
         "application_sensor_type_association",
+        "application_device_type_association",
         "device",
         "device_deployment",
         "device_sensor_association",
@@ -57,6 +57,7 @@ class precache extends Command
      */
     public function handle(): int
     {
+        $this->info(now());
         $this->info("Starting table pre-cache...");
 
         try {

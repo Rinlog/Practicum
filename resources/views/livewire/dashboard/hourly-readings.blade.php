@@ -19,15 +19,15 @@
                             <path d="M12 6V12" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M16.24 16.24L12 12" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <label id="TimeRange" class="cursor-pointer">{{$StartTime}} - {{ $EndTime }}</label>
+                        <label id="TimeRange" class="cursor-pointer">Hour {{$StartTime}} - {{ $EndTime }}</label>
                         <svg class="-mr-1 size-6 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon" class="min-h-[26px] min-w-[26px]">
                             <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
                         </svg>
                     </button>
                     <div id="FilterDropDown" isOpen="false" class="absolute right-0 z-3 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="p-4 flex flex-col items-center" role="none">
-                            <livewire:components.req-underline-input id="startTime" text="Start Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
-                            <livewire:components.req-underline-input id="endTime" text="End Time*" textColor="text-gray-500" inputColor="text-gray-600" type="time"></livewire:components.req-underline-input>
+                            <livewire:components.req-underline-input id="startTime" text="Start Time*" textColor="text-gray-500" inputColor="text-gray-600" type="number"></livewire:components.req-underline-input>
+                            <livewire:components.req-underline-input id="endTime" text="End Time*" textColor="text-gray-500" inputColor="text-gray-600" type="number"></livewire:components.req-underline-input>
                         </div>
                         <span class="flex flex-row justify-center items-center p-4">
                             <button wire:click="$js.Filter" class="bg-white border-2 border-[#46c0e5] p-3 rounded-full text-[#46c0e5] font-semibold hover:text-[#3c8fb0] hover:border-[#3c8fb0] cursor-pointer w-full">
@@ -68,9 +68,9 @@
         <div class="DeviceContainer"> 
             <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                 <label class="pl-2 text-lg">Device Types:</label>
-                <select id="deviceTypes" class="w-full pl-2" wire:model="deviceTypeName">
+                <select id="deviceTypes" class="w-full pl-2" wire:model="deviceTypeName" wire:click="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType()">
                     @foreach ($deviceTypes as $type)
-                        <option wire:click="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType" id={{ $type->device_type_id }}>{{ $type->device_type }}</option>
+                        <option id={{ $type->device_type_id }}>{{ $type->device_type }}</option>
                     @endforeach
                 </select>
             </div> 
@@ -130,9 +130,19 @@
                             <td>{{ $Row[0][1] }}</td>
                             @foreach($Row[1] as $Readings)
                                 @foreach ($Readings as $key=>$Reading)
-                                    <td>
-                                        {{ $Reading }}
-                                    </td>
+                                    @foreach ($Reading as $DeepKey=>$DeepReading)
+                                        @if (strtolower($DeepKey) == "total")
+                                            <td>
+                                                {{ round($DeepReading/$Row[0][2],2) }}
+                                            </td>
+                                        @else
+                                            @foreach ($DeepReading as $MinMaxKey=>$MinMaxVal)
+                                            <td>
+                                                {{ $MinMaxVal }}
+                                            </td>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
                                 @endforeach
                             @endforeach
                             </tr>
@@ -145,6 +155,7 @@
             </tbody>
         </table>
      </div>
+     <livewire:alert.notification></livewire:alert.notification>
 </div>
         @script
         <script>
@@ -163,10 +174,10 @@
             let locations;
             let sublocations;
             let appLocationsAssoc;
+            let appDeviceTypeAssoc;
             let deviceDeploymentInfo;
             let devices;
             let deviceTypes;
-            let appDeviceTypeAssoc;
             let deviceSensorAssoc;
             let sensors;
             let groupedJsonReadings;
@@ -238,6 +249,7 @@
                 FormVals.push($(`#${Log} #endTime`).val());
                 return FormVals;
             }
+            //this refresh function is not being used, it's just here in case it is needed at some point
             $js("refresh",async function(){
                 ShowLoading();
                 TimeFrame = "TODAY";
@@ -252,8 +264,8 @@
                 
                 setStartDate = JSON.stringify(new Date(NewStartDate));
                 setEndDate = JSON.stringify(new Date(NewEndDate));
-                await $wire.set("StartTime", '00:00',false);
-                await $wire.set("EndTime", '23:59',false);
+                await $wire.set("StartTime", '0',false);
+                await $wire.set("EndTime", '23',false);
                 await SetTimeFrame();
             });
             function UpdateShowingCount(){
@@ -349,12 +361,30 @@
             $js("Filter",async function(){
                 OpenCloseFilter();
                 let vals = PopulateArrayWithVals("FilterDropDown");
-                if (vals[1] == "" || vals[2] == ""){
+                console.log(vals[0]);
+                if (vals[0] == "" || vals[1] == ""){
+                    setAlertText("Invalid Hours");
+                    displayAlert();
+                    return;
+                }
+                else if (vals[0] < 0 || vals[0] > 23){
+                    setAlertText("Start hour invalid");
+                    displayAlert();
+                    return;
+                }
+                else if (vals[1] > 23 || vals[1] < 0){
+                    setAlertText("End hour invalid");
+                    displayAlert();
+                    return;
+                }
+                else if (vals[0] > vals[1]){
+                    setAlertText("Start hour must be before end hour");
+                    displayAlert();
                     return;
                 }
                 await $wire.set("StartTime",vals[0],false);
                 await $wire.set("EndTime",vals[1],false);
-                $("#TimeRange").text(vals[0] + " - " + vals[1]);
+                $("#TimeRange").text("Hour " + vals[0] + " - " + vals[1]);
 
             })
             $js("Search",async function(){
@@ -647,6 +677,7 @@
                             return Location.includes(item.location_id)
                         }
                     });
+                    
                     $("#subLocations").html("");
                     let InfoString = "";
                     $(SubLocationsDetailed).each(function(index){
@@ -798,18 +829,43 @@
             function GenChart(){
                 Charts = {};
 
-                //generating raw data for charts
+               //generating raw data for charts
                 $.each(groupedJsonReadings,function(key,value){
                     $.each(value[1],function(k,v){
                         $.each(v,function(ReadingName,ReadingValue){
-                            if (Charts[ReadingName] !== undefined){
-                                Charts[ReadingName].push(ReadingValue);
-                            }
-                            else{
-                                if (!(isNaN(ReadingValue))){
-                                    Charts[ReadingName] = [ReadingValue];
+                            $.each(ReadingValue,function(DeepReadingKey,DeepReadingVal){
+                                //first we are checking for the average based on the total field
+                                if (Charts[ReadingName + " Average"] !== undefined && DeepReadingKey.toLowerCase() == "total"){
+                                    Charts[ReadingName + " Average"].push(Math.round(DeepReadingVal/value[0][2] * 100)/100);
                                 }
-                            }
+                                else if (Charts[ReadingName + " Average"] === undefined){
+                                    if (!(isNaN(DeepReadingVal))){
+                                        Charts[ReadingName + " Average"] = [Math.round(DeepReadingVal/value[0][2] * 100)/100];
+                                    }
+                                }
+                                //next we check all the maximum and minimum vals and add them to charts
+                                if (DeepReadingKey.toLowerCase() !== "total"){
+                                    $.each(DeepReadingVal,function(MinMaxKey,MinMaxVal){
+                                        if (Charts["Maximum " + MinMaxKey] !== undefined && !(isNaN(MinMaxVal)) && DeepReadingKey.toLowerCase() !== "minimum"){
+                                            Charts["Maximum " + MinMaxKey].push(MinMaxVal);
+                                        }   
+                                        else if (Charts["Minimum " + MinMaxKey] !== undefined && !(isNaN(MinMaxVal)) && DeepReadingKey.toLowerCase() !== "maximum"){
+                                            Charts["Minimum " + MinMaxKey].push(MinMaxVal);
+                                        }
+                                        else{
+                                            if (!(isNaN(MinMaxVal))){
+                                                if (DeepReadingKey.toLowerCase() == "minimum"){
+                                                    Charts["Minimum " + MinMaxKey] = [MinMaxVal];
+                                                }
+                                                else if (DeepReadingKey.toLowerCase() == "maximum"){
+                                                    Charts["Maximum " + MinMaxKey] = [MinMaxVal];
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            })
+                            
                         })
                     });
                 })
