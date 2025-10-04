@@ -1,6 +1,6 @@
 <div>
     {{-- Search Options --}}
-    <div class="fixed sm:right-0 sm:w-[15%] sm:h-full sm:top-15 overflow-y-scroll sm:overflow-y-visible bottom-5 h-[25%] bg-white p-4 shadow-md z-2"]>
+    <div class="fixed sm:right-0 sm:w-[16%] sm:h-full sm:top-15 overflow-y-scroll sm:overflow-y-visible bottom-5 h-[25%] bg-white p-4 shadow-md z-2"]>
         {{-- DatePicker --}}
         <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] mt-6 p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[240px]">
             <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
@@ -105,8 +105,17 @@
      </div>
      {{-- Table Section --}}
      <div>
+        {{-- Export Button --}}
+        <div class="p-2">
+            <button id="Export" wire:click="$js.DownloadCSV" class="export flex text-[#4fbce7] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center hover:text-[#3c8fb0] cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" width="24px" height="24px" class="svg" fill="#46c0e5">
+                        <path id="Export" class="cls-1" d="M16.71,13.62c.39.39.39,1.02,0,1.41-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-1.29-1.29v3.93c0,.55-.45,1-1,1s-1-.45-1-1v-3.93l-1.29,1.29c-.39.39-1.02.39-1.41,0s-.39-1.02,0-1.41l3-3c.38-.38,1.04-.38,1.41,0l3,3ZM23,8v12.81c-.03,2.31-1.94,4.19-4.29,4.19H7.31s-.05,0-.06,0c-2.31,0-4.22-1.88-4.25-4.22V5.19c.03-2.31,1.94-4.19,4.25-4.19h.03s8.71,0,8.71,0c.53,0,1.04.21,1.41.59l5,5c.38.38.59.88.59,1.41ZM17,7h3l-3-3v3ZM21,9h-4c-1.1,0-2-.9-2-2v-4h-7.71s-.02,0-.03,0c-1.23,0-2.24.99-2.25,2.22v15.56c.02,1.23,1.02,2.22,2.25,2.22.01,0,.02,0,.03,0h11.43s.02,0,.03,0c1.23,0,2.24-.99,2.25-2.22v-11.78Z"/>
+                    </svg>
+                    EXPORT
+            </button>
+        </div>
         <table class="rounded-lg border-2 border-[#f4f4f4] border-separate w-full min-h-[550px] max-h-[550px] block overflow-y-auto overflow-x-auto border-spacing-[0]">
-            <thead class="rounded-lg bg-[#f2f2f2] border-2 border-[#f4f4f4] border-separate">
+            <thead id="InfoHeader" class="rounded-lg bg-[#f2f2f2] border-2 border-[#f4f4f4] border-separate">
                 <tr>
                     <th class="cursor-pointer hover:bg-[#e6e6e6] select-none">
                         <span class="flex justify-between">
@@ -129,10 +138,14 @@
                             <td>{{ $Row[0][0] }}</td>
                             <td>{{ $Row[0][1] }}</td>
                             @foreach($Row[1] as $Readings)
-                                @foreach ($Readings as $key=>$Reading)
-                                    <td>
-                                        {{ $Reading }}
-                                    </td>
+                                @foreach ($readingHeaders as $readingHeader)
+                                    @foreach ($Readings as $key=>$Reading)
+                                        @if ($key == $readingHeader)
+                                            <td>
+                                                {{ $Reading }}
+                                            </td>
+                                        @endif
+                                    @endforeach
                                 @endforeach
                             @endforeach
                             </tr>
@@ -148,7 +161,7 @@
 </div>
         @script
         <script>
-            let headers = $wire.headers;
+            let headers;
             let application = "";
             let ActionsDone = [];
             let TableObjects = [];
@@ -259,7 +272,8 @@
             function UpdateShowingCount(){
                 $("#LogCount").text($("#InfoTable").children().length-1);
             }
-            async function refresh(){
+            async function refresh(LogExport = false){
+                ShowLoading();
                 //reset actions done
                 ActionsDone = [];
                 //now that everything is we re-load the table
@@ -268,10 +282,14 @@
                 let SubLocation = $("#subLocations").children(":selected").attr("id");
                 let Device = $("#devices").children(":selected").attr("id");
                 let Sensor = $("#sensors").children(":selected").attr("id");
+                if (LogExport == true){
+                    await $wire.call("LogExport");
+                }
                 await $wire.call("LoadInfo",[Device,Sensor]);
                 groupedJsonReadings = $wire.groupedJsonReadings;
-                UpdateShowingCount();
+                headers = $wire.headers;
                 PrepFileForExport();
+                UpdateShowingCount();
                 OGTable = [];
                 $("#InfoTable").children().each(function(index){
                     OGTable.push($(this).clone(true,true));
@@ -279,8 +297,6 @@
                 $("#SearchBarLogs").on('input',function(ev){
                     SearchThroughTable($("#SearchBarLogs").val());
                 })
-                await DisplayInfoBasedOnApp(applications[0]["application_id"]);
-                console.log($("#sensors #"+Sensor));
                 //re-choosing previous selections
                 $("applications"+App).prop("selected",true);
                 DisplayInfoBasedOnApp(App);
@@ -362,7 +378,9 @@
                 await refresh();
             });
             function ShowLoading(){
+                $("#InfoHeader").html("<tr><th>Loading...</th></tr>");
                 let LoadingTD = $("#InfoTable #LoadingIcon");
+
                 LoadingTD.html(
                     "<span class=\"absolute top-[35%] left-[45%]\" wire:loading colspan=\"999\"><img src=\"/images/Loading_2.gif\"></span>"
                 )
@@ -472,10 +490,20 @@
                     $("#FilterDropDown").attr("isOpen",false);
                 }
             }
+            function CleanseTD(text){
+                try{
+                    text = text.replace("\n","");
+                    text = text.trim();
+                    return text;
+                }
+                catch(e){
+                    console.log(e);
+                }
+            }
             function TRToObject(tr){
                 let Values = [];
                 tr.children().each(function(){
-                    Values.push($(this).text());
+                    Values.push(CleanseTD($(this).text()));
                 })
                 Values.splice(0,1);
                 let Obj = {}
@@ -546,8 +574,8 @@
             $js("DownloadCSV",async function(){
                 if (TableObjects.length != 0){
                     let result = exportToCsv("SensorReadingInfo.csv",TableObjects);
-                    await $wire.call("LogExport");
-                    await refresh();
+
+                    await refresh(true);
                     if (result == true){
                         setAlertText("Exported to CSV");
                         displayAlert();
@@ -830,7 +858,7 @@
                         options: {
                         scales: {
                             y: {
-                            beginAtZero: true
+                            beginAtZero: false
                             }
                         },
                         responsive: true,

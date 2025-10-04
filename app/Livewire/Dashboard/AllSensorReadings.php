@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use \Exception;
 use Illuminate\Support\Facades\Cache;
 use \PDO;
@@ -27,6 +28,7 @@ class AllSensorReadings extends Component
     public $applicationDeviceTypeAssoc = [];
     public $deviceDeploymentInfo = [];
     public $deviceSensorAssoc = [];
+    public $readingHeaders = [];
     public $headers = [
         "DATE",
         "TIME",
@@ -118,6 +120,8 @@ class AllSensorReadings extends Component
         $this->tableInfo = $stmnt->fetchAll(PDO::FETCH_OBJ);
         $this->groupedJsonReadings = [];
         $JsonData = [];
+        $this->readingHeaders = [];
+        //reading info + table info
         foreach ($this->tableInfo as $SensorInfo){
             $ReadingInfo = json_decode($SensorInfo->sensor_reading_data);
             array_push($JsonData,$ReadingInfo); //storing json data for later use
@@ -128,16 +132,54 @@ class AllSensorReadings extends Component
                 $this->groupedJsonReadings += [$SensorInfo->date . $SensorInfo->time => [[$SensorInfo->date,$SensorInfo->time],[$ReadingInfo]]];
             }
         }
+        //getting table headers
         foreach ($JsonData as $Reading){
             $Keys = array_keys((array) $Reading);
             foreach ($Keys as $Key){
                 if (!(in_array(strtoupper($Key),$this->headers))){
                     array_push($this->headers,strtoupper($Key));
+                    array_push($this->readingHeaders,$Key);
                 }
             }
         }
-
+        //verifying grouped reading length
+        foreach ($this->groupedJsonReadings as $GroupedReading){
+            $HeadersWeHave = [];
+            foreach ($GroupedReading[1] as $Readings){
+                foreach ($this->readingHeaders as $HeaderReading){
+                    if (isset($Readings->{$HeaderReading})){
+                        if (!(in_array($HeaderReading,$HeadersWeHave))){
+                            array_push($HeadersWeHave,$HeaderReading);
+                        }
+                    }
+                }
+            }
+            $HeadersNeeded = [];
+            foreach ($this->readingHeaders as $AllHeader){
+                if (!(in_array($AllHeader,$HeadersWeHave))){
+                    array_push($HeadersNeeded,$AllHeader);
+                }
+            }
+            if (count($HeadersNeeded) > 0){
+                foreach ($HeadersNeeded as $HeaderNeeded){
+                    $GroupedReading[1][0]->{$HeaderNeeded} = 0;
+                }
+            }
+        }
     }
+    public function LogExport(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!(isset($_SESSION["User"]))) { return null; }
+        DB::table("log")->insert([
+            "log_activity_time"=>now(),
+            "log_activity_type"=>"REPORT",
+            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_desc"=>"Downloaded CSV of dashboard sensor readings"
+        ]);
+    }
+    
     public function render()
     {
         return view('livewire.dashboard.all-sensor-readings');

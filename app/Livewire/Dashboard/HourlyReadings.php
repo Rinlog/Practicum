@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use \Exception;
 use Illuminate\Support\Facades\Cache;
 use \PDO;
@@ -31,7 +32,12 @@ class HourlyReadings extends Component
         "DATE",
         "HOUR",
     ];
+    public $dataItems = [];
     public $groupedJsonReadings = [];
+    public $normalDisplay = true;
+    public $displayDataItems = false;
+    public $dataItemList = [];
+    public $selectedDataItem = null;
     public function __construct(){
         $DB1 = config("database.connections.pgsql");
         $this->conn = new PDO(
@@ -128,19 +134,106 @@ class HourlyReadings extends Component
                 $this->groupedJsonReadings += [$SensorInfo->date . $SensorInfo->hour=> [[$SensorInfo->date, $SensorInfo->hour, $SensorInfo->hourly_readings_counter],[$ReadingInfo]]];
             }
         }
-        foreach ($JsonData as $Reading){
-            $Keys = array_keys((array) $Reading);
-            foreach ($Keys as $Key){
-                
-                if (!(in_array(strtoupper($Key . " Average"),$this->headers))){
-                    array_push($this->headers,strtoupper($Key . " Average"));
-                    array_push($this->headers,strtoupper("Maximum " . $Key . " Time"));
-                    array_push($this->headers,strtoupper("Maximum " . $Key . " Value"));
-                    array_push($this->headers,strtoupper("Minimum " . $Key . " Time"));
-                    array_push($this->headers,strtoupper("Minimum " . $Key . " Value"));
+        //check if data items exist
+        $this->normalDisplay = true; //this is used for certain tables that don't follow the normal total,maximum,minimum entrys inside the reading
+        $this->displayDataItems = false;
+        if (count($this->groupedJsonReadings) > 0){
+            $keys = array_keys($this->groupedJsonReadings);
+            $InnerValueKeys = array_keys((array) $this->groupedJsonReadings[$keys[0]][1][0]);
+            $FirstInnerValueSectionCount = count((array) $this->groupedJsonReadings[$keys[0]][1][0]->{$InnerValueKeys[0]});
+            if ($FirstInnerValueSectionCount  > 3){
+                //verifying info is what is expected
+                if (str_contains(strtolower($InnerValueKeys[0]),"all_regions")){
+                    $this->normalDisplay = false;
+                    $this->displayDataItems = true;
                 }
             }
+            elseif ($FirstInnerValueSectionCount == 3){
+                if ($InnerValueKeys[0] == "total"){
+                    $this->normalDisplay = true;
+                }
+            }
+            elseif ($FirstInnerValueSectionCount < 3){
+                //verifying info is what is expected
+                if ($InnerValueKeys[0] == "total_exited"){
+                    $this->normalDisplay = false;
+                }
+            }
+            
         }
+        //loading in headers, loading them in depends on the type of sensor info, hence "normalDisplay" 
+        //is used which refers to which one i was exposed to first,
+        //then the second option i considered not normal.
+        $AlreadyAddedHeaders = false; //this is used for the data-items page
+        foreach ($JsonData as $Reading){
+                if (is_object($Reading) && $this->normalDisplay == true){
+                    $Keys = array_keys((array) $Reading);
+                    foreach ($Keys as $Key){
+                        
+                        if (!(in_array(strtoupper($Key . " Average"),$this->headers))){
+                            array_push($this->headers,strtoupper($Key . " Average"));
+                            array_push($this->headers,strtoupper("Maximum " . $Key . " Time"));
+                            array_push($this->headers,strtoupper("Maximum " . $Key . " Value"));
+                            array_push($this->headers,strtoupper("Minimum " . $Key . " Time"));
+                            array_push($this->headers,strtoupper("Minimum " . $Key . " Value"));
+                        }
+                    }
+                }
+                else if ($this->normalDisplay == false){
+                    if (is_object($Reading)){
+                        $Keys = array_keys((array) $Reading);
+                        if ($this->displayDataItems == false){
+                            if (!(in_array(strtoupper($Keys[0]),$this->headers))){
+                                foreach ($Keys as $Key){
+                                    if (str_contains(strtolower($Key), "maximum") || str_contains(strtolower($Key),"minimum")){
+                                        array_push($this->headers,strtoupper($Key." time"));
+                                        array_push($this->headers,strtoupper($Key." value"));
+                                    }
+                                    else{
+                                        array_push($this->headers,strtoupper($Key));
+                                    }
+                                }
+                            }
+                        }
+                        else if ($this->displayDataItems == true){
+                            if ($this->selectedDataItem == null){
+                                $this->selectedDataItem = $Keys[0];
+                            }
+                            foreach ($Keys as $Key){
+                                if (!(in_array($Key,$this->dataItems))){
+                                    array_push($this->dataItems,$Key);
+                                }
+                                if ($Key = $this->selectedDataItem){
+                                    if ($AlreadyAddedHeaders == false){
+                                        $AlreadyAddedHeaders = true;
+                                        foreach($Reading->{$Key} as $InnerReadingKey=>$InnerReading){
+                                            if (str_contains(strtolower($InnerReadingKey), "maximum") || str_contains(strtolower($InnerReadingKey),"minimum")){
+                                                array_push($this->headers,strtoupper($InnerReadingKey." time"));
+                                                array_push($this->headers,strtoupper($InnerReadingKey." value"));
+                                            }
+                                            else{
+                                                array_push($this->headers,strtoupper($InnerReadingKey));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    }
+    public function LogExport(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!(isset($_SESSION["User"]))) { return null; }
+        DB::table("log")->insert([
+            "log_activity_time"=>now(),
+            "log_activity_type"=>"REPORT",
+            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_desc"=>"Downloaded CSV of dashboard average hourly sensor readings"
+        ]);
     }
     public function render()
     {
