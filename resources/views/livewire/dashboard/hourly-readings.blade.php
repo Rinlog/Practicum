@@ -338,8 +338,10 @@
                 let Device = $("#devices").children(":selected").attr("id");
                 let Sensor = $("#sensors").children(":selected").attr("id");
                 if (LogExport == true){
+                    ShowLoading();
                     await $wire.call("LogExport");
                 }
+                ShowLoading();
                 await $wire.call("LoadInfo",[Device,Sensor]);
                 headers = $wire.headers;
                 normalDisplay = $wire.normalDisplay;

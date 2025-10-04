@@ -273,7 +273,6 @@
                 $("#LogCount").text($("#InfoTable").children().length-1);
             }
             async function refresh(LogExport = false){
-                ShowLoading();
                 //reset actions done
                 ActionsDone = [];
                 //now that everything is we re-load the table
@@ -283,8 +282,10 @@
                 let Device = $("#devices").children(":selected").attr("id");
                 let Sensor = $("#sensors").children(":selected").attr("id");
                 if (LogExport == true){
+                    ShowLoading();
                     await $wire.call("LogExport");
                 }
+                ShowLoading();
                 await $wire.call("LoadInfo",[Device,Sensor]);
                 groupedJsonReadings = $wire.groupedJsonReadings;
                 headers = $wire.headers;
