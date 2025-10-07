@@ -8,13 +8,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Organizations" key="{{ Str::random() }}" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeOrg($event,$event.target.value)">
                             @foreach($Organizations as $org)
                                 @if (isset($_SESSION["User"]))
                                     @if ($org->organization_id == $OrgInfo->organization_id)
-                                        <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                        <option selected value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                        <option value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                     @endif
                                 @endif
                             @endforeach
@@ -24,14 +24,14 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Location</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Locations" key="{{ Str::random() }}" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Locations" key="{{ Str::random() }}" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeLocation($event,$event.target.value)">
                             @foreach ($Locations as $location)
                                 @if (isset($LocationInfo))
                                     @if ($location->location_id == $LocationInfo->location_id)
                                         {{ $LocationInfo->location_id }}
-                                        <option selected wire:click="$js.ChangeLocation($event,'{{ $location->location_id }}')">{{ $location->location_name }}</option>
+                                        <option selected value="{{ $location->location_id }}">{{ $location->location_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeLocation($event,'{{ $location->location_id }}')">{{ $location->location_name }}</option>
+                                        <option value="{{ $location->location_id }}">{{ $location->location_name }}</option>
                                     @endif
                                 @endif
                             @endforeach
@@ -532,7 +532,6 @@
             }
             $js("refresh",refresh)
             async function refresh(){
-                ShowLoading()
                 //reset actions done
                 ActionsDone = [];
                 //uncheck everything
@@ -548,6 +547,7 @@
                 EnableDisableEditDelete();
 
                 //now that everything is unchecked we re-load the table and org
+                ShowLoading()
                 await $wire.call("LoadInfo");
                 //re-gen sequence nums
                 try{
@@ -684,20 +684,12 @@
             $js("ChangeOrg",async function(ev,Org){
                 ShowLoading()
                 await $wire.call("SetOrg",Org)
-                organization = $wire.organization;
-                location = $wire.Location;
                 await refresh();
-                $("#Locations").val(location);
-                $("#Organizations").val(organization)
             })
             $js("ChangeLocation",async function(ev,loc){
                 ShowLoading()
                 await $wire.call("SetLocation",loc);
-                organization = $wire.organization;
-                location = $wire.Location;
                 await refresh()
-                $("#Locations").val(location);
-                $("#Organizations").val(organization)
 
             }); 
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------

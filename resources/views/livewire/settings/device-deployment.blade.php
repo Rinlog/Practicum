@@ -7,13 +7,13 @@
             <div id="OrganizationSelector" class="w-full flex items-center">
                 <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
                 <div class="selectWrapperLG w-full">
-                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeOrg($event,$event.target.value)">
                         @foreach($Organizations as $org)
                             @if (isset($_SESSION["User"]))
                                 @if ($org->organization_id == $OrgInfo->organization_id)
-                                    <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                    <option selected value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                 @else
-                                    <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                    <option value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                 @endif
                             @endif
                         @endforeach
@@ -126,9 +126,9 @@
                     <livewire:components.frm-select-box id="Devices" selectMessage="Devices:" :options="$Devices" optionName="device_name" optionId="device_eui"></livewire:components.frm-select-box>
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                         <label class="pl-2 text-lg">Locations:</label>
-                        <select id="locations" class="w-full pl-2">
+                        <select id="locations" class="w-full pl-2" wire:change="$js.DisplayInfoBasedOnLocation($event.target.value)">
                             @foreach ($Locations as $location)
-                                <option class="bg-gray-500" id="{{ $location->location_id }}" wire:click="$js.DisplayInfoBasedOnLocation('{{ $location->location_id }}')">{{ $location->location_name }}</option>
+                                <option class="bg-gray-500" id="{{ $location->location_id }}" value="{{ $location->location_id }}" >{{ $location->location_name }}</option>
                             @endforeach
                         </select>
                     </div> 
@@ -182,9 +182,9 @@
                     </div> 
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                         <label class="pl-2 text-lg">Locations:</label>
-                        <select id="locations" class="w-full pl-2">
+                        <select id="locations" class="w-full pl-2" wire:change="$js.DisplayInfoBasedOnLocation($event.target.value)">
                             @foreach ($Locations as $location)
-                                <option class="bg-gray-500" id="{{ $location->location_id }}" wire:click="$js.DisplayInfoBasedOnLocation('{{ $location->location_id }}')">{{ $location->location_name }}</option>
+                                <option class="bg-gray-500" id="{{ $location->location_id }}" value="{{ $location->location_id }}" >{{ $location->location_name }}</option>
                             @endforeach
                         </select>
                     </div> 
@@ -540,7 +540,7 @@
                     $("#EditMenu").removeClass("opacity-0");
                     let Obj = TRToObject($("#"+SpaceToUnderScore(EditItem)));
                     $("#EditDeployment #Devices").val(Obj["DEVICE NAME"]);
-                    $("#EditDeployment #locations").val(Obj["LOCATION NAME"]);
+                    $("#EditDeployment #location").val(Obj["LOCATION NAME"]);
                     $("#EditDeployment #subLocations").val(Obj["SUB LOCATION NAME"]);
                     $("#EditDeployment #latitude").val(Obj["LATITUDE"]);
                     $("#EditDeployment #longitude").val(Obj["LONGITUDE"]);

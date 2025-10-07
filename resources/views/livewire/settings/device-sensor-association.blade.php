@@ -8,13 +8,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeOrg($event,$event.target.value)">
                             @foreach($Organizations as $org)
                                 @if (isset($_SESSION["User"]))
                                     @if ($org->organization_id == $OrgInfo->organization_id)
-                                        <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                        <option selected value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                        <option value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                     @endif
                                 @endif
                             @endforeach
@@ -24,13 +24,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Device</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Devices" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Devices" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeDevice($event,$event.target.value)">
                             @foreach($Devices as $device)
                                 @if (isset($DeviceInfo))
                                     @if ($device->device_eui == $DeviceInfo->device_eui)
-                                        <option selected wire:click="$js.ChangeDevice($event,'{{ $device->device_eui }}')" id="{{ $device->device_eui }}">{{ $device->device_name }}</option>
+                                        <option selected value="{{ $device->device_eui }}" id="{{ $device->device_eui }}">{{ $device->device_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeDevice($event,'{{ $device->device_eui }}')" id="{{ $device->device_eui }}">{{ $device->device_name }}</option>
+                                        <option value="{{ $device->device_eui }}" id="{{ $device->device_eui }}">{{ $device->device_name }}</option>
                                     @endif
                                 @endif
                             @endforeach

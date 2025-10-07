@@ -8,13 +8,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Component Name</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeComponent($event,$event.target.value)">
                             @foreach ($Components as $Component)
                                 @if (isset($ComponentInfo))
                                     @if($Component->component_id == $ComponentInfo->component_id)
-                                        <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                        <option value="{{ $Component->component_id }}" selected >{{ $Component->component_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                        <option value="{{ $Component->component_id }}">{{ $Component->component_name }}</option>
                                     @endif
                                 @endif
                             @endforeach
@@ -24,13 +24,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Applications</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] w-full text-white text-lg hover:bg-[#4a4a4a] p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeApplication($event,$event.target.value)">
                             @foreach($Applications as $application)
                                 @if (isset($ApplicationInfo))
                                     @if ($application->application_id == $ApplicationInfo->application_id)
-                                        <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                        <option selected value="{{ $application->application_id }}" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                        <option value="{{ $application->application_id }}" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
                                     @endif
                                 @endif
                             @endforeach
@@ -143,9 +143,9 @@
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                         <label class="pl-2 text-lg">Organizations:</label>
-                        <select id="organizations" class="w-full pl-2">
+                        <select id="organizations" class="w-full pl-2" wire:change="$js.DisplayUsersBasedOnOrg($event.target.value)">
                             @foreach ($Organizations as $org)
-                                <option class="bg-gray-500" id="{{ $org->organization_id }}" wire:click="$js.DisplayUsersBasedOnOrg('{{ $org->organization_id }}')">{{ $org->organization_name }}</option>
+                                <option class="bg-gray-500" id="{{ $org->organization_id }}" value="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                             @endforeach
                         </select>
                     </div> 

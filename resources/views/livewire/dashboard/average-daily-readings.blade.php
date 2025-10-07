@@ -14,9 +14,9 @@
         {{-- Application --}}
         <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
             <label class="pl-2 text-lg">Application:</label>
-            <select id="applications" class="w-full pl-2">
+            <select id="applications" class="w-full pl-2" wire:change="$js.DisplayInfoBasedOnApp($event.target.value)">
                 @foreach ($applications as $application)
-                    <option wire:click="$js.DisplayInfoBasedOnApp('{{ $application->application_id }}')" id={{ $application->application_id }}>{{ $application->application_name }}</option>
+                    <option value="{{ $application->application_id }}" id={{ $application->application_id }}>{{ $application->application_name }}</option>
                 @endforeach
             </select>
         </div> 
@@ -24,17 +24,17 @@
         <div id="LocationContainer" class="mt-6">
             <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                 <label class="pl-2 text-lg">Location:</label>
-                <select id="locations" class="w-full pl-2">
+                <select id="locations" class="w-full pl-2" wire:change="$js.DisplaySubLocationBasedOnLocation">
                     @foreach ($locations as $location)
-                        <option id={{ $location->location_id }}>{{ $location->location_name }}</option>
+                        <option value="{{ $location->location_id }}" id={{ $location->location_id }}>{{ $location->location_name }}</option>
                     @endforeach
                 </select>
             </div> 
             <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                 <label class="pl-2 text-lg">Sub-Location:</label>
-                <select id="subLocations" class="w-full pl-2" >
+                <select id="subLocations" class="w-full pl-2" wire:change="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType" >
                     @foreach ($subLocations as $subLocation)
-                        <option id={{ $subLocation->sub_location_id }}>{{ $subLocation->sub_location_name }}</option>
+                        <option value="{{ $subLocation->sub_location_id }}" id={{ $subLocation->sub_location_id }}>{{ $subLocation->sub_location_name }}</option>
                     @endforeach
                 </select>
             </div> 
@@ -43,17 +43,17 @@
         <div class="DeviceContainer"> 
             <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                 <label class="pl-2 text-lg">Device Types:</label>
-                <select id="deviceTypes" class="w-full pl-2" wire:model="deviceTypeName" wire:click="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType()">
+                <select id="deviceTypes" class="w-full pl-2" wire:change="$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType">
                     @foreach ($deviceTypes as $type)
-                        <option id={{ $type->device_type_id }}>{{ $type->device_type }}</option>
+                        <option value="{{ $type->device_type_id }}" id={{ $type->device_type_id }}>{{ $type->device_type }}</option>
                     @endforeach
                 </select>
-            </div> 
+            </div>
             <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                 <label class="pl-2 text-lg">Devices:</label>
-                <select id="devices" class="w-full pl-2">
+                <select id="devices" class="w-full pl-2" wire:change="$js.DisplaySensorsBasedOnDevice($event.target.value)">
                     @foreach ($devices as $device)
-                        <option id={{ $device->device_eui }}>{{ $device->device_name }}</option>
+                        <option value="{{ $device->device_eui }}" id={{ $device->device_eui }}>{{ $device->device_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -328,8 +328,6 @@
                 $("#SearchBarLogs").on('input',function(ev){
                     SearchThroughTable($("#SearchBarLogs").val());
                 })
-                await DisplayInfoBasedOnApp(applications[0]["application_id"]);
-                console.log($("#sensors #"+Sensor));
                 //re-choosing previous selections
                 $("applications"+App).prop("selected",true);
                 DisplayInfoBasedOnApp(App);
@@ -665,7 +663,7 @@
                     $("#locations").html("");
                     let InfoString = "";
                     $(LocationsDetailed).each(function(index){
-                        InfoString+="<option id="+$(this)[0]["location_id"]+" wire:click=\"$js.DisplaySubLocationBasedOnLocation()\">"+$(this)[0]["location_name"]+"</option>"
+                        InfoString+="<option value="+$(this)[0]["location_id"]+" id="+$(this)[0]["location_id"]+">"+$(this)[0]["location_name"]+"</option>"
                     })
                     $("#locations").html(InfoString);
 
@@ -673,7 +671,7 @@
                     $("#deviceTypes").html("");
                     let InfoString2 = "";
                     $(DeviceTypesDetailed).each(function(index){
-                        InfoString2+="<option id="+$(this)[0]["device_type_id"]+" wire:click=\"$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType\">"+$(this)[0]["device_type"]+"</option>"
+                        InfoString2+="<option value="+$(this)[0]["device_type_id"]+" id="+$(this)[0]["device_type_id"]+">"+$(this)[0]["device_type"]+"</option>"
                     })
                     $("#deviceTypes").html(InfoString2);
 
@@ -707,11 +705,10 @@
                             return Location.includes(item.location_id)
                         }
                     });
-                    
                     $("#subLocations").html("");
                     let InfoString = "";
                     $(SubLocationsDetailed).each(function(index){
-                        InfoString+="<option id="+$(this)[0]["sub_location_id"]+" wire:click=\"$js.DisplayDevicesBasedOnLocationSubLocationAndDeviceType()\">"+$(this)[0]["sub_location_name"]+"</option>"
+                        InfoString+="<option value="+$(this)[0]["sub_location_id"]+" id="+$(this)[0]["sub_location_id"]+">"+$(this)[0]["sub_location_name"]+"</option>"
                     })
                     $("#subLocations").html(InfoString);
                     DisplayDevicesBasedOnLocationSubLocationAndDeviceType();
@@ -810,7 +807,7 @@
                     $("#devices").html("");
                     let InfoString = "";
                     $(DevicesDetailed).each(function(index){
-                        InfoString+="<option id="+$(this)[0]["device_eui"]+" wire:click=\"$js.DisplaySensorsBasedOnDevice('"+$(this)[0]["device_eui"]+"')\">"+$(this)[0]["device_name"]+"</option>"
+                        InfoString+="<option value="+$(this)[0]["device_eui"]+" id="+$(this)[0]["device_eui"]+">"+$(this)[0]["device_name"]+"</option>"
                     })
                     $("#devices").html(InfoString);
                     if (DevicesDetailed.length > 0){
@@ -847,7 +844,7 @@
                     $("#sensors").html("");
                     let InfoString = "";
                     $(SensorDetailed).each(function(index){
-                        InfoString+="<option id="+$(this)[0]["sensor_id"]+" >"+$(this)[0]["sensor_name"]+"</option>"
+                        InfoString+="<option value="+$(this)[0]["sensor_id"]+" id="+$(this)[0]["sensor_id"]+" >"+$(this)[0]["sensor_name"]+"</option>"
                     })
                     $("#sensors").html(InfoString);
                 }

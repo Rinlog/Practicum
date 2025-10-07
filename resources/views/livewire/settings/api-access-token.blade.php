@@ -7,33 +7,33 @@
                     <div class="flex w-full">
                         <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Component Name</label>
                         <div class="selectWrapperLG w-full">
-                            <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                                @foreach ($Components as $Component)
-                                    @if (isset($ComponentInfo))
-                                        @if($Component->component_id == $ComponentInfo->component_id)
-                                            <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
-                                        @else
-                                            <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
-                                        @endif
+                        <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeComponent($event,$event.target.value)">
+                            @foreach ($Components as $Component)
+                                @if (isset($ComponentInfo))
+                                    @if($Component->component_id == $ComponentInfo->component_id)
+                                        <option value="{{ $Component->component_id }}" selected >{{ $Component->component_name }}</option>
+                                    @else
+                                        <option value="{{ $Component->component_id }}">{{ $Component->component_name }}</option>
                                     @endif
-                                @endforeach
-                            </select>
+                                @endif
+                            @endforeach
+                        </select>
                         </div>
                     </div>
                     <div class="flex w-full">
                         <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Applications</label>
                         <div class="selectWrapperLG w-full">
-                            <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                                @foreach($Applications as $application)
-                                    @if (isset($ApplicationInfo))
-                                        @if ($application->application_id == $ApplicationInfo->application_id)
-                                            <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
-                                        @else
-                                            <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
-                                        @endif
+                        <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] w-full text-white text-lg hover:bg-[#4a4a4a] p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeApplication($event,$event.target.value)">
+                            @foreach($Applications as $application)
+                                @if (isset($ApplicationInfo))
+                                    @if ($application->application_id == $ApplicationInfo->application_id)
+                                        <option selected value="{{ $application->application_id }}" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                    @else
+                                        <option value="{{ $application->application_id }}" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
                                     @endif
-                                @endforeach
-                            </select>
+                                @endif
+                            @endforeach
+                        </select>
                         </div>
                     </div>
                 </div>

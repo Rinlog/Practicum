@@ -8,13 +8,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Software Component Name</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Components" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeComponent($event,$event.target.value)">
                             @foreach ($Components as $Component)
                                 @if (isset($ComponentInfo))
                                     @if($Component->component_id == $ComponentInfo->component_id)
-                                        <option selected wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                        <option value="{{ $Component->component_id }}" selected >{{ $Component->component_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeComponent($event,'{{ $Component->component_id }}')">{{ $Component->component_name }}</option>
+                                        <option value="{{ $Component->component_id }}">{{ $Component->component_name }}</option>
                                     @endif
                                 @endif
                             @endforeach
@@ -24,13 +24,13 @@
                 <div class="flex w-full">
                     <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md w-[100%] md:w-[100%] lg:w-[40%] whitespace-nowrap">Role</label>
                     <div class="selectWrapperLG w-full">
-                        <select id="Roles" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                        <select id="Roles" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeRole($event,$event.target.value)">
                             @foreach ($Roles as $role)
                                 @if (isset($RoleInfo))
                                     @if($role->role_id == $RoleInfo->role_id)
-                                        <option selected wire:click="$js.ChangeRole($event,'{{ $role->role_id }}')">{{ $role->role_name }}</option>
+                                        <option selected value="{{ $role->role_id }}">{{ $role->role_name }}</option>
                                     @else
-                                        <option wire:click="$js.ChangeRole($event,'{{ $role->role_id }}')">{{ $role->role_name }}</option>
+                                        <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
                                     @endif
                                 @endif
                             @endforeach

@@ -7,17 +7,17 @@
             <div id="OrganizationSelector" class="w-full flex items-center">
                 <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Application</label>
                 <div class="selectWrapperLG w-full">
-                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach($Applications as $application)
-                            @if (isset($ApplicationInfo))
-                                @if ($application->application_id == $ApplicationInfo->application_id)
-                                    <option selected wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
-                                @else
-                                    <option wire:click="$js.ChangeApplication($event,'{{ $application->application_id }}')" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                        <select id="Applications" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] w-full text-white text-lg hover:bg-[#4a4a4a] p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeApplication($event,$event.target.value)">
+                            @foreach($Applications as $application)
+                                @if (isset($ApplicationInfo))
+                                    @if ($application->application_id == $ApplicationInfo->application_id)
+                                        <option selected value="{{ $application->application_id }}" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                    @else
+                                        <option value="{{ $application->application_id }}" id="{{ $application->application_id }}">{{ $application->application_name }}</option>
+                                    @endif
                                 @endif
-                            @endif
-                        @endforeach
-                    </select>
+                            @endforeach
+                        </select>
                 </div>
             </div>
         </div>

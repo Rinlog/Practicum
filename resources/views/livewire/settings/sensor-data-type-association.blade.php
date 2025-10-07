@@ -7,13 +7,13 @@
             <div id="OrganizationSelector" class="w-full flex items-center">
                 <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md ">Sensor</label>
                 <div class="selectWrapperLG w-full">
-                    <select id="Sensors" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md">
+                    <select id="Sensors" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full md:p-6 lg:p-6 p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeSensor($event,$event.target.value)">
                         @foreach ($Sensors as $sensor)
                             @if (isset($SensorInfo))
                                 @if($sensor->sensor_id == $SensorInfo->sensor_id)
-                                    <option selected wire:click="$js.ChangeSensor($event,'{{ $sensor->sensor_id }}')">{{ $sensor->sensor_name }}</option>
+                                    <option selected value="{{ $sensor->sensor_id }}">{{ $sensor->sensor_name }}</option>
                                 @else
-                                    <option wire:click="$js.ChangeSensor($event,'{{ $sensor->sensor_id }}')">{{ $sensor->sensor_name }}</option>
+                                    <option value="{{ $sensor->sensor_id }}">{{ $sensor->sensor_name }}</option>
                                 @endif
                             @endif
                         @endforeach
@@ -125,9 +125,9 @@
             <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                         <label class="pl-2 text-lg">Sensor Data Types:</label>
-                        <select id="sensorDataTypes" class="w-full pl-2">
+                        <select id="sensorDataTypes" class="w-full pl-2" wire:change="$js.DisplayValueTypeBasedOnDataType($event.target.value)">
                             @foreach ($SensorDataTypeNames as $sensorDataType)
-                                <option class="bg-gray-500" id="{{ $sensorDataType }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType }}')">{{ $sensorDataType}}</option>
+                                <option class="bg-gray-500" id="{{ $sensorDataType }}" value="{{ $sensorDataType }}">{{ $sensorDataType}}</option>
                             @endforeach
                         </select>
                     </div> 
@@ -167,9 +167,9 @@
             <div id="EditAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
                     <div class="mt-6 w-[90%] border-b-2 border-[#32a3cf] ">
                         <label class="pl-2 text-lg">Sensor Data Types:</label>
-                        <select id="sensorDataTypes" class="w-full pl-2">
+                        <select id="sensorDataTypes" class="w-full pl-2" wire:change="$js.DisplayValueTypeBasedOnDataType($event.target.value)">
                             @foreach ($SensorDataTypeNames as $sensorDataType)
-                                <option class="bg-gray-500" id="{{ $sensorDataType }}" wire:click="$js.DisplayValueTypeBasedOnDataType('{{ $sensorDataType }}')">{{ $sensorDataType}}</option>
+                                <option class="bg-gray-500" id="{{ $sensorDataType }}" value="{{ $sensorDataType }}">{{ $sensorDataType}}</option>
                             @endforeach
                         </select>
                     </div> 
@@ -308,7 +308,6 @@
 
             //used to make sure the primary key being added is a unique key
             function ValidateIfUnique(ID, Mode){
-
                 let result = "";
                 let IDDupeCount = 0;
                 let IDAsName = ID
@@ -441,8 +440,7 @@
                         }
                     }
                 });
-                
-                Result = ""; //setting to default since no need to validate for uniqueness
+                let Result = ValidateIfUnique(FormVals[0],"edit");
                 if (Result != ""){
                     $(OGCopy).insertAfter($("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))));
                     $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).remove();

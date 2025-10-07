@@ -93,8 +93,9 @@ class SensorDataTypeAssociation extends Component
                 $this->DisplayTableInfo = "";
                 foreach ($assocInfo as $key => $assoc) {
                     $DataValueSet = $this->DecodePostGresJson($assoc->data_value_set);
+                    $TRID = $this->SpaceToUnderScore($assoc->data_item_name);
                     $this->DisplayTableInfo.=
-                    "<tr id={$assoc->data_item_name}>
+                    "<tr id={$TRID}>
                         <td>
                         <input type='checkbox' wire:click=\"\$js.ItemChecked(\$event,'{$assoc->data_item_name}')\">
                         </td>

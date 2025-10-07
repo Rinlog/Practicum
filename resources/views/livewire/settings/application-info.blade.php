@@ -7,17 +7,17 @@
             <div id="OrganizationSelector" class="w-full flex items-center">
                 <label class="open-sans-soft-regular border-l-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] rounded-l-lg text-white text-lg block p-6 pl-10 h-full shadow-md">Organization</label>
                 <div class="selectWrapperLG w-full">
-                    <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md">
-                        @foreach($Organizations as $org)
-                            @if (isset($_SESSION["User"]))
-                                @if ($org->organization_id == $OrgInfo->organization_id)
-                                    <option selected wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
-                                @else
-                                    <option wire:click="$js.ChangeOrg($event,'{{ $org->organization_id }}')" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                        <select id="Organizations" class="open-sans-soft-regular border-r-1 border-t-1 border-b-1 border-gray-300 border-solid bg-[#707070] text-white text-lg hover:bg-[#4a4a4a] w-full p-6 pr-10 rounded-r-lg font-bold shadow-md" wire:change="$js.ChangeOrg($event,$event.target.value)">
+                            @foreach($Organizations as $org)
+                                @if (isset($_SESSION["User"]))
+                                    @if ($org->organization_id == $OrgInfo->organization_id)
+                                        <option selected value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                    @else
+                                        <option value="{{ $org->organization_id }}" id="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
+                                    @endif
                                 @endif
-                            @endif
-                        @endforeach
-                    </select>
+                            @endforeach
+                        </select>
                 </div>
             </div>
         </div>
