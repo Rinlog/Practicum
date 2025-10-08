@@ -1,6 +1,6 @@
 <div>
     {{-- Search Options --}}
-    <div class="fixed sm:right-0 sm:w-[16%] sm:h-full sm:top-15 overflow-y-scroll sm:overflow-y-visible bottom-5 h-[25%] bg-white p-4 shadow-md z-2"]>
+    <div class="fixed lg:w-[16%] lg:h-full lg:top-15 overflow-y-scroll lg:overflow-y-scroll bottom-5 h-[25%] right-0 bg-[#f9f9f9] lg:bg-white p-4 shadow-md z-2"]>
         {{-- DatePicker --}}
         <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] mt-6 p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[240px]">
             <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
@@ -104,7 +104,7 @@
             </div>
         @endif
         {{-- Confirm --}}
-        <span class="flex flex-row justify-center items-center p-4 flex-1 sm:pt-20">
+        <span class="flex flex-row justify-center items-center p-4 flex-1 sm:pt-20 sm:pb-20">
             <button wire:click="$js.Search" class="bg-white border-2 border-[#46c0e5] p-3 rounded-full text-[#46c0e5] font-semibold hover:text-[#3c8fb0] hover:border-[#3c8fb0] cursor-pointer w-full">
                 CONFIRM
             </button>
@@ -453,6 +453,7 @@
 
             })
             $js("Search",async function(){
+                $("#Graphs").text("");
                 ShowLoading();
                 await refresh();
             });

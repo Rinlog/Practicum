@@ -97,6 +97,10 @@ class SensorReadings extends Component
                 $this->device = $this->devices[0]->device_name;
                 $this->deviceInfo = $this->devices[0];
             }
+            else{
+                $this->device = "NONE";
+                $this->deviceInfo = null;
+            }
             $this->LoadSensorsBasedOnDevice();
         }
         catch(Exception $e){
@@ -154,6 +158,8 @@ class SensorReadings extends Component
             $this->LoadSensorTypeInfo();
         }
         catch(Exception $e){
+            $this->sensor = "NO SENSORS";
+            $this->sensorInfo = null;
             Log::channel("customlog")->error($e->getMessage());
         }
     }

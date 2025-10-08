@@ -92,6 +92,10 @@ class DeviceReadings extends Component
                 $this->device = $this->devices[0]->device_name;
                 $this->deviceInfo = $this->devices[0];
             }
+            else{
+                $this->device = "NONE";
+                $this->deviceInfo = null;
+            }
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());

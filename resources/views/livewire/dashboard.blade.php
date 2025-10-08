@@ -12,9 +12,9 @@
                     <div class="relative w-full lg:flex-1 pt-5 overflow-y-hidden overflow-x-hidden">
                         {{-- info selection --}}
                         <div class="flex">
-                            <div class="relative inline-block text-left w-full pr-4 lg:pr-0 bg-[#f6f6f6] rounded-t-lg">
+                            <div class="relative inline-block text-left w-full lg:pr-4 lg:pr-0 bg-[#f6f6f6] rounded-t-lg">
                                 <span class="flex flex-row flex-grow">
-                                    <ul class="flex h-full lg:flex-row flex-col">
+                                    <ul class="flex h-full lg:flex-row flex-col w-full lg:w-auto">
                                         @if ($option == "allSensorReadings")
                                             <li wire:click="SwitchToAllReadings" class="bg-white h-full w-full p-9 pr-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToDeviceReading">Sensor Readings</h2></li>
                                             <li wire:click="SwitchToDailyReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Daily Readings</h2></li>
