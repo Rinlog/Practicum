@@ -281,15 +281,14 @@ class UserRoleAssociation extends Component
                     foreach($ItemsToDelete as $Item){
                         $DoubleID = explode("-!-",$Item);
                         $result = DB::table("user_role_association")->where("application_id", $this->ApplicationInfo->application_id)->where("user_id", $DoubleID[0])->where("role_id", $DoubleID[1])->delete();
+                        DB::table("application_log")->insert([
+                            "application_id"=>$this->ApplicationInfo->application_id,
+                            "applog_activity_time"=>now(),
+                            "applog_activity_type"=>"INSERT",
+                            "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                            "applog_activity_desc"=>"Removed user role Association: " . $DoubleID[0] . "-" . $DoubleID[1]
+                        ]);
                     }
-
-                    DB::table("application_log")->insert([
-                        "application_id"=>$this->ApplicationInfo->application_id,
-                        "applog_activity_time"=>now(),
-                        "applog_activity_type"=>"INSERT",
-                        "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "applog_activity_desc"=>"Removed user role Association(s): " . $Value
-                    ]);
                     array_push($Results, $result);
                 }
                 catch(Exception $e){

@@ -203,12 +203,16 @@ class Deviceinfo extends Component
                 try{
                     $result = DB::table("device")->whereIn("device_eui", $ItemsToDelete)->delete();
 
-                    DB::table("log")->insert([
-                        "log_activity_time"=>now(),
-                        "log_activity_type"=>"DELETE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Deleted device(s): ". $Value
-                    ]);
+                    DB::transaction(function() use ($ItemsToDelete){
+                        foreach ($ItemsToDelete as $Item){
+                            DB::table("log")->insert([
+                                "log_activity_time"=>now(),
+                                "log_activity_type"=>"DELETE",
+                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_desc"=>"Deleted device ". $Item
+                            ]);
+                        }
+                    });
                     array_push($Results, $result);
                 }
                 catch(Exception $e){

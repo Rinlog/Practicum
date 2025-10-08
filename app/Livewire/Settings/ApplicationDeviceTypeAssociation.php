@@ -205,13 +205,17 @@ class ApplicationDeviceTypeAssociation extends Component
                         ->whereIn("device_type_id", $ItemsToDelete)
                         ->delete();
 
-                    DB::table("application_log")->insert([
-                        "application_id" => $this->ApplicationInfo->application_id,
-                        "applog_activity_time"=>now(),
-                        "applog_activity_type"=>"DELETE",
-                        "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "applog_activity_desc"=>"Deleted application device type association(s) ". $Value
-                    ]);
+                    DB::transaction(function() use ($ItemsToDelete){
+                        foreach ($ItemsToDelete as $Item){
+                           DB::table("application_log")->insert([
+                                "application_id" => $this->ApplicationInfo->application_id,
+                                "applog_activity_time"=>now(),
+                                "applog_activity_type"=>"DELETE",
+                                "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "applog_activity_desc"=>"Deleted application device association ". $Item
+                            ]);
+                        }
+                    });
                     $Results[] = $result;
                 } catch(Exception $e){
                     $Results[] = 0;

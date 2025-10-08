@@ -220,12 +220,16 @@ class RolePermissionAssociation extends Component
                 try{
                     $result = DB::table("role_permission_association")->where("role_id", $this->RoleInfo->role_id)->whereIn("permission_id", $ItemsToDelete)->delete();
 
-                    DB::table("log")->insert([
-                        "log_activity_time"=>now(),
-                        "log_activity_type"=>"DELETE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"deleted role permission association(s): ". $Value
-                    ]);
+                    DB::transaction(function() use ($ItemsToDelete){
+                        foreach ($ItemsToDelete as $Item){
+                            DB::table("log")->insert([
+                                "log_activity_time"=>now(),
+                                "log_activity_type"=>"DELETE",
+                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_desc"=>"Deleted role permission association ". $Item
+                            ]);
+                        }
+                    });
                     array_push($Results, $result);
                 }
                 catch(Exception $e){

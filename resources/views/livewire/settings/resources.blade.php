@@ -282,27 +282,29 @@
             //used to make sure the primary key being added is a unique key
             function ValidateIfUnique(Item1,Item2, Mode){
                 let result = "";
-                let Item1DupeCount = 0;
-                let Item2DupeCount = 0;
+                let ItemDupeCount = 0;
                 $("#InfoTable").children().each(function(index){
                     if ($(this).children()[3] !== undefined && $(this).children()[4] !== undefined){
                         let tempitem1 = $(this).children()[3].textContent;
+                        let FoundFirst = false;
                         if (tempitem1.toString() == Item1.toString()){
-                            Item1DupeCount+=1
+                            FoundFirst = true;
                         }
-                        let Tempitem2 = $(this).children()[4].textContent;
-                        if (Tempitem2.toString() == Item2.toString()){
-                            Item2DupeCount+=1
+                        if (FoundFirst == true){
+                            let Tempitem2 = $(this).children()[4].textContent;
+                            if (Tempitem2.toString() == Item2.toString()){
+                                ItemDupeCount+=1
+                            }
                         }
                     }
                 });
                 if (Mode == "add"){
-                    if (Item1DupeCount >= 1 && Item2DupeCount >= 1){
+                    if (ItemDupeCount >= 1){
                         return "This resource already exists";
                     }
                 }
                 else if (Mode == "edit"){
-                    if (Item1DupeCount > 1 && Item2DupeCount > 1){
+                    if (ItemDupeCount > 1){
                         return "This resource already exists";
                     }
                 }
@@ -377,7 +379,7 @@
                 let OGCopy = $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).clone(false);
                 $("#"+CustomSplitterToUnderScore(SpaceToUnderScore(EditItem))).children().each(function(index){
                     
-                    //we exclude the checkbox, sequence num, Sensor Data Type ID
+                    //we exclude the checkbox, sequence num
                     if (index >=3){
                         //skipping CRUDR
                         if (index-3 == 3){return;}
@@ -527,7 +529,7 @@
                     setTimeout(function(){
                         $("#DeleteModal").addClass("hide");
                     },200);
-                    setAlertText("Successfully deleted Sensor Data Type(s)");
+                    setAlertText("Successfully deleted resource(s)");
                     displayAlert();
                 });
                 closeAddMenu();
@@ -611,20 +613,20 @@
                             if (Result[index] == 0){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to update Sensor Data Type \"" + Obj["SENSOR DATA TYPE"] + ", " + Obj["DATA VALUE SET TYPE"] + "\"<br>";
+                                ErrorMsg += "Failed to update resource \"" + Obj["RESOURCE NAME"] + ", " + Obj["RESOURCE SUBNAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("INSERT")){
                             if (Result[index] != true){
                                 Errors = true;
                                 let Obj = JSON.parse(ItemInfo);
-                                ErrorMsg += "Failed to insert Sensor Data Type \"" + Obj["SENSOR DATA TYPE"] + ", " + Obj["DATA VALUE SET TYPE"] + "\"<br>";
+                                ErrorMsg += "Failed to insert resource \"" + Obj["RESOURCE NAME"] + ", " + Obj["RESOURCE SUBNAME"] + "\"<br>";
                             }
                         }
                         else if (Type.includes("DELETE")){
                             if (Result[index] == 0){
                                 Errors = true;
-                                ErrorMsg += "Failed to delete Sensor Data Type(s) " + ItemInfo + "<br>";
+                                ErrorMsg += "Failed to delete resource(s) " + ItemInfo + "<br>";
                             }
                         }
                     }

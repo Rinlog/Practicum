@@ -31,7 +31,7 @@ class PermissionInfo extends Component
     public $Components = [];
 
     public $Resource;
-    public $ResourceInfo;
+    public $resourcesInfo = [];
     public $Resources = [];
     public function LoadSoftwareComponents(){
         try{
@@ -68,9 +68,8 @@ class PermissionInfo extends Component
     public function setDefaultResource(){
         try{
             $this->Resource = $this->Resources[0]->resource_name;
-            $this->ResourceInfo = collect(Cache::get("resource", collect()))
+            $this->resourcesInfo = Cache::get("resource", collect())
                     ->where("resource_name", $this->Resource)
-                    ->unique("resource_name")
                     ->values()
                     ->toArray();
         }
@@ -83,9 +82,8 @@ class PermissionInfo extends Component
             foreach($this->Resources as $Resource){
                 if ($Resource->resource_name == $resourceName){
                     $this->Resource = $Resource->resource_name;
-                    $this->ResourceInfo = collect(Cache::get("resource", collect()))
+                    $this->resourcesInfo = Cache::get("resource", collect())
                             ->where("resource_name", $this->Resource)
-                            ->unique("resource_name")
                             ->values()
                             ->toArray();
                 }
@@ -201,6 +199,7 @@ class PermissionInfo extends Component
                     array_push($Results, $result);
                 }
                 catch(Exception $e){
+                    dd($e);
                     array_push($Results, false);
                 }
             }
@@ -211,15 +210,20 @@ class PermissionInfo extends Component
                     //permission name should be unique so deleteing just on that
                     $result = DB::table("permission")->whereIn("permission_name", $ItemsToDelete)->delete();
                     
-                    DB::table("log")->insert([
-                        "log_activity_time"=>now(),
-                        "log_activity_type"=>"DELETE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Deleted permission(s) from component ".$this->Component.": ". $Value
-                    ]);
+                    DB::transaction(function() use ($ItemsToDelete){
+                        foreach ($ItemsToDelete as $Item){
+                            DB::table("log")->insert([
+                                "log_activity_time"=>now(),
+                                "log_activity_type"=>"DELETE",
+                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_desc"=>"Deleted permission from component ".$this->Component.": ". $Item
+                            ]);
+                        }
+                    });
                     array_push($Results, $result);
                 }
                 catch(Exception $e){
+                    dd($e);
                     array_push($Results, 0);
                 }
             }

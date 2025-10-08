@@ -95,14 +95,13 @@ class SensorDataTypes extends Component
                     foreach ($ItemsToDelete as $ItemToDelete){
                         $DoubleID = explode("-!-", $ItemToDelete);
                         $result = DB::table("sensor_data_types")->where("data_type", $DoubleID[0])->where("data_value_set_type", $DoubleID[1])->delete();
+                        DB::table("log")->insert([
+                            "log_activity_time"=>now(),
+                            "log_activity_type"=>"DELETE",
+                            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                            "log_activity_desc"=>"Deleted sensor data type: ". $DoubleID[0] . "-" . $DoubleID[1]
+                        ]);
                     }
-
-                    DB::table("log")->insert([
-                        "log_activity_time"=>now(),
-                        "log_activity_type"=>"DELETE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"Deleted sensor data type(s): ". $Value
-                    ]);
                     array_push($Results, $result);
                 }
                 catch(Exception $e){

@@ -282,12 +282,16 @@ class ApiAccessToken extends Component
                         "assoc_api_token"=>""
                     ]);
 
-                    DB::table("log")->insert([
-                        "log_activity_time"=>now(),
-                        "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
-                        "log_activity_desc"=>"removed api token from user(s) ". $Value
-                    ]);
+                    DB::transaction(function() use ($ItemsToDelete){
+                        foreach ($ItemsToDelete as $Item){
+                            DB::table("log")->insert([
+                                "log_activity_time"=>now(),
+                                "log_activity_type"=>"UPDATE",
+                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_desc"=>"removed api token from user ". $Item
+                            ]);
+                        }
+                    });
                     array_push($Results, $result);
                 }
                 catch(Exception $e){

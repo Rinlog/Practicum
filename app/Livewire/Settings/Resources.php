@@ -22,6 +22,26 @@ class Resources extends Component
     public $Component;
     public $ComponentInfo;
     public $Components = [];
+
+    //used for crudr
+    public $permissionSets = [
+                            'Read-Update-Report'                => ['C'=>false,'R'=>true,'U'=>true,'D'=>false,'RE'=>true],
+                            'Read'                              => ['C'=>false,'R'=>true,'U'=>false,'D'=>false,'RE'=>false],
+                            'Read-Create'                       => ['C'=>true,'R'=>true,'U'=>false,'D'=>false,'RE'=>false],
+                            'Read-Update'                       => ['C'=>false,'R'=>true,'U'=>true,'D'=>false,'RE'=>false],
+                            'Read-Delete'                       => ['C'=>false,'R'=>true,'U'=>false,'D'=>true,'RE'=>false],
+                            'Read-Report'                       => ['C'=>false,'R'=>true,'U'=>false,'D'=>false,'RE'=>true],
+                            'Read-Create-Update'                => ['C'=>true,'R'=>true,'U'=>true,'D'=>false,'RE'=>false],
+                            'Read-Create-Delete'                => ['C'=>true,'R'=>true,'U'=>false,'D'=>true,'RE'=>false],
+                            'Read-Create-Report'                => ['C'=>true,'R'=>true,'U'=>false,'D'=>false,'RE'=>true],
+                            'Read-Create-Update-Delete'         => ['C'=>true,'R'=>true,'U'=>true,'D'=>true,'RE'=>false],
+                            'Read-Create-Update-Report'         => ['C'=>true,'R'=>true,'U'=>true,'D'=>false,'RE'=>true],
+                            'Read-Create-Delete-Report'         => ['C'=>true,'R'=>true,'U'=>false,'D'=>true,'RE'=>true],
+                            'Read-Update-Delete'                => ['C'=>false,'R'=>true,'U'=>true,'D'=>true,'RE'=>false],
+                            'Read-Update-Delete-Report'         => ['C'=>false,'R'=>true,'U'=>true,'D'=>true,'RE'=>true],
+                            'Read-Delete-Report'                => ['C'=>false,'R'=>true,'U'=>false,'D'=>true,'RE'=>true],
+                            'Full-Access'                       => ['C'=>true,'R'=>true,'U'=>true,'D'=>true,'RE'=>true],
+                        ];
     public function LoadSoftwareComponents(){
         try{
             $this->Components = Cache::get("software_component", collect())->values()->toArray();
@@ -103,6 +123,7 @@ class Resources extends Component
             $Query = $ActionSplit[0];
             $Value = $ActionSplit[1];
             if (str_contains(strtolower($Query),"insert")) {
+                $Crudr = $ActionSplit[2];
                 $Object = json_decode($Value);
                 try{
                     $result = DB::table("resource")->insert([
@@ -117,6 +138,26 @@ class Resources extends Component
                         "log_activity_performed_by"=> $_SESSION["User"]->user_username,
                         "log_activity_desc"=>"Inserted resource ". $Object->{"RESOURCE NAME"} . ", " . $Object->{"RESOURCE SUBNAME"}
                     ]);
+                    //doing after resource is inserted, if resource fails to insert this will also fail
+                    if ($Crudr == "true"){
+                        DB::transaction(function() use ($Object){
+                            foreach ($this->permissionSets as $key=>$permission){
+                                DB::table("permission")->insert([
+                                    "permission_id"=>Uuid::uuid4(),
+                                    "resource_name"=> trim($Object->{"RESOURCE NAME"}),
+                                    "resource_sub_name"=> trim($Object->{"RESOURCE SUBNAME"}),
+                                    "component_id" => $this->ComponentInfo->component_id,
+                                    "permission_name"=>  $key." ". $Object->{"RESOURCE NAME"} . "_" . $Object->{"RESOURCE SUBNAME"},
+                                    "permission_desc"=> "Automatically generated permission",
+                                    "permission_create" => $permission['C'],
+                                    "permission_read"=> $permission['R'],
+                                    "permission_update"=>$permission['U'],
+                                    "permission_delete"=>$permission['D'],
+                                    "permission_report"=>$permission['RE']
+                                ]);
+                            }
+                        },2);
+                    }
                     array_push($Results, $result);
                 }
                 catch(Exception $e){
@@ -125,10 +166,10 @@ class Resources extends Component
             }
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
-
                 try{
                     foreach ($ItemsToDelete as $ItemToDelete){
                         $DoubleID = explode("-!-", $ItemToDelete);
+                        DB::table("permission")->where("resource_name", $DoubleID[0])->where("resource_sub_name",$DoubleID[1])->where("component_id",$this->ComponentInfo->component_id)->delete();
                         $result = DB::table("resource")->where("resource_name", $DoubleID[0])->where("resource_sub_name", $DoubleID[1])->where("component_id",$this->ComponentInfo->component_id)->delete();
                     }
 
@@ -147,16 +188,37 @@ class Resources extends Component
             else if (str_contains(strtolower($Query),"update")){
                 try{
                     $Object = json_decode($Value);
-
+                    $Crudr = $ActionSplit[2];
                     $bracketloc = strpos($Query,"[");
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
                     $doubleID = explode("-!-",$idToUpdate);
+                    //we will start by removing old permission info to allow for an update
+                    DB::table("permission")->where("resource_name", $doubleID[0])->where("resource_sub_name",$doubleID[1])->where("component_id",$this->ComponentInfo->component_id)->delete();
                     $result = DB::table("resource")->where("resource_name", $doubleID[0])->where("resource_sub_name",$doubleID[1])->where("component_id",$this->ComponentInfo->component_id)->update([
                         "resource_name" =>$Object->{"RESOURCE NAME"},
                         "resource_sub_name" => $Object->{"RESOURCE SUBNAME"},
                         "resource_desc" => $Object->{"DESCRIPTION"}
                     ]);
+                    if ($Crudr == "true"){
+                        DB::transaction(function() use ($Object){
+                            foreach ($this->permissionSets as $key=>$permission){
+                                DB::table("permission")->insert([
+                                    "permission_id"=>Uuid::uuid4(),
+                                    "resource_name"=> trim($Object->{"RESOURCE NAME"}),
+                                    "resource_sub_name"=> trim($Object->{"RESOURCE SUBNAME"}),
+                                    "component_id" => $this->ComponentInfo->component_id,
+                                    "permission_name"=>  $key." ". $Object->{"RESOURCE NAME"} . "_" . $Object->{"RESOURCE SUBNAME"},
+                                    "permission_desc"=> "Automatically generated permission",
+                                    "permission_create" => $permission['C'],
+                                    "permission_read"=> $permission['R'],
+                                    "permission_update"=>$permission['U'],
+                                    "permission_delete"=>$permission['D'],
+                                    "permission_report"=>$permission['RE']
+                                ]);
+                            }
+                        },2);
+                    }
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
@@ -166,12 +228,15 @@ class Resources extends Component
                     array_push($Results, $result);
                 }
                 catch(Exception $e){
+                    dd($e);
                     array_push($Results, 0);
                 }
             }
         }
+        Cache::forget("permission");
         Cache::forget("resource");
         Cache::rememberForever("resource", fn() => DB::table("resource")->get());
+        Cache::rememberForever("resource", fn() => DB::table("permission")->get());
         return $Results;
     }
     public function LogExport(){
