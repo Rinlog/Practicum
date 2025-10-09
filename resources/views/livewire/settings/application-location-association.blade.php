@@ -114,7 +114,7 @@
                 </div>
             </div>
         </button>
-        <div class="text-white bg-[#00719d] z-2 top-27 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
+        <div class="text-white bg-[#00719d] z-2 top-28 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
             <h1 class="absolute top-14">Add Row</h1>       
         </div>
         <div class="absolute text-white lg:right-18 left-85 top-30">
@@ -160,7 +160,7 @@
                 </div>
             </div>
         </button>
-        <div class="text-white bg-[#00719d] z-2 top-27 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
+        <div class="text-white bg-[#00719d] z-2 top-28 rounded-t-lg absolute w-[383px] h-[120px] text-start pl-10">
             <h1 class="absolute top-14">Edit Row</h1>       
         </div>
         <div class="absolute text-white right-18 top-30">

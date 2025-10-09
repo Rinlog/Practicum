@@ -104,7 +104,7 @@ class Home extends Component
             $RolePermissionIds = Cache::get("role_permission_association",collect())->whereIn("role_id",$UserRolesBasedOnApp)->pluck("permission_id")->values()->toArray();
             session()->put("AllAppPermsForUser",Cache::get("permission",collect())->whereIn("permission_id",$RolePermissionIds)->values()->toArray());
             session()->put("AppId",$this->ApplicationInfo->application_id);
-            header("Refresh: 0");
+            return redirect('home');
         }
     }
 
