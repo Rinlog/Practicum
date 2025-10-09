@@ -140,8 +140,8 @@
         </div>
         {{-- form --}}  
         <form>
-            <div id="AddAssoc" class="pt-24 pb-30 relative bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
-                    <livewire:components.frm-select-box selectMessage="Permission:" id="permissions" key="{{ Str::random() }}" :options="$Permissions" optionName="permission_name" optionId="permission_id"></livewire:components.frm-select-box>
+            <div id="AddAssoc" class="pt-24 pb-30 bg-[#00719d] z-1 pl-10 pt-1 pr-3 mt-22 text-white h-[645px] rounded-lg w-[400px] overflow-x-visible overflow-y-scroll">
+                    <livewire:components.frm-select-with-search selectMessage="Permission:" selectId="permissions" key="{{ Str::random() }}" :options="$Permissions" optionName="permission_name" optionId="permission_id"></livewire:components.frm-select-with-search>
                     <livewire:components.underline-input id="description" placeholder="Description" type="text"></livewire:components.underline-input>
             </div>
             {{-- Confirm Section --}}
@@ -316,11 +316,10 @@
 
                 let result = "";
                 let IDDupeCount = 0;
-                let IDAsName = $("option[id='"+ID.toString().trim()+"']").val();
                 $("#InfoTable").children().each(function(index){
                     if ($(this).children()[4] !== undefined){
                         let id = $(this).children()[4].textContent;
-                        if (id.toString() == IDAsName.toString()){
+                        if (id.toString() == ID.toString()){
                             IDDupeCount+=1
                         }
                     }
@@ -372,7 +371,7 @@
                         tr.appendChild(td3);
                         //putting value of option instead of id
                         let td = document.createElement("td");
-                        td.textContent = $("option[id='"+value.toString().trim()+"']").val();
+                        td.textContent = value.toString().trim();
                         tr.appendChild(td)
                     }
                     else if (index == 1){
@@ -416,7 +415,7 @@
             }
             function PopulateArrayWithVals(EditAdd){
                 let FormVals = [];
-                FormVals.push($(`#${EditAdd} #permissions`).find('option:selected').attr("id"));
+                FormVals.push($(`#${EditAdd} #button-permissions`).text());
                 FormVals.push($(`#${EditAdd} #description`).val());
                 return FormVals;
             }
@@ -703,10 +702,15 @@
             })
             //generate Sequence Numbers on load ------------------------------------------------------------------------ON LOAD SEGMENT---------------------------
             $(document).ready(async function(){
+                ShowLoading();
                 await $wire.call("LoadSoftwareComponents");
+                ShowLoading();
                 await $wire.call("setDefaultComponent");
+                ShowLoading();
                 await $wire.call("LoadRoles");
+                ShowLoading();
                 await $wire.call("SetDefaultRole");
+                ShowLoading();
                 await $wire.call("LoadPermission");
                 component = $wire.component;
                 role = $wire.role;

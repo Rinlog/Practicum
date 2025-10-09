@@ -14,8 +14,7 @@ use \PDO;
 #[Title("UserSettings | IDL")]
 class UserSettings extends Component
 {
-    private $conn2; // ✅ keep only PDO for key_vault
-
+    private $conn2;
     private $errStyle = "border-2 border-red-500";
     public $FName = "";
     public $LName = "";

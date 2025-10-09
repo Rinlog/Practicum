@@ -1,6 +1,6 @@
 <div>
     {{-- Search Options --}}
-    <div class="fixed lg:w-[16%] lg:h-full lg:top-15 overflow-y-scroll lg:overflow-y-scroll bottom-5 h-[25%] right-0 bg-[#f9f9f9] lg:bg-white p-4 shadow-md z-2"]>
+    <div id="SearchContainerOptions" class="fixed lg:w-[16%] lg:h-full lg:top-15 overflow-y-scroll lg:overflow-y-scroll bottom-5 h-[35%] right-0 bg-[#f9f9f9] lg:bg-white p-4 shadow-md z-2"]>
         {{-- DatePicker --}}
         <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] mt-6 p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[240px]">
             <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
@@ -24,7 +24,7 @@
                             <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
                         </svg>
                     </button>
-                    <div id="FilterDropDown" isOpen="false" class="absolute right-0 z-3 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div id="FilterDropDown" isOpen="false" class="fixed z-3 mt-2 w-90 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                         <div class="p-4 flex flex-col items-center" role="none">
                             <livewire:components.req-underline-input id="startTime" text="Start Time*" textColor="text-gray-500" inputColor="text-gray-600" type="number"></livewire:components.req-underline-input>
                             <livewire:components.req-underline-input id="endTime" text="End Time*" textColor="text-gray-500" inputColor="text-gray-600" type="number"></livewire:components.req-underline-input>
@@ -452,6 +452,7 @@
                 $("#TimeRange").text("Hour " + vals[0] + " - " + vals[1]);
 
             })
+            
             $js("Search",async function(){
                 $("#Graphs").text("");
                 ShowLoading();
@@ -552,8 +553,32 @@
             $("#Filter").on("click",function(e){
                 OpenCloseFilter()
             });
+            function UpdateFilterPos(){
+                let button = document.getElementById("Filter");
+                let dropdown = document.getElementById("FilterDropDown");
+                let searchContainer = document.getElementById("SearchContainerOptions").getBoundingClientRect();
+                let rect = button.getBoundingClientRect();
+                let screen = document.getElementsByTagName("body")[0].getBoundingClientRect();
+                if (screen.right > 1024){
+                    dropdown.style.left = `auto`;
+                    if (!(searchContainer.top >= rect.bottom)){
+                        dropdown.style.top = `${rect.bottom}px`
+                    }
+                    dropdown.style.right = `${screen.right - rect.right}px`
+                }
+                else if (screen.right < 1024){
+                    dropdown.style.right = `auto`;
+                    if (!(searchContainer.top >= rect.bottom)){
+                        dropdown.style.top = `${rect.bottom}px`
+                    }
+                    dropdown.style.left = `${rect.left}px`
+                }
+            }
+            document.getElementById("SearchContainerOptions").addEventListener("scroll",UpdateFilterPos);
+            window.addEventListener("resize",UpdateFilterPos);
             function OpenCloseFilter(){
                 if ($("#FilterDropDown").attr("isopen") == "false"){
+                    UpdateFilterPos();
                     $("#FilterDropDown").addClass("transition ease-out duration-100");
                     $("#FilterDropDown").removeClass("transform opacity-0 scale-0");
                     $("#FilterDropDown").addClass("transform opacity-100 scale-100");

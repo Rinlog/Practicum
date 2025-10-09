@@ -198,6 +198,13 @@ class Login extends Component
                     session_start();
                     $_SESSION["UserName"] = ucfirst(strtolower($this->Username));
                     $_SESSION["User"] = $this->user;
+                    $UserRoleAssoc = Cache::get("user_role_association",collect())->where("user_id",$this->user->user_id);
+                    $ApplicationsArray = $UserRoleAssoc->pluck("application_id")->unique()->all();
+                    $UserRolesBasedOnApp = $UserRoleAssoc->where("application_id",$ApplicationsArray[0])->pluck("role_id")->values()->toArray(); //using a default value
+                    $RolePermissionIds = Cache::get("role_permission_association",collect())->whereIn("role_id",$UserRolesBasedOnApp)->pluck("permission_id")->values()->toArray();
+                    session()->put("AllAppPermsForUser",Cache::get("permission",collect())->whereIn("permission_id",$RolePermissionIds)->values()->toArray());
+                    session()->put("AdminComponentID",Cache::get("software_component",collect())->where("component_name","Admin Component")->pluck("component_id")[0]);
+                    session()->put("AppId",$ApplicationsArray[0]);
                     return redirect("/home");
                 }
             }

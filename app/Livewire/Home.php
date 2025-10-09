@@ -78,33 +78,41 @@ class Home extends Component
 
     public function LoadApplications(){
         try{
-            $this->Applications = Cache::get("application", collect());
+            $userRoles = Cache::get("user_role_association", collect())
+                    ->where("user_id", $this->user->user_id);
+
+            $ApplicationsArray = $userRoles->pluck("application_id")->all();
+            if (count($ApplicationsArray) > 0){
+                $this->Applications = Cache::get("application", collect())
+                    ->whereIn("application_id", $ApplicationsArray);
+            }
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-
-    public function setDefaultApplication(){
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
+    public function SetApplication($ApplicationID){
+        foreach ($this->Applications as $Application){
+            if ($Application->application_id == $ApplicationID) {
+                $this->ApplicationInfo = $Application;
+                $this->application = $Application->application_name;
+            }
         }
-        if (isset($_SESSION["User"])) {
-            try{
-                $this->application = $this->Applications[0]->application_name;
-                $this->ApplicationInfo = $this->Applications[0];
-            }
-            catch(Exception $e){
-                $this->application = "";
-            }
+        if ($ApplicationID != session()->get("AppId")){
+            $UserRoleAssoc = Cache::get("user_role_association",collect())->where("user_id",$this->user->user_id);
+            $UserRolesBasedOnApp = $UserRoleAssoc->where("application_id",$this->ApplicationInfo->application_id)->pluck("role_id")->values()->toArray(); //using a default value
+            $RolePermissionIds = Cache::get("role_permission_association",collect())->whereIn("role_id",$UserRolesBasedOnApp)->pluck("permission_id")->values()->toArray();
+            session()->put("AllAppPermsForUser",Cache::get("permission",collect())->whereIn("permission_id",$RolePermissionIds)->values()->toArray());
+            session()->put("AppId",$this->ApplicationInfo->application_id);
+            header("Refresh: 0");
         }
     }
 
     public function LoadLogInfo(){
         try{
             $this->DisplayLogTableInfo = '';
-            $StartDate = new DateTime()->modify("-1 days")->format("Y-m-d");
-            $EndDate = new DateTime()->modify("+1 day")->format("Y-m-d");
+            $StartDate = (new DateTime())->modify("-1 days")->format("Y-m-d");
+            $EndDate = (new DateTime())->modify("+1 day")->format("Y-m-d");
             $StartDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T00:00:00.000",$StartDate);
             $EndDate = preg_replace('/T[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{3}Z/i',"T23:59:00.000",$EndDate);
 
@@ -121,7 +129,6 @@ class Home extends Component
                 ":start" => $StartDate,
                 ":end" => $EndDate
             ]);
-
             $TableInfo = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             foreach($TableInfo as $Row){
@@ -147,7 +154,7 @@ class Home extends Component
         $this->LoadUserInfo();
         $this->LoadUsersRoles();
         $this->LoadApplications();
-        $this->setDefaultApplication();
+        $this->SetApplication(session()->get("AppId"));
         return view('livewire.home');
     }
 }
