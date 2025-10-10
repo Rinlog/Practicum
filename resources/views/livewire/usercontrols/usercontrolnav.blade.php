@@ -7,7 +7,7 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
     <div>
         <div class="inline-block text-left">
             <div id="UserControlDiv" class="transition-all duration-300 pr-10">
-                <button type="button" id="OpenUserControls" class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                <button type="button" id="OpenUserControls" class="inline-flex w-full justify-center items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100" id="menu-button" aria-expanded="true" aria-haspopup="true">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#767676" id="Path" viewBox="0 0 26 26" width="24px" height="24px">
                     <path id="Profile" class="cls-1" d="M13,13c-2.76,0-5-2.24-5-5s2.24-5,5-5,5,2.24,5,5-2.24,5-5,5ZM13,5c-1.65,0-3,1.35-3,3s1.35,3,3,3,3-1.35,3-3-1.35-3-3-3ZM20.5,22v-2c0-2.76-2.24-5-5-5h-5c-2.76,0-5,2.24-5,5v2c0,.55.45,1,1,1s1-.45,1-1v-2c0-1.65,1.35-3,3-3h5c1.65,0,3,1.35,3,3v2c0,.55.45,1,1,1s1-.45,1-1Z"/>
                 </svg>
@@ -17,7 +17,6 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
                 </svg>
                 </button>
             </div>
-
             <div id="UserDropDown" isOpen="false" class="absolute right-10 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden transform opacity-0 scale-0" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                 <div class="py-1" role="none">
                 <a href="/profilesettings" class="flex gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 hover:outline-hidden" role="menuitem" tabindex="-1" id="menu-item-0">

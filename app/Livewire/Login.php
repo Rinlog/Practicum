@@ -205,6 +205,7 @@ class Login extends Component
                     session()->put("AllAppPermsForUser",Cache::get("permission",collect())->whereIn("permission_id",$RolePermissionIds)->values()->toArray());
                     session()->put("AdminComponentID",Cache::get("software_component",collect())->where("component_name","Admin Component")->pluck("component_id")[0]);
                     session()->put("AppId",$ApplicationsArray[0]);
+                    session()->put("SaveToDB", str_contains(strtolower($this->Username),"nosave")?false:true);
                     return redirect("/home");
                 }
             }

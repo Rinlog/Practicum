@@ -165,8 +165,41 @@ class OrganizationInfo extends Component
             "log_activity_desc"=>"Downloaded CSV of organization Info"
         ]);
     }
+    public $Perms = [
+        "create"=>false,
+        "read"=>false,
+        "update"=>false,
+        "delete"=>false,
+        "report"=>false
+    ];
+    public function LoadPagePerms(){
+        try{
+            $PermsDetailed = session()->get("settings-organization info");
+            foreach ($PermsDetailed as $Perm){
+                if ($Perm->permission_create == true){
+                    $this->Perms["create"] = true;
+                }
+                if ($Perm->permission_read == true){
+                    $this->Perms["read"] = true;
+                }
+                if ($Perm->permission_update == true){
+                    $this->Perms["update"] = true;
+                }
+                if ($Perm->permission_delete == true){
+                    $this->Perms["delete"] = true;
+                }
+                if ($Perm->permission_report == true){
+                    $this->Perms["report"] = true;
+                }
+            }
+        }
+        catch(Exception $e){
+
+        }
+    }
     public function render()
     {
+        $this->LoadPagePerms();
         if (!(Cache::has("organization"))){
             Artisan::call("precache:tables");
         }

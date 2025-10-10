@@ -11,7 +11,19 @@ class Logs extends Component
     public $LogPage = "generalLog";
     public function render()
     {
-        $this->LogPage = session()->get("LogsPage","generalLog");
+        $AllowedPages = [];
+        if (session()->get('logs-general log')){
+            array_push($AllowedPages,"generalLog");
+        }
+        if (session()->get('logs-application-specific log')){
+            array_push($AllowedPages,"applicationLog");
+        }
+        if (in_array(session()->get("LogsPage"),$AllowedPages)){
+            $this->LogPage = session()->get("LogsPage","generalLog");
+        }
+        else{
+            $this->LogPage = $AllowedPages[0];
+        }
         return view('livewire.logs');
     }
 

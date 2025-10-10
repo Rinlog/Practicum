@@ -21,6 +21,6 @@ Route::get("/profilesettings",UserSettings::class);
 Route::Post("/logout",function(){
     session_start();
     session_destroy();
+    session()->flush();
     return redirect("/");
 });
-Route::get("/precache",[Precache::class,'__construct']);

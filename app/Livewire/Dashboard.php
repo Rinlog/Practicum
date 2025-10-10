@@ -18,7 +18,23 @@ class Dashboard extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        $this->option = session()->get("SensorReadingPage","allSensorReadings");
+        $AllowedPages = [];
+        if (session()->get('browse_sensor_readings-sensor readings')){
+            array_push($AllowedPages,"allSensorReadings");
+        }
+        if (session()->get('browse_sensor_readings-daily averages')){
+            array_push($AllowedPages,"dailySensorReadings");
+        }
+        if (session()->get('browse_sensor_readings-hourly averages')){
+            array_push($AllowedPages,"hourlySensorReadings");
+        }
+        if (in_array(session()->get("SensorReadingPage"),$AllowedPages)){
+            $this->option = session()->get("SensorReadingPage","allSensorReadings");
+        }
+        else{
+            $this->option = $AllowedPages[0];
+        }
+        
         return view('livewire.dashboard');
     }
     public function SaveSession(){

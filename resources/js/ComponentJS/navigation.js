@@ -95,8 +95,9 @@ $(document).ready(function(e){
         let search = e.target.value;
         let regex = new RegExp("^"+search+".*","i")
         $("#list").children().each(function(index){
+            console.log($(this).text().trim());
             if ($(this).prop("tagName") == "A"){
-                let TestCase = $(this).text();
+                let TestCase = $(this).text().trim();
                 if (regex.test(TestCase) == false){
                     $(this).addClass("hide");
                 }

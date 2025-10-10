@@ -1,6 +1,6 @@
 <?php session_start()?>
 <div class="bg-[#f2f2f2] flex flex-row">
-    @if (empty($_SESSION["UserName"]))
+    @if (empty(session()->get("AllAppPermsForUser"))))
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>
@@ -14,13 +14,38 @@
                     <div class="relative inline-block text-left w-full pr-4 lg:pr-0 bg-[#f6f6f6] rounded-t-lg">
                         <span class="flex flex-row flex-grow">
                             <ul class="flex h-full">
-                                @if ($LogPage == "generalLog")
-                                    <li wire:click="$js.SwitchToGeneralLog" class="bg-white h-full w-full p-9 pr-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToGeneralLog">General Log</h2></li>
-                                    <li wire:click="$js.SwitchToApplicationLog" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToApplicationLog">Application Log</h2></li>
-                                @else
-                                    <li wire:click="$js.SwitchToGeneralLog" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToGeneralLog">General Log</h2></li>
-                                    <li wire:click="$js.SwitchToApplicationLog" class="bg-white h-full w-full p-9 pl-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToApplicationLog">Application Log</h2></li>
-                                @endif
+                                        @php
+                                            // Define the available tabs dynamically based on session permissions
+                                            $tabs = [];
+
+                                            if (session('logs-general log')) {
+                                                $tabs['generalLog'] = [
+                                                    'label' => 'General Log',
+                                                    'click' => 'ShowGeneralLog',
+                                                ];
+                                            }
+
+                                            if (session('logs-application-specific log')) {
+                                                $tabs['applicationLog'] = [
+                                                    'label' => 'Application Log',
+                                                    'click' => 'ShowAppLog',
+                                                ];
+                                            }
+                                        @endphp
+
+                                        @if (!empty($tabs))
+                                            @foreach ($tabs as $key => $tab)
+                                                @php
+                                                    $isActive = $LogPage === $key;
+                                                @endphp
+
+                                                <li wire:click="{{ $tab['click'] }}"
+                                                    class="h-full w-full p-9 rounded-t-lg whitespace-nowrap cursor-pointer hover:bg-neutral-200
+                                                        {{ $isActive ? 'pl-12 bg-white text-[#056c8b] font-bold' : 'bg-[#f6f6f6] text-[#707070] font-semibold' }}">
+                                                    <h2>{{ $tab['label'] }}</h2>
+                                                </li>
+                                            @endforeach
+                                        @endif
                             </ul>
                         </span>
                     </div>

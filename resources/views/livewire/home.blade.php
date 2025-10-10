@@ -3,7 +3,7 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
 ?>
 <div class="bg-[#f2f2f2] flex flex-row">
     @vite('resources/css/home.css')
-    @if (empty($_SESSION["UserName"]))
+    @if (empty(session()->get("AllAppPermsForUser")))
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>

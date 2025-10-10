@@ -1,5 +1,5 @@
 <div class="bg-[#f2f2f2] flex flex-row overflow-x-hidden block">
-    @if (empty($_SESSION["UserName"]))
+    @if (empty(session()->get("AllAppPermsForUser"))))
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>

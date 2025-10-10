@@ -1,5 +1,6 @@
-    <div class="bg-[#f2f2f2] flex flex-row">
-        @if (empty($_SESSION["UserName"]))
+
+<div class="bg-[#f2f2f2] flex flex-row">
+        @if (empty(session()->get("AllAppPermsForUser"))))
             <script>window.location = "/";</script>
         @endif
         <livewire:navigation></livewire:navigation>
@@ -15,18 +16,44 @@
                             <div class="relative inline-block text-left w-full lg:pr-4 lg:pr-0 bg-[#f6f6f6] rounded-t-lg">
                                 <span class="flex flex-row flex-grow">
                                     <ul class="flex h-full lg:flex-row flex-col w-full lg:w-auto">
-                                        @if ($option == "allSensorReadings")
-                                            <li wire:click="SwitchToAllReadings" class="bg-white h-full w-full p-9 pr-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToDeviceReading">Sensor Readings</h2></li>
-                                            <li wire:click="SwitchToDailyReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Daily Readings</h2></li>
-                                            <li wire:click="SwitchToHourlyReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Hourly Readings</h2></li>
-                                        @elseif ($option == "dailySensorReadings")
-                                            <li wire:click="SwitchToAllReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToDeviceReading">Sensor Readings</h2></li>
-                                            <li wire:click="SwitchToDailyReadings" class="bg-white h-full w-full p-9 pl-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Daily Readings</h2></li>
-                                            <li wire:click="SwitchToHourlyReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Hourly Readings</h2></li>
-                                        @else
-                                            <li wire:click="SwitchToAllReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToDeviceReading">Sensor Readings</h2></li>
-                                            <li wire:click="SwitchToDailyReadings" class="bg-[#f6f6f6] h-full w-full p-9 rounded-t-lg whitespace-nowrap text-[#707070] font-semibold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Daily Readings</h2></li>
-                                            <li wire:click="SwitchToHourlyReadings" class="bg-white h-full w-full p-9 pl-12 rounded-t-lg whitespace-nowrap text-[#056c8b] font-bold hover:bg-neutral-200 cursor-pointer"><h2 wire:click="$js.SwitchToSensorReading">Average Hourly Readings</h2></li>
+                                        @php
+                                            // Define the available tabs dynamically based on session permissions
+                                            $tabs = [];
+
+                                            if (session('browse_sensor_readings-sensor readings')) {
+                                                $tabs['allSensorReadings'] = [
+                                                    'label' => 'Sensor Readings',
+                                                    'click' => 'SwitchToAllReadings',
+                                                ];
+                                            }
+
+                                            if (session('browse_sensor_readings-daily averages')) {
+                                                $tabs['dailySensorReadings'] = [
+                                                    'label' => 'Average Daily Readings',
+                                                    'click' => 'SwitchToDailyReadings',
+                                                ];
+                                            }
+
+                                            if (session('browse_sensor_readings-hourly averages')) {
+                                                $tabs['hourlySensorReadings'] = [
+                                                    'label' => 'Average Hourly Readings',
+                                                    'click' => 'SwitchToHourlyReadings',
+                                                ];
+                                            }
+                                        @endphp
+
+                                        @if (!empty($tabs))
+                                            @foreach ($tabs as $key => $tab)
+                                                @php
+                                                    $isActive = $option === $key;
+                                                @endphp
+
+                                                <li wire:click="{{ $tab['click'] }}"
+                                                    class="h-full w-full p-9 rounded-t-lg whitespace-nowrap cursor-pointer hover:bg-neutral-200
+                                                        {{ $isActive ? 'pl-12 bg-white text-[#056c8b] font-bold' : 'bg-[#f6f6f6] text-[#707070] font-semibold' }}">
+                                                    <h2>{{ $tab['label'] }}</h2>
+                                                </li>
+                                            @endforeach
                                         @endif
                                     </ul>
                                 </span>

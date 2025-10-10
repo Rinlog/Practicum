@@ -11,7 +11,19 @@ class Readings extends Component
     public $readingPage = "deviceReadings";
     public function render()
     {
-        $this->readingPage = session()->get("ReadingPage","deviceReadings");
+        $AllowedPages = [];
+        if (session()->get('browse_readings-device readings')){
+            array_push($AllowedPages,"deviceReadings");
+        }
+        if (session()->get('browse_readings-sensor readings')){
+            array_push($AllowedPages,"sensorPage");
+        }
+        if (in_array(session()->get("ReadingPage"),$AllowedPages)){
+            $this->readingPage = session()->get("ReadingPage","deviceReadings");
+        }
+        else{
+            $this->readingPage = $AllowedPages[0];
+        }
         return view('livewire.readings');
     }
 

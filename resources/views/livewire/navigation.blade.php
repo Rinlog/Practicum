@@ -74,65 +74,51 @@
             </span>
             <!--Content-->
             <div id="list" class="flex flex-col gap-2 z-4">
-                <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">INFORMATION</h2>
-                @foreach ($SettingPages as $SettingPage)
-                @if (strtolower($SettingPage->resource_sub_name) == "device info")
-                    <a href="/settings/deviceInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Devices</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "device type info")
-                    <a href="/settings/deviceTypeInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Device Types</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "sensor type info")
-                    <a href="/settings/sensorTypeInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensor Types</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "sensor info")
-                    <a href="/settings/sensorInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensors</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "sensor data types info")
-                    <a href="/settings/sensorDataTypeInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensor Data Types</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "location info")
-                    <a href="/settings/locationInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Locations</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "sub-location info")
-                    <a href="/settings/subLocationInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sub-Locations</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "application info")
-                    <a href="/settings/applicationInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Applications</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "organization info")
-                    <a href="/settings/organizationInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Organizations</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "software component info")
-                    <a href="/settings/softwareComponentInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Software Components</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "resource info")
-                    <a href="/settings/resourceInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Resources</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "permission info")
-                    <a href="/settings/permissionInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Permissions</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "role info")
-                    <a href="/settings/roleInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Roles</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "user info")
-                    <a href="/settings/userInfo"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Users</h3></button></a>
-                @elseif (strtolower($SettingPage->resource_sub_name) == "api access token info")
-                    <a href="/settings/apiAccessToken"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Api Access Token</h3></button></a>
+                {{-- SETTINGS --}}
+                @if (collect($settings)->contains(fn($_, $key) => session()->get("settings-".$key)))
+                    <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">INFORMATION</h2>
                 @endif
+
+                @foreach ($settings as $key => [$label, $route])
+                    @if (session()->get("settings-".$key))
+                        <a href="/settings/{{ $route }}">
+                            <button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer">
+                                <h3 class="text-white text-sm">{{ $label }}</h3>
+                            </button>
+                        </a>
+                    @endif
                 @endforeach
-                <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">ASSOCIATIONS</h2>
-                @foreach ($SettingPages as $SettingPage2)
-                @if (strtolower($SettingPage2->resource_sub_name) == "application-sensor type association")
-                    <a href="/settings/applicationSensorTypeAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Sensor Type</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "application-device type association")
-                    <a href="/settings/applicationDeviceTypeAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Device Type</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "application-device association")
-                    <a href="/settings/applicationDeviceAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Device</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "application-location association")
-                    <a href="/settings/applicationLocationAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Application-Location</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "device-sensor association")
-                    <a href="/settings/deviceSensorAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Device-Sensor</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "role-permission association")
-                    <a href="/settings/rolePermissionAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Role-Permission</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "user-role association")
-                    <a href="/settings/userRoleAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">User-Role</h3></button></a>
-                @elseif (strtolower($SettingPage2->resource_sub_name) == "sensor-data types association")
-                    <a href="/settings/sensorDataTypeAssociation"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Sensor-Data Types</h3></button></a>
+
+
+                {{-- ASSOCIATIONS --}}
+                @if (collect($associations)->contains(fn($_, $key) => session()->get("settings-".$key)))
+                    <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">ASSOCIATIONS</h2>
                 @endif
+
+                @foreach ($associations as $key => [$label, $route])
+                    @if (session()->get("settings-".$key))
+                        <a href="/settings/{{ $route }}">
+                            <button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer">
+                                <h3 class="text-white text-sm">{{ $label }}</h3>
+                            </button>
+                        </a>
+                    @endif
                 @endforeach
-                <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">DEPLOYMENT</h2>
-                @foreach ($SettingPages as $SettingPage3)
-                @if (strtolower($SettingPage3->resource_sub_name) == "device deployment")
-                    <a href="/settings/deviceDeployement"><button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer"><h3 class="text-white text-sm">Device Deployment</h3></button></a>
+
+
+                {{-- DEPLOYMENT --}}
+                @if (collect($deployment)->contains(fn($_, $key) => session()->get("settings-".$key)))
+                    <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">DEPLOYMENT</h2>
                 @endif
+
+                @foreach ($deployment as $key => [$label, $route])
+                    @if (session()->get("settings-".$key))
+                        <a href="/settings/{{ $route }}">
+                            <button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer">
+                                <h3 class="text-white text-sm">{{ $label }}</h3>
+                            </button>
+                        </a>
+                    @endif
                 @endforeach
             </div>
         </div>
