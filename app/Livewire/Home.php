@@ -66,9 +66,9 @@ class Home extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
-                $this->user = $_SESSION["User"];
+                $this->user = session()->get("User");
             }
             catch(Exception $e){
                 $this->user = "";
@@ -145,9 +145,48 @@ class Home extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
-
+    public $Perms = [
+        "create"=>false,
+        "read"=>false,
+        "update"=>false,
+        "delete"=>false,
+        "report"=>false
+    ];
+    public function LoadPagePerms(){
+        try{
+            $this->Perms = [
+                "create"=>false,
+                "read"=>false,
+                "update"=>false,
+                "delete"=>false,
+                "report"=>false
+            ];
+            $PermsDetailed = session()->get("logs-general log");
+            foreach ($PermsDetailed as $Perm){
+                if ($Perm->permission_create == true){
+                    $this->Perms["create"] = true;
+                }
+                if ($Perm->permission_read == true){
+                    $this->Perms["read"] = true;
+                }
+                if ($Perm->permission_update == true){
+                    $this->Perms["update"] = true;
+                }
+                if ($Perm->permission_delete == true){
+                    $this->Perms["delete"] = true;
+                }
+                if ($Perm->permission_report == true){
+                    $this->Perms["report"] = true;
+                }
+            }
+        }
+        catch(Exception $e){
+            
+        }
+    }
     public function render()
     {
+        $this->LoadPagePerms();
         if (!(Cache::has("users"))){
             Artisan::call("precache:tables");
         }

@@ -57,7 +57,14 @@ class ApplicationLog extends Component
 
     public function LoadApplications(){
         try{
-            $this->Applications = Cache::get("application", collect())->values()->toArray();
+            $userRoles = Cache::get("user_role_association", collect())
+                    ->where("user_id", session("User")->user_id);
+
+            $ApplicationsArray = $userRoles->pluck("application_id")->all();
+            if (count($ApplicationsArray) > 0){
+                $this->Applications = Cache::get("application", collect())
+                    ->whereIn("application_id", $ApplicationsArray);
+            }
         }
         catch(Exception $e){
             Log::channel("customlog")->error($e->getMessage());
@@ -127,7 +134,7 @@ class ApplicationLog extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
 
         try {
             $stmt = $this->conn->prepare("
@@ -136,7 +143,7 @@ class ApplicationLog extends Component
             ");
             $stmt->execute([
                 ":appid" => $this->ApplicationInfo->application_id,
-                ":user"  => $_SESSION["User"]->user_username
+                ":user"  => session()->get("User")->user_username
             ]);
         }
         catch(Exception $e){

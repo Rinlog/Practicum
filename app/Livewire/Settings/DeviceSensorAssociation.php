@@ -36,9 +36,9 @@ class DeviceSensorAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
-                $this->user = $_SESSION["User"];
+                $this->user = session()->get("User");
             }
             catch(Exception $e){
                 $this->user = "";
@@ -49,10 +49,10 @@ class DeviceSensorAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $organizationInfo = collect(Cache::get('organization', collect()))
-                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
+                    ->firstWhere("organization_id", session()->get("User")->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -167,7 +167,7 @@ class DeviceSensorAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $assocInfo = Cache::get("device_sensor_association", collect())->where("device_eui", $this->DeviceInfo->device_eui);
                 $this->DisplayTableInfo = "";
@@ -207,7 +207,7 @@ class DeviceSensorAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -222,13 +222,13 @@ class DeviceSensorAssociation extends Component
                         "device_eui"=> $this->DeviceInfo->device_eui,
                         "sensor_id"=> $Sensor->sensor_id,
                         "assoc_creation_time" => now(),
-                        "assoc_created_by"=>$_SESSION["User"]->user_username,
+                        "assoc_created_by"=>session()->get("User")->user_username,
                         "assoc_desc"=> $Object->{"DESCRIPTION"},
                     ]);
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"associated device ".$this->DeviceInfo->device_eui." with sensor " . $Sensor->sensor_id
                     ]);
                     array_push($Results, $result);
@@ -248,7 +248,7 @@ class DeviceSensorAssociation extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"DELETE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"Deleted device sensor association ". $this->DeviceInfo->device_eui . "-" . $Item
                             ]);
                         }
@@ -274,7 +274,7 @@ class DeviceSensorAssociation extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"updated device sensor association: ".$this->DeviceInfo->device_eui.", " . $Sensor->sensor_id
                     ]);
                     array_push($Results, $result);
@@ -293,11 +293,11 @@ class DeviceSensorAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of Device sensor association Info"
         ]);
     }

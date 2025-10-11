@@ -93,11 +93,11 @@ class GeneralLog extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
 
         $stmt = $this->conn->prepare("INSERT INTO log (log_activity_time, log_activity_type, log_activity_performed_by, log_activity_desc) VALUES (NOW(), 'REPORT', :by, :desc)");
         $stmt->execute([
-            ":by" => $_SESSION["User"]->user_username,
+            ":by" => session()->get("User")->user_username,
             ":desc" => "Downloaded CSV of General Log Info"
         ]);
     }

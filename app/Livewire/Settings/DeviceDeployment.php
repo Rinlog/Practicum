@@ -42,10 +42,10 @@ class DeviceDeployment extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $organizationInfo = collect(Cache::get('organization', collect()))
-                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
+                    ->firstWhere("organization_id", session()->get("User")->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -174,9 +174,9 @@ class DeviceDeployment extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
-                $this->user = $_SESSION["User"];
+                $this->user = session()->get("User");
             }
             catch(Exception $e){
                 $this->user = "";
@@ -187,7 +187,7 @@ class DeviceDeployment extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $DeploymentInfo = Cache::get("device_deployment",collect()
                 ->where("device.organization_id", $this->OrgInfo->organization_id));
@@ -240,7 +240,7 @@ class DeviceDeployment extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -272,7 +272,7 @@ class DeviceDeployment extends Component
                         "sub_location_id"=>$SubLocation->sub_location_id,
                         "deploy_ip_address"=>$Object->{"IP ADDRESS"},
                         "deploy_geo"=>$geo,
-                        "deploy_deployed_by"=>$_SESSION["User"]->user_username,
+                        "deploy_deployed_by"=>session()->get("User")->user_username,
                         "deploy_is_latest"=>$Object->{"LATEST DEPLOYMENT"},
                         "deploy_device_data"=>$Object->{"DEVICE DEPLOYMENT DATA"},
                         "deploy_data_port"=>$Object->{"DATA PORT"},
@@ -284,7 +284,7 @@ class DeviceDeployment extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Deployed device ". $Object->{"DEPLOYMENT ID"}
                     ]);
                     if ($result == true && $result2 == 1) {
@@ -310,7 +310,7 @@ class DeviceDeployment extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"DELETE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"Deleted device deployment ". $Item
                             ]);
                         }
@@ -356,7 +356,7 @@ class DeviceDeployment extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Updated device deployment ". $Object->{"DEPLOYMENT ID"}
                     ]);
                     if ($result == 1 && $result2 == 1){
@@ -385,11 +385,11 @@ class DeviceDeployment extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of Device Deployment Info"
         ]);
     }

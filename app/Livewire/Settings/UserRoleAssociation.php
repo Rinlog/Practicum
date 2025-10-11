@@ -39,9 +39,9 @@ class UserRoleAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
-                $this->user = $_SESSION["User"];
+                $this->user = session()->get("User");
             }
             catch(Exception $e){
                 $this->user = "";
@@ -92,7 +92,7 @@ class UserRoleAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                
                 $this->application = $this->Applications[0]->application_name;
@@ -193,7 +193,7 @@ class UserRoleAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $assocInfo = Cache::get("user_role_association", collect())
                 ->where("application_id", $this->ApplicationInfo->application_id)
@@ -240,7 +240,7 @@ class UserRoleAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -257,7 +257,7 @@ class UserRoleAssociation extends Component
                         "role_id"=> $Role->role_id,
                         "application_id"=> $this->ApplicationInfo->application_id,
                         "assoc_creation_time" => now(),
-                        "assoc_created_by"=>$_SESSION["User"]->user_username,
+                        "assoc_created_by"=>session()->get("User")->user_username,
                         "assoc_desc"=> $Object->{"DESCRIPTION"},
                         "assoc_expiry_date"=> $Object->{"EXPIRY DATE"},
                     ]);
@@ -265,7 +265,7 @@ class UserRoleAssociation extends Component
                         "application_id"=>$this->ApplicationInfo->application_id,
                         "applog_activity_time"=>now(),
                         "applog_activity_type"=>"INSERT",
-                        "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "applog_activity_performed_by"=> session()->get("User")->user_username,
                         "applog_activity_desc"=>"Inserted user role association: " . $User->user_id . ", " . $Role->role_id
                     ]);
                     array_push($Results, $result);
@@ -285,7 +285,7 @@ class UserRoleAssociation extends Component
                             "application_id"=>$this->ApplicationInfo->application_id,
                             "applog_activity_time"=>now(),
                             "applog_activity_type"=>"INSERT",
-                            "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                            "applog_activity_performed_by"=> session()->get("User")->user_username,
                             "applog_activity_desc"=>"Removed user role Association: " . $DoubleID[0] . "-" . $DoubleID[1]
                         ]);
                     }
@@ -315,7 +315,7 @@ class UserRoleAssociation extends Component
                         "application_id"=>$this->ApplicationInfo->application_id,
                         "applog_activity_time"=>now(),
                         "applog_activity_type"=>"INSERT",
-                        "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "applog_activity_performed_by"=> session()->get("User")->user_username,
                         "applog_activity_desc"=>"Updated user role association " . $User->user_id . ", " . $Role->role_id
                     ]);
                     array_push($Results, $result);
@@ -334,11 +334,11 @@ class UserRoleAssociation extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of user role association Info"
         ]);
     }

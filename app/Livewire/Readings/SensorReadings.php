@@ -55,10 +55,10 @@ class SensorReadings extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $organizationInfo = collect(Cache::get('organization', collect()))
-                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
+                    ->firstWhere("organization_id", session()->get("User")->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -219,11 +219,11 @@ class SensorReadings extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
 
         $stmt = $this->conn->prepare("INSERT INTO log (log_activity_time, log_activity_type, log_activity_performed_by, log_activity_desc) VALUES (NOW(), 'REPORT', :by, :desc)");
         $stmt->execute([
-            ":by" => $_SESSION["User"]->user_username,
+            ":by" => session()->get("User")->user_username,
             ":desc" => "Downloaded CSV of Sensor Reading Info"
         ]);
     }

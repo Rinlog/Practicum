@@ -37,10 +37,10 @@ class SubLocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $organizationInfo = Cache::get('organization', collect())
-                    ->firstWhere('organization_id', $_SESSION["User"]->organization_id);
+                    ->firstWhere('organization_id', session()->get("User")->organization_id);
 
                 if ($organizationInfo) {
                     $this->organization = $organizationInfo->organization_name;
@@ -113,7 +113,7 @@ class SubLocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                $subLocations  = Cache::get('sub_location', collect())
                     ->where('location_id', $this->LocationInfo->location_id);
@@ -158,7 +158,7 @@ class SubLocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -191,7 +191,7 @@ class SubLocationInfo extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Inserted sub location ". $Object->{"SUB-LOCATION ID"}
                     ]);
                     array_push($Results, $result);
@@ -211,7 +211,7 @@ class SubLocationInfo extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"DELETE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"Deleted sub location ". $Item
                             ]);
                         }
@@ -249,7 +249,7 @@ class SubLocationInfo extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Updated sub location ". $Object->{"SUB-LOCATION ID"}
                     ]);
                     array_push($Results, $result);
@@ -270,11 +270,11 @@ class SubLocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of location Info"
         ]);
     }

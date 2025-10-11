@@ -22,7 +22,7 @@ class SensorTypeInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $SensorTypeInfo = Cache::get("sensor_type", collect())->all();
                 $this->SensorTypes = "";
@@ -58,7 +58,7 @@ class SensorTypeInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -79,7 +79,7 @@ class SensorTypeInfo extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Inserted sensor type ". $Object->{"SENSOR TYPE"}
                     ]);
                     array_push($Results, $result);
@@ -98,7 +98,7 @@ class SensorTypeInfo extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"DELETE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"Deleted sensor type ". $Item
                             ]);
                         }
@@ -123,7 +123,7 @@ class SensorTypeInfo extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Updated sensor type ". $Object->{"SENSOR TYPE"}
                     ]);
                     array_push($Results, $result);
@@ -141,11 +141,11 @@ class SensorTypeInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of sensor type Info"
         ]);
     }

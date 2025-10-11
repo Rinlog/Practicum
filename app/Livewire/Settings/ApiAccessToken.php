@@ -92,8 +92,14 @@ class ApiAccessToken extends Component
     }
     public function LoadApplications(){
         try{
-            $applications = Cache::get("application", collect())->values()->toArray();
-            $this->Applications = $applications;
+            $userRoles = Cache::get("user_role_association", collect())
+                    ->where("user_id", session("User")->user_id);
+
+            $ApplicationsArray = $userRoles->pluck("application_id")->all();
+            if (count($ApplicationsArray) > 0){
+                $this->Applications = Cache::get("application", collect())
+                    ->whereIn("application_id", $ApplicationsArray);
+            }
         }
         catch(Exception $e){
 
@@ -103,7 +109,7 @@ class ApiAccessToken extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                
                 $this->application = $this->Applications[0]->application_name;
@@ -239,7 +245,7 @@ class ApiAccessToken extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -265,7 +271,7 @@ class ApiAccessToken extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Updated api token to ". $Object->{"API TOKEN"}
                     ]);
                     array_push($Results, $result);
@@ -287,7 +293,7 @@ class ApiAccessToken extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"UPDATE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"removed api token from user ". $Item
                             ]);
                         }
@@ -307,11 +313,11 @@ class ApiAccessToken extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of api access Info"
         ]);
     }

@@ -29,10 +29,10 @@ class ApplicationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $organizationInfo = collect(Cache::get('organization', collect()))
-                    ->firstWhere("organization_id", $_SESSION["User"]->organization_id);
+                    ->firstWhere("organization_id", session()->get("User")->organization_id);
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
             }
@@ -45,9 +45,9 @@ class ApplicationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
-                $this->user = $_SESSION["User"];
+                $this->user = session()->get("User");
             }
             catch(Exception $e){
                 $this->user = "";
@@ -76,7 +76,7 @@ class ApplicationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $applicationInfo = Cache::get("application", collect())->where("organization_id",$this->OrgInfo->organization_id);
                 $this->applications = "";
@@ -128,7 +128,7 @@ class ApplicationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -147,14 +147,14 @@ class ApplicationInfo extends Component
                         "organization_id"=> $organizationID,
                         "application_name" => $Object->{"APPLICATION NAME"},
                         "application_creation_time"=>now(),
-                        "application_created_by"=> $_SESSION["User"]->user_username,
+                        "application_created_by"=> session()->get("User")->user_username,
                         "application_desc"=> $Object->{"DESCRIPTION"},
                     ]);
                     DB::table("application_log")->insert([
                         "application_id"=>$Object->{"APPLICATION ID"},
                         "applog_activity_time"=>now(),
                         "applog_activity_type"=>"INSERT",
-                        "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "applog_activity_performed_by"=> session()->get("User")->user_username,
                         "applog_activity_desc"=>"Inserted application ". $Object->{"APPLICATION NAME"}
                     ]);
                     array_push($Results, $result);
@@ -175,7 +175,7 @@ class ApplicationInfo extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"DELETE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"Deleted application ". $Item
                             ]);
                         }
@@ -206,7 +206,7 @@ class ApplicationInfo extends Component
                         "application_id"=>$Object->{"APPLICATION ID"},
                         "applog_activity_time"=>now(),
                         "applog_activity_type"=>"UPDATE",
-                        "applog_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "applog_activity_performed_by"=> session()->get("User")->user_username,
                         "applog_activity_desc"=>"Updated application ". $Object->{"APPLICATION NAME"}
                     ]);
                     array_push($Results, $result);
@@ -225,11 +225,11 @@ class ApplicationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of Application Info"
         ]);
     }

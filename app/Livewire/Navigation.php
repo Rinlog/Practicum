@@ -11,7 +11,10 @@ class Navigation extends Component
     public $buttonPos = "left-10";
     public $buttonText = ">>";
     public $CurrentPage = "";
-    //hashmaps of all the pages including there labels and routes
+    //hashmaps of all the pages including there labels and routes 
+    //would want some of these things associated in an automatically updating config file (or just a regular one)
+    //but time constraints required this solution.
+    //keep in mind currently if a resource name or sub name changes permissions will not function properly until it is also updated here.
     public $settings = [
         'device info' => ['Devices', 'deviceInfo'],
         'device type info' => ['Device Types', 'deviceTypeInfo'],

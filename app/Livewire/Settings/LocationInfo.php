@@ -31,10 +31,10 @@ class LocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $organizationInfo = Cache::get("organization", collect())
-                    ->where("organization_id", $_SESSION["User"]->organization_id)
+                    ->where("organization_id", session()->get("User")->organization_id)
                     ->first();
                 $this->organization = $organizationInfo->organization_name;
                 $this->OrgInfo = $organizationInfo;
@@ -47,7 +47,7 @@ class LocationInfo extends Component
     public function LoadOrganizations(){
         try{
             $organizations = Cache::get("organization", collect());
-            $this->Organizations = $organizations->toArray();
+            $this->Organizations = $organizations->values()->toArray();
         }
         catch(Exception $e){
 
@@ -67,7 +67,7 @@ class LocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $locationInfo = Cache::get("location", collect())
                     ->where("organization_id", $this->OrgInfo->organization_id)
@@ -110,7 +110,7 @@ class LocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -142,7 +142,7 @@ class LocationInfo extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Inserted location ". $Object->{"LOCATION ID"}
                     ]);
                     array_push($Results, $result);
@@ -162,7 +162,7 @@ class LocationInfo extends Component
                             DB::table("log")->insert([
                                 "log_activity_time"=>now(),
                                 "log_activity_type"=>"DELETE",
-                                "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                                "log_activity_performed_by"=> session()->get("User")->user_username,
                                 "log_activity_desc"=>"Deleted location ". $Item
                             ]);
                         }
@@ -199,7 +199,7 @@ class LocationInfo extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Updated location ". $Object->{"LOCATION ID"}
                     ]);
                     array_push($Results, $result);
@@ -220,11 +220,11 @@ class LocationInfo extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of location Info"
         ]);
     }

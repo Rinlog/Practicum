@@ -197,7 +197,7 @@ class Login extends Component
                     $this->clear();
                     session_start();
                     $_SESSION["UserName"] = ucfirst(strtolower($this->Username));
-                    $_SESSION["User"] = $this->user;
+                    session()->put("User",$this->user);
                     $UserRoleAssoc = Cache::get("user_role_association",collect())->where("user_id",$this->user->user_id);
                     $ApplicationsArray = $UserRoleAssoc->pluck("application_id")->unique()->all();
                     $UserRolesBasedOnApp = $UserRoleAssoc->where("application_id",$ApplicationsArray[0])->pluck("role_id")->values()->toArray(); //using a default value

@@ -76,7 +76,7 @@ class Resources extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION["User"])) {
+        if (session()->get("User")) {
             try{
                 $RawTableInfo = Cache::get("resource", collect())
                 ->where("component_id", $this->ComponentInfo->component_id);
@@ -115,7 +115,7 @@ class Resources extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         $ArrayOfActions = json_decode($actions, true);
         $Results = [];
         foreach ($ArrayOfActions as $action){
@@ -135,7 +135,7 @@ class Resources extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"INSERT",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Inserted resource ". $Object->{"RESOURCE NAME"} . ", " . $Object->{"RESOURCE SUBNAME"}
                     ]);
                     //doing after resource is inserted, if resource fails to insert this will also fail
@@ -176,7 +176,7 @@ class Resources extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"DELETE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Deleted resources(s) from component ".$this->Component.": ". $Value
                     ]);
                     array_push($Results, $result);
@@ -222,7 +222,7 @@ class Resources extends Component
                     DB::table("log")->insert([
                         "log_activity_time"=>now(),
                         "log_activity_type"=>"UPDATE",
-                        "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+                        "log_activity_performed_by"=> session()->get("User")->user_username,
                         "log_activity_desc"=>"Updated resource ". $Object->{"RESOURCE NAME"} . ", " . $Object->{"RESOURCE SUBNAME"}
                     ]);
                     array_push($Results, $result);
@@ -243,11 +243,11 @@ class Resources extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of resource Info"
         ]);
     }

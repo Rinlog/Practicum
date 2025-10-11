@@ -50,7 +50,14 @@ class AverageDailyReadings extends Component
     }
     public function LoadOptions(){
         //getting locations from application
-        $this->applications = Cache::get("application",collect())->values()->toArray(); //loading applications
+        $userRoles = Cache::get("user_role_association", collect())
+                    ->where("user_id", session("User")->user_id);
+
+            $ApplicationsArray = $userRoles->pluck("application_id")->all();
+            if (count($ApplicationsArray) > 0){
+                $this->applications = Cache::get("application", collect())
+                    ->whereIn("application_id", $ApplicationsArray);
+            }
         $this->applicationLocationAssoc = Cache::get("application_location_association",collect())->values()->toArray();
         $this->applicationDeviceTypeAssoc = Cache::get("application_device_type_association",collect())->values()->toArray();
         //location proccessing
@@ -217,11 +224,11 @@ class AverageDailyReadings extends Component
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        if (!(isset($_SESSION["User"]))) { return null; }
+        if (!(session()->get("User"))) { return null; }
         DB::table("log")->insert([
             "log_activity_time"=>now(),
             "log_activity_type"=>"REPORT",
-            "log_activity_performed_by"=> $_SESSION["User"]->user_username,
+            "log_activity_performed_by"=> session()->get("User")->user_username,
             "log_activity_desc"=>"Downloaded CSV of dashboard average daily sensor readings"
         ]);
     }

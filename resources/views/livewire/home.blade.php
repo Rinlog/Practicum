@@ -47,16 +47,19 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
                 <h1 class="text-gray-500">Overview</h1>
 
                 <div class="flex gap-5 py-5 h-full">
+
                     <div id="RecentLogs" class="bg-white sm:p-10 w-[50%] rounded-lg shadow-md flex flex-col items-start max-h-[140%] min-h-[140%]">
-                        <h3 class="text-[#00719d] font-semibold">RECENT LOGS</h3>
-                        <table class="rounded-lg  border-separate w-full block overflow-y-auto overflow-x-auto border-spacing-[0]">
-                            <tbody class="align-top">
-                                {!! $DisplayLogTableInfo !!}
-                            </tbody>
-                        </table>
-                        <span class="p-2 flex w-full justify-end items-end">
-                            <h4 class="text-[#74cbdf] font-semibold"><a href="/logs">VIEW ALL &#10148;</a></h4>
-                        </span>
+                        @if ($Perms["read"] == true)
+                            <h3 class="text-[#00719d] font-semibold">RECENT LOGS</h3>
+                            <table class="rounded-lg  border-separate w-full block overflow-y-auto overflow-x-auto border-spacing-[0]">
+                                <tbody class="align-top">
+                                    {!! $DisplayLogTableInfo !!}
+                                </tbody>
+                            </table>
+                            <span class="p-2 flex w-full justify-end items-end">
+                                <h4 class="text-[#74cbdf] font-semibold"><a href="/logs">VIEW ALL &#10148;</a></h4>
+                            </span>
+                        @endif
                     </div>
                     <div id="Cube2" class="bg-white p-10 w-[50%] rounded-lg shadow-md max-h-[140%] min-h-[140%]">
 
