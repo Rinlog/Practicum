@@ -61,11 +61,11 @@ class UserSettings extends Component
             if (session_status() == PHP_SESSION_NONE) {
                 session_start();
             }
-            if (isset($_SESSION["User"])){
+            if (session()->get("User")){
 
                 $users = Cache::get("users", collect());
-                $this->User = $users->firstWhere("user_id", $_SESSION["User"]->user_id);
-                $_SESSION["User"] = $this->User;
+                $this->User = $users->firstWhere("user_id", session()->get("User")->user_id);
+                session()->put("User",$this->User);
                 $this->Username = $this->User->user_username;
 
 

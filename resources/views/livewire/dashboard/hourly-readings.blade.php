@@ -1,6 +1,6 @@
 <div>
     {{-- Search Options --}}
-    <div id="SearchContainerOptions" class="fixed lg:w-[16%] lg:h-full lg:top-15 overflow-y-scroll lg:overflow-y-scroll bottom-5 h-[35%] right-0 bg-[#f9f9f9] lg:bg-white p-4 shadow-md z-2"]>
+    <div id="SearchContainerOptions" class="fixed lg:w-[16%] lg:h-full lg:top-15 overflow-y-scroll bottom-5 h-[35%] w-[90%] right-0 bg-[#f9f9f9] lg:bg-white p-4 shadow-md z-2"]>
         {{-- DatePicker --}}
         <button id="DateRangePicker" class="flex justify-between bg-[#0071a0] mt-6 p-4 pr-6 pl-6 rounded-lg flex items-center gap-2 text-white font-semibold hover:bg-[#0486bd] cursor-pointer min-w-[240px]">
             <svg xmlns="http://www.w3.org/2000/svg" id="Path" fill="#FFFFFF" viewBox="0 0 26 26" class="size-5 min-h-[26px] min-w-[26px]">
