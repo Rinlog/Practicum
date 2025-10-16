@@ -12,17 +12,19 @@ class Logs extends Component
     public function render()
     {
         $AllowedPages = [];
-        if (session()->get('logs-general log')){
+        if (session()->get('logs-general log') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"generalLog");
         }
-        if (session()->get('logs-application-specific log')){
+        if (session()->get('logs-application-specific log') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"applicationLog");
         }
         if (in_array(session()->get("LogsPage"),$AllowedPages)){
             $this->LogPage = session()->get("LogsPage","generalLog");
         }
         else{
-            $this->LogPage = $AllowedPages[0];
+            if (count($AllowedPages) > 0){
+                $this->LogPage = $AllowedPages[0];
+            }
         }
         return view('livewire.logs');
     }

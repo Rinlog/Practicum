@@ -19,20 +19,22 @@ class Dashboard extends Component
             session_start();
         }
         $AllowedPages = [];
-        if (session()->get('browse_sensor_readings-sensor readings')){
+        if (session()->get('browse_sensor_readings-sensor readings') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"allSensorReadings");
         }
-        if (session()->get('browse_sensor_readings-daily averages')){
+        if (session()->get('browse_sensor_readings-daily averages') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"dailySensorReadings");
         }
-        if (session()->get('browse_sensor_readings-hourly averages')){
+        if (session()->get('browse_sensor_readings-hourly averages') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"hourlySensorReadings");
         }
         if (in_array(session()->get("SensorReadingPage"),$AllowedPages)){
             $this->option = session()->get("SensorReadingPage","allSensorReadings");
         }
         else{
-            $this->option = $AllowedPages[0];
+            if (count($AllowedPages) > 0){
+                $this->option = $AllowedPages[0];
+            }
         }
         
         return view('livewire.dashboard');

@@ -193,15 +193,17 @@ class Resources extends Component
                     //subtracts the position of the opening bracket (not including the open bracket) plus 1 more for the end bracket
                     $idToUpdate = substr($Query,$bracketloc+1,strlen($Query)-($bracketloc+2));
                     $doubleID = explode("-!-",$idToUpdate);
-                    //we will start by removing old permission info to allow for an update
-                    DB::table("permission")->where("resource_name", $doubleID[0])->where("resource_sub_name",$doubleID[1])->where("component_id",$this->ComponentInfo->component_id)->delete();
                     $result = DB::table("resource")->where("resource_name", $doubleID[0])->where("resource_sub_name",$doubleID[1])->where("component_id",$this->ComponentInfo->component_id)->update([
                         "resource_name" =>$Object->{"RESOURCE NAME"},
                         "resource_sub_name" => $Object->{"RESOURCE SUBNAME"},
                         "resource_desc" => $Object->{"DESCRIPTION"}
                     ]);
                     if ($Crudr == "true"){
-                        DB::transaction(function() use ($Object){
+                        //we will start by removing old permission info to allow for an update
+                        DB::transaction(function() use ($Object,$doubleID){
+                            $PermIds = DB::table("permission")->where("resource_name", $doubleID[0])->where("resource_sub_name",$doubleID[1])->where("component_id",$this->ComponentInfo->component_id)->pluck("permission_id")->all();
+                            DB::table("role_permission_association")->whereIn("permission_id", $PermIds)->delete();
+                            DB::table("permission")->whereIn("permission_id",$PermIds)->delete();
                             foreach ($this->permissionSets as $key=>$permission){
                                 DB::table("permission")->insert([
                                     "permission_id"=>Uuid::uuid4(),
@@ -234,9 +236,11 @@ class Resources extends Component
             }
         }
         Cache::forget("permission");
+        Cache::forget("role_permission_association");
         Cache::forget("resource");
         Cache::rememberForever("resource", fn() => DB::table("resource")->get());
-        Cache::rememberForever("resource", fn() => DB::table("permission")->get());
+        Cache::rememberForever("permission", fn() => DB::table("permission")->get());
+        Cache::rememberForever("role_permission_association", fn() => DB::table("role_permission_association")->get());
         return $Results;
     }
     public function LogExport(){
@@ -261,6 +265,13 @@ class Resources extends Component
     public function LoadPagePerms(){
         try{
             $PermsDetailed = session()->get("settings-resource info");
+            if (session()->get("IsSuperAdmin") == true){
+                $this->Perms['create'] = true;
+                $this->Perms['delete'] = true;
+                $this->Perms["read"] = true;
+                $this->Perms['update'] = true;
+                $this->Perms['report'] = true;
+            }
             foreach ($PermsDetailed as $Perm){
                 if ($Perm->permission_create == true){
                     $this->Perms["create"] = true;

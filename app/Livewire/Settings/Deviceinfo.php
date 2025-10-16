@@ -294,6 +294,13 @@ class Deviceinfo extends Component
     public function LoadPagePerms(){
         try{
             $PermsDetailed = session()->get("settings-device info");
+            if (session()->get("IsSuperAdmin") == true){
+                $this->Perms['create'] = true;
+                $this->Perms['delete'] = true;
+                $this->Perms["read"] = true;
+                $this->Perms['update'] = true;
+                $this->Perms['report'] = true;
+            }
             foreach ($PermsDetailed as $Perm){
                 if ($Perm->permission_create == true){
                     $this->Perms["create"] = true;
@@ -313,7 +320,7 @@ class Deviceinfo extends Component
             }
         }
         catch(Exception $e){
-
+            
         }
     }
     public function render()

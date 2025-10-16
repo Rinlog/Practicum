@@ -1,4 +1,7 @@
 <div id="MainWindowSettings" class="flex flex-col lg:flex-row lg:w-[1750px] gap-10">
+    @if ($this->Perms['read'] == false)
+        <script>window.location = "/home";</script>
+    @endif
     {{-- LEFT SIDE --}}
     <div class="relative w-[90%] md:w-[80%] lg:w-[70%]">
     {{-- info selection --}}
@@ -62,7 +65,7 @@
                 </button>
             @else
                 {{-- disabled export button --}}
-                <button disabled id="DisabledExport" wire:click="$js.DownloadCSV" class=" flex text-[#dddddd] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center">
+                <button disabled id="DisabledExport" class=" flex text-[#dddddd] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" id="" viewBox="0 0 26 26" width="24px" height="24px" class="svg" fill="#dddddd">
                         <path id="Export" class="cls-1" d="M16.71,13.62c.39.39.39,1.02,0,1.41-.2.2-.45.29-.71.29s-.51-.1-.71-.29l-1.29-1.29v3.93c0,.55-.45,1-1,1s-1-.45-1-1v-3.93l-1.29,1.29c-.39.39-1.02.39-1.41,0s-.39-1.02,0-1.41l3-3c.38-.38,1.04-.38,1.41,0l3,3ZM23,8v12.81c-.03,2.31-1.94,4.19-4.29,4.19H7.31s-.05,0-.06,0c-2.31,0-4.22-1.88-4.25-4.22V5.19c.03-2.31,1.94-4.19,4.25-4.19h.03s8.71,0,8.71,0c.53,0,1.04.21,1.41.59l5,5c.38.38.59.88.59,1.41ZM17,7h3l-3-3v3ZM21,9h-4c-1.1,0-2-.9-2-2v-4h-7.71s-.02,0-.03,0c-1.23,0-2.24.99-2.25,2.22v15.56c.02,1.23,1.02,2.22,2.25,2.22.01,0,.02,0,.03,0h11.43s.02,0,.03,0c1.23,0,2.24-.99,2.25-2.22v-11.78Z"/>
                     </svg>
@@ -109,7 +112,7 @@
             @else
                 {{-- delete button --}}
                 <span>
-                    <button disabled id="DisabledDelete" wire:click="$js.OpenDeleteModal">
+                    <button disabled id="DisabledDelete">
                         <div id="DisabledDeleteFrame" class="bg-[#dddddd] flex items-center justify-center text-white rounded-full pb-4 pt-4 pr-4 pl-4 text-5xl">
                             <svg xmlns="http://www.w3.org/2000/svg" id="" width="24px" height="24px" fill="#FFFFFF" viewBox="0 0 26 26">
                                 <path id="Delete" class="cls-1" d="M21.5,6h-4.5v-3c0-.55-.45-1-1-1h-6c-.55,0-1,.45-1,1v3h-4.5c-.55,0-1,.45-1,1s.45,1,1,1h.62l2.01,15.13c.07.5.49.87.99.87h9.76c.5,0,.93-.37.99-.87l2.01-15.13h.62c.55,0,1-.45,1-1s-.45-1-1-1ZM11,4h4v2h-4v-2ZM17,22h-8.01l-1.86-14h11.72l-1.86,14Z"/>
@@ -129,7 +132,7 @@
                         </div>
                     </button>
                 @else
-                    <button disabled id="DisabledEdit" wire:click="$js.CloseOpenEdit">
+                    <button disabled id="DisabledEdit">
                         <div id="DisabledEditFrame" class="bg-[#dddddd] flex items-center justify-center text-white rounded-full pb-4 pt-4 pr-4 pl-4 text-5xl">
                             <svg xmlns="http://www.w3.org/2000/svg" id="" width="24px" height="24px" fill="#FFFFFF" viewBox="0 0 26 26">
                                 <path id="Edit" class="cls-1" d="M24,23c0,.55-.45,1-1,1H3c-.55,0-1-.45-1-1s.45-1,1-1h20c.55,0,1,.45,1,1ZM6.61,19.79l-.21-3.44c-.02-.28.06-.55.21-.79L15.06,2.59c.37-.58,1.16-.77,1.76-.41.01,0,.03.02.04.02l3.45,2.23c.29.19.49.48.56.82.07.34,0,.7-.19.99l-8.44,12.96c-.15.23-.38.42-.65.51l-3.23,1.21c-.16.06-.31.08-.46.08h0c-.68,0-1.25-.54-1.29-1.21ZM8.41,16.45l.14,2.26,2.14-.8,7.94-12.18-2.27-1.47-7.94,12.19Z"/>
@@ -144,7 +147,7 @@
                         </div>
                     </button>
                 @else
-                    <button disabled id="DisabledAdd" wire:click="$js.CloseOpenAdd">
+                    <button disabled id="DisabledAdd">
                         <div id="DisabledAddFrame" class="bg-[#dddddd] flex items-center justify-center text-white rounded-full pb-2 pr-3 pl-3 text-5xl">
                             +
                         </div>
@@ -160,7 +163,7 @@
                         SAVE TO DATABASE
                     </button>
                 @else
-                    <button disabled wire:click="$js.saveToDB" id="save" class=" flex text-[#dddddd] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center">
+                    <button disabled  id="save" class=" flex text-[#dddddd] font-semibold gap-3 border-2 rounded-full p-3 pl-5 pr-5 items-center justify-center">
                         <svg class="svg" stroke="#dddddd" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                             <polyline data-name="Right" fill="none" id="Right-2" points="7.9 12.3 12 16.3 16.1 12.3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>

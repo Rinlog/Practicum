@@ -1,7 +1,4 @@
 {{-- user controls section --}}
-<?php
-include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
-?>
 <div id="UserControlMainDiv" class="fixed top-0 left-0 w-screen flex justify-end items-center bg-white h-15 shadow-md z-4">
     @vite('resources/js/ComponentJS/usercontrolnav.js')
     <div>
@@ -11,7 +8,7 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#767676" id="Path" viewBox="0 0 26 26" width="24px" height="24px">
                     <path id="Profile" class="cls-1" d="M13,13c-2.76,0-5-2.24-5-5s2.24-5,5-5,5,2.24,5,5-2.24,5-5,5ZM13,5c-1.65,0-3,1.35-3,3s1.35,3,3,3,3-1.35,3-3-1.35-3-3-3ZM20.5,22v-2c0-2.76-2.24-5-5-5h-5c-2.76,0-5,2.24-5,5v2c0,.55.45,1,1,1s1-.45,1-1v-2c0-1.65,1.35-3,3-3h5c1.65,0,3,1.35,3,3v2c0,.55.45,1,1,1s1-.45,1-1Z"/>
                 </svg>
-                <label class="text-[#767676]"><?php OutPutIfLoggedIn("UserName");?></label>
+                <label class="text-[#767676]">{{ session()->get("UserName") }}</label>
                 <svg class="-mr-1 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                     <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
                 </svg>

@@ -1,6 +1,6 @@
 <?php session_start()?>
 <div class="bg-[#f2f2f2] flex flex-row">
-    @if (empty(session()->get("AllAppPermsForUser"))))
+    @if (empty(session()->get("AllAppPermsForUser")) && session()->get("IsSuperAdmin") != true)
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>
@@ -21,14 +21,14 @@
                                             // Define the available tabs dynamically based on session permissions
                                             $tabs = [];
 
-                                            if (session('browse_readings-device readings')) {
+                                            if (session('browse_readings-device readings') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['deviceReadings'] = [
                                                     'label' => 'Device',
                                                     'click' => 'ShowDeviceReadings',
                                                 ];
                                             }
 
-                                            if (session('browse_readings-sensor readings')) {
+                                            if (session('browse_readings-sensor readings') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['sensorPage'] = [
                                                     'label' => 'Sensor',
                                                     'click' => 'ShowSensorReadings',

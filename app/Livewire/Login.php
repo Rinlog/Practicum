@@ -87,11 +87,14 @@ class Login extends Component
                 if (!$this->user) {
                     return false;
                 }
-
                 $UsersPass = $this->DecryptPass($this->user->user_password, $this->user->user_salt);
                 if ("idl123abc" == $UsersPass) {
                     return $this->Password == "idl123abc";
-                } else {
+                } 
+                else if ($this->user->user_password_change_date <= now()){
+                    return true;
+                }
+                else {
                     return false;
                 }
             }
@@ -115,7 +118,7 @@ class Login extends Component
                 ":id" => $this->user->user_salt
             ]);
 
-            $stmt1 = $this->conn->prepare("UPDATE users SET user_password = :pass WHERE user_username = :uname");
+            $stmt1 = $this->conn->prepare("UPDATE users SET user_password = :pass, user_password_change_date = now() + interval '6 months'  WHERE user_username = :uname");
             $stmt1->execute([
                 ":pass" => $PasswordInfo[2],
                 ":uname" => $this->Username
@@ -196,8 +199,9 @@ class Login extends Component
                 if ($userNameValid and $passwordValid) {
                     $this->clear();
                     session_start();
-                    $_SESSION["UserName"] = ucfirst(strtolower($this->Username));
+                    session()->put("UserName",ucfirst(strtolower($this->Username)));
                     session()->put("User",$this->user);
+                    session()->put("IsSuperAdmin",$this->user->user_is_super_admin);
                     $UserRoleAssoc = Cache::get("user_role_association",collect())->where("user_id",$this->user->user_id);
                     $ApplicationsArray = $UserRoleAssoc->pluck("application_id")->unique()->all();
                     $UserRolesBasedOnApp = $UserRoleAssoc->where("application_id",$ApplicationsArray[0])->pluck("role_id")->values()->toArray(); //using a default value
@@ -215,7 +219,9 @@ class Login extends Component
             $this->usrShowErr = "show";
             $this->usrErrMsg = "User does not exist";
         }
-        catch(Exception $e){ }
+        catch(Exception $e){
+            dd($e);
+         }
     }
 
     public function GenEncryptedPass($Password){

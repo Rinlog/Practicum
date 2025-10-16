@@ -1,6 +1,6 @@
 <?php session_start();?>
 <div id="SettingsLoader" class="bg-[#f2f2f2] flex flex-row overflow-x-hidden block">
-    @if (empty(session()->get("AllAppPermsForUser"))))
+    @if (empty(session()->get("AllAppPermsForUser")) && session()->get("IsSuperAdmin") != true)
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>

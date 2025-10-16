@@ -77,10 +77,12 @@
                 {{-- SETTINGS --}}
                 @if (collect($settings)->contains(fn($_, $key) => session()->get("settings-".$key)))
                     <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">INFORMATION</h2>
+                @elseif (session()->get("IsSuperAdmin") == true)
+                    <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">INFORMATION</h2>
                 @endif
 
                 @foreach ($settings as $key => [$label, $route])
-                    @if (session()->get("settings-".$key))
+                    @if (session()->get("settings-".$key) or session()->get("IsSuperAdmin") == true)
                         <a href="/settings/{{ $route }}">
                             <button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer">
                                 <h3 class="text-white text-sm">{{ $label }}</h3>
@@ -93,10 +95,12 @@
                 {{-- ASSOCIATIONS --}}
                 @if (collect($associations)->contains(fn($_, $key) => session()->get("settings-".$key)))
                     <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">ASSOCIATIONS</h2>
+                @elseif (session()->get("IsSuperAdmin") == true)
+                    <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">ASSOCIATIONS</h2>
                 @endif
 
                 @foreach ($associations as $key => [$label, $route])
-                    @if (session()->get("settings-".$key))
+                    @if (session()->get("settings-".$key) or session()->get("IsSuperAdmin") == true)
                         <a href="/settings/{{ $route }}">
                             <button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer">
                                 <h3 class="text-white text-sm">{{ $label }}</h3>
@@ -109,10 +113,12 @@
                 {{-- DEPLOYMENT --}}
                 @if (collect($deployment)->contains(fn($_, $key) => session()->get("settings-".$key)))
                     <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">DEPLOYMENT</h2>
+                @elseif (session()->get("IsSuperAdmin") == true)
+                    <h2 class="text-[#4bbedb] pt-12 pl-4 font-semibold">DEPLOYMENT</h2>
                 @endif
 
                 @foreach ($deployment as $key => [$label, $route])
-                    @if (session()->get("settings-".$key))
+                    @if (session()->get("settings-".$key) or session()->get("IsSuperAdmin") == true)
                         <a href="/settings/{{ $route }}">
                             <button class="hover:bg-[#054863]/50 p-2 pl-4 rounded-lg w-full text-start text-sm cursor-pointer">
                                 <h3 class="text-white text-sm">{{ $label }}</h3>

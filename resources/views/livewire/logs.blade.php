@@ -1,6 +1,6 @@
 <?php session_start()?>
 <div class="bg-[#f2f2f2] flex flex-row">
-    @if (empty(session()->get("AllAppPermsForUser"))))
+    @if (empty(session()->get("AllAppPermsForUser")) && session()->get("IsSuperAdmin") != true)
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>
@@ -18,14 +18,14 @@
                                             // Define the available tabs dynamically based on session permissions
                                             $tabs = [];
 
-                                            if (session('logs-general log')) {
+                                            if (session('logs-general log') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['generalLog'] = [
                                                     'label' => 'General Log',
                                                     'click' => 'ShowGeneralLog',
                                                 ];
                                             }
 
-                                            if (session('logs-application-specific log')) {
+                                            if (session('logs-application-specific log') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['applicationLog'] = [
                                                     'label' => 'Application Log',
                                                     'click' => 'ShowAppLog',

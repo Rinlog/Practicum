@@ -15,6 +15,7 @@ use \PDO;
 class UserSettings extends Component
 {
     private $conn2;
+    private $conn;
     private $errStyle = "border-2 border-red-500";
     public $FName = "";
     public $LName = "";
@@ -32,6 +33,17 @@ class UserSettings extends Component
     public $User;
 
     public function __construct(){
+        $DB1 = config("database.connections.pgsql");
+        $this->conn = new PDO(
+            $DB1["driver"].":host=".$DB1["host"]." port=".$DB1["port"]." dbname=".$DB1["database"],
+            $DB1["username"],
+            $DB1["password"],
+            [
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            ]
+        );
+
         $DB2 = config("database.connections.pgsql_2");
         $this->conn2 = new PDO(
             $DB2["driver"].":host=".$DB2["host"]." port=".$DB2["port"]." dbname=".$DB2["database"],
@@ -187,8 +199,7 @@ class UserSettings extends Component
 
 
             $users = Cache::get("users", collect());
-            $Salt = optional($users->firstWhere("user_id", $this->User->user_id))->user_salt;
-
+            $Salt = $users->firstWhere("user_id", $this->User->user_id)->user_salt;
 
             $stmt2 = $this->conn2->prepare("UPDATE key_vault SET key_data = :data WHERE key_id = :id");
             $stmt2->execute([
@@ -197,11 +208,11 @@ class UserSettings extends Component
             ]);
 
 
-            DB::table("users")
-                ->where("user_username", $this->Username)
-                ->update([
-                    "user_password" => $PasswordInfo[2],
-                ]);
+            $stmt1 = $this->conn->prepare("UPDATE users SET user_password = :pass, user_password_change_date = now() + interval '6 months'  WHERE user_username = :uname");
+            $stmt1->execute([
+                ":pass" => $PasswordInfo[2],
+                ":uname" => $this->Username
+            ]);
 
             Cache::forget("users");
             Cache::rememberForever("users", fn() => DB::table("users")->get());

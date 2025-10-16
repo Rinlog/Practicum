@@ -1,9 +1,6 @@
-<?php
-include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
-?>
 <div class="bg-[#f2f2f2] flex flex-row">
     @vite('resources/css/home.css')
-    @if (empty(session()->get("AllAppPermsForUser")))
+    @if (empty(session()->get("AllAppPermsForUser")) && session()->get("IsSuperAdmin") != true)
         <script>window.location = "/";</script>
     @endif
     <livewire:navigation></livewire:navigation>
@@ -12,7 +9,7 @@ include_once(app_path() . "/Includes/OutPutIfLoggedIn.php");
         <livewire:usercontrols.usercontrolnav></livewire:usercontrols.usercontrolnav>
         <div class="sm:p-10 min-h-screen lg:min-h-[857px] sm:grid sm:grid-cols-2 grid-rows-5 sm:gap-x-10 sm:gap-x-20">
             <div class="bg-[#00719d] shadow-md w-full rounded-lg sm:p-10 flex flex-col gap-4 col-1">
-                <h1 class="text-white">Hello, <b><?php OutPutIfLoggedIn("UserName");?>!</b></h1>
+                <h1 class="text-white">Hello, <b>{{ session()->get("UserName") }}!</b></h1>
                 <span class="text-[#48bbe7] text-lg font-semibold">
                     @foreach( $userRoles as $role)
                         @if ($loop->index == 0)

@@ -92,6 +92,12 @@ class Navigation extends Component
         ]);
     }
     function LoadPerms(){
+        if (session()->get("IsSuperAdmin") == true){
+                $this->ShowSettings = true;
+                $this->ShowLogs = true;
+                $this->ShowReadings = true;
+                $this->ShowSensorReadings = true;
+            }
         $Permissions = session()->get("AllAppPermsForUser");
         $ComponenentOfInterest = session()->get("AdminComponentID");
         $this->ForgetKeys();

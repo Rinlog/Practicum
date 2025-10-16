@@ -1,4 +1,3 @@
-<?php session_start(); ?>
 <div>
     <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="NoPadding">
         <head>
@@ -6,7 +5,7 @@
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
             {{--@vite(['resources\js\ComponentJS\alertJS.js'])--}}
-            @if (!empty(session()->get("AllAppPermsForUser")))
+            @if (!empty(session()->get("AllAppPermsForUser")) || session()->get("IsSuperAdmin") == true)
                 <script>window.location = "/home";</script>
             @endif
         </head>
@@ -67,7 +66,7 @@
 @script
 <script>
     $js("HandleLogin",async function(){
-        DefaultPass = await $wire.call("CheckForDefaultPass");
+        DefaultPass = await $wire.call("CheckForDefaultPass"); //will now also be used for checking if User Password is too old
         if (DefaultPass == true){
 
             OpenModal();
@@ -76,6 +75,7 @@
                 let ConfirmPass = $("#ChangeConfirmPassword");
                 let PasswordErr = $("#ChangePasswordErr");
                 let ConfirmPassErr = $("#ChangeConfirmPasswordErr")
+                let Regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$&*_-])[A-Za-z\d!@#$&*_-]{6,}$/g //main regex
 
                 Password.removeClass("border-2 border-red-500");
                 PasswordErr.addClass("hide");
@@ -103,6 +103,12 @@
                     ConfirmPass.addClass("border-2 border-red-500");
                     ConfirmPassErr.removeClass("hide");
                     ConfirmPassErr.text("Confirm pass can not be blank");
+                    return;
+                }
+                else if (Regex.test(Password.val()) == false){
+                    Password.addClass("border-2 border-red-500");
+                    PasswordErr.removeClass("hide");
+                    PasswordErr.text("");
                     return;
                 }
                 if (Password.val() == ConfirmPass.val()){

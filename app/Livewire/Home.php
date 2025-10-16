@@ -78,13 +78,18 @@ class Home extends Component
 
     public function LoadApplications(){
         try{
-            $userRoles = Cache::get("user_role_association", collect())
+            if (session()->get("IsSuperAdmin") == true){
+                $this->Applications = Cache::get("application", collect());
+            }
+            else{
+                $userRoles = Cache::get("user_role_association", collect())
                     ->where("user_id", $this->user->user_id);
 
-            $ApplicationsArray = $userRoles->pluck("application_id")->all();
-            if (count($ApplicationsArray) > 0){
-                $this->Applications = Cache::get("application", collect())
-                    ->whereIn("application_id", $ApplicationsArray);
+                $ApplicationsArray = $userRoles->pluck("application_id")->all();
+                if (count($ApplicationsArray) > 0){
+                    $this->Applications = Cache::get("application", collect())
+                        ->whereIn("application_id", $ApplicationsArray);
+                }
             }
         }
         catch(Exception $e){
@@ -162,6 +167,13 @@ class Home extends Component
                 "report"=>false
             ];
             $PermsDetailed = session()->get("logs-general log");
+            if (session()->get("IsSuperAdmin") == true){
+                $this->Perms['create'] = true;
+                $this->Perms['delete'] = true;
+                $this->Perms["read"] = true;
+                $this->Perms['update'] = true;
+                $this->Perms['report'] = true;
+            }
             foreach ($PermsDetailed as $Perm){
                 if ($Perm->permission_create == true){
                     $this->Perms["create"] = true;

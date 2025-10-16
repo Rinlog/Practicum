@@ -252,6 +252,13 @@ class HourlyReadings extends Component
     public function LoadPagePerms(){
         try{
             $PermsDetailed = session()->get("browse_sensor_readings-hourly averages");
+            if (session()->get("IsSuperAdmin") == true){
+                $this->Perms['create'] = true;
+                $this->Perms['delete'] = true;
+                $this->Perms["read"] = true;
+                $this->Perms['update'] = true;
+                $this->Perms['report'] = true;
+            }
             foreach ($PermsDetailed as $Perm){
                 if ($Perm->permission_create == true){
                     $this->Perms["create"] = true;

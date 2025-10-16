@@ -12,17 +12,19 @@ class Readings extends Component
     public function render()
     {
         $AllowedPages = [];
-        if (session()->get('browse_readings-device readings')){
+        if (session()->get('browse_readings-device readings') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"deviceReadings");
         }
-        if (session()->get('browse_readings-sensor readings')){
+        if (session()->get('browse_readings-sensor readings') or session()->get("IsSuperAdmin") == true){
             array_push($AllowedPages,"sensorPage");
         }
         if (in_array(session()->get("ReadingPage"),$AllowedPages)){
             $this->readingPage = session()->get("ReadingPage","deviceReadings");
         }
         else{
-            $this->readingPage = $AllowedPages[0];
+            if (count($AllowedPages) > 0){
+                $this->readingPage = $AllowedPages[0];
+            }
         }
         return view('livewire.readings');
     }

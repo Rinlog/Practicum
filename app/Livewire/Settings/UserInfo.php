@@ -23,7 +23,8 @@ class UserInfo extends Component
         "IS SUPER ADMIN",
         "IS DISABLED",
         "CREATION TIME",
-        "CREATED BY"
+        "CREATED BY",
+        "PASSWORD CHANGE DATE"
     ];
     public $organization = "";
     public $Organizations = [];
@@ -106,6 +107,7 @@ class UserInfo extends Component
                         <td>{$userIsDisabled}</td>
                         <td>{$user->user_creation_time}</td>
                         <td>{$user->user_created_by}</td>
+                        <td>{$user->user_password_change_date}</td>
                     </tr>";
                 }
             }
@@ -145,7 +147,8 @@ class UserInfo extends Component
                     $Salt = $this->GenSalt($Object->{"USER NAME"}, (new DateTime())->format("D M d Y H:i:s T P"));
                     $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
                         "key_id"=>$Salt,
-                        "key_data"=>$PassInfo[0] . ',' . $PassInfo[1]
+                        "key_data"=>$PassInfo[0] . ',' . $PassInfo[1],
+                        "key_desc"=>""
                     ]);
                     $result = DB::table("users")->insert([
                         "user_id"=>$Object->{"USER ID"},
@@ -182,7 +185,13 @@ class UserInfo extends Component
             else if (str_contains(strtolower($Query),"delete")){
                 $ItemsToDelete = explode(",",$Value);
                 try{
-                    $result = DB::table("users")->whereIn("user_username", $ItemsToDelete)->delete();
+                    DB::transaction(function() use($ItemsToDelete,$Results){
+                        $UserSalts = DB::table("users")->whereIn("user_username", $ItemsToDelete)->pluck("user_salt")->values()->toArray();
+                        DB::connection("pgsql_2")->table("key_vault")->whereIn("key_id",$UserSalts)->delete();
+                        $result = DB::table("users")->whereIn("user_username", $ItemsToDelete)->delete();
+                        
+                        array_push($Results, $result);
+                    });
 
                     DB::transaction(function() use ($ItemsToDelete){
                         foreach ($ItemsToDelete as $Item){
@@ -194,7 +203,6 @@ class UserInfo extends Component
                             ]);
                         }
                     });
-                    array_push($Results, $result);
                 }
                 catch(Exception $e){
                     array_push($Results, 0);
@@ -215,22 +223,26 @@ class UserInfo extends Component
                     if ($ResetPass == "true"){
                         $PasswordInfo = $this->GenEncryptedPass("idl123abc");
 
-                        $Salt = Cache::get("users", collect())->where("user_id",$Object->{"USER ID"})->pluck("user_salt");
+                        $Salt = Cache::get("users", "")->where("user_id",$Object->{"USER ID"})->pluck("user_salt");
                         //check if salt exists
-                        $SaltFound = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->exists();
-                        if ($SaltFound == true){
-                            $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
-                                "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
-                            ]);
-                        }
-                        else{
-                            $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
-                                "key_id"=>$Salt,
-                                "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
-                            ]);
+                        if (strlen($Salt) > 0){
+                            $SaltFound = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->exists();
+                            if ($SaltFound == true){
+                                $keystore = DB::connection("pgsql_2")->table("key_vault")->where("key_id",$Salt)->update([
+                                    "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1]
+                                ]);
+                            }
+                            else{
+                                $keystore = DB::connection("pgsql_2")->table("key_vault")->insert([
+                                    "key_id"=>$Salt,
+                                    "key_data"=>$PasswordInfo[0] . ',' . $PasswordInfo[1],
+                                    "key_desc"=>""
+                                ]);
+                            }
                         }
                         $resetPassResult = DB::table("users")->where("user_username",$idToUpdate)->update([
-                            "user_password"=> $PasswordInfo[2]
+                            "user_password"=> $PasswordInfo[2],
+                            "user_password_change_date"=>now()->modify('+6 months')
                         ]);
                     }
                     $result = DB::table("users")->where("user_username", $idToUpdate)->update([
@@ -286,6 +298,13 @@ class UserInfo extends Component
     public function LoadPagePerms(){
         try{
             $PermsDetailed = session()->get("settings-user info");
+            if (session()->get("IsSuperAdmin") == true){
+                $this->Perms['create'] = true;
+                $this->Perms['delete'] = true;
+                $this->Perms["read"] = true;
+                $this->Perms['update'] = true;
+                $this->Perms['report'] = true;
+            }
             foreach ($PermsDetailed as $Perm){
                 if ($Perm->permission_create == true){
                     $this->Perms["create"] = true;

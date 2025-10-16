@@ -1,6 +1,6 @@
 
 <div class="bg-[#f2f2f2] flex flex-row">
-        @if (empty(session()->get("AllAppPermsForUser"))))
+        @if (empty(session()->get("AllAppPermsForUser")) && session()->get("IsSuperAdmin") != true)
             <script>window.location = "/";</script>
         @endif
         <livewire:navigation></livewire:navigation>
@@ -20,21 +20,21 @@
                                             // Define the available tabs dynamically based on session permissions
                                             $tabs = [];
 
-                                            if (session('browse_sensor_readings-sensor readings')) {
+                                            if (session('browse_sensor_readings-sensor readings') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['allSensorReadings'] = [
                                                     'label' => 'Sensor Readings',
                                                     'click' => 'SwitchToAllReadings',
                                                 ];
                                             }
 
-                                            if (session('browse_sensor_readings-daily averages')) {
+                                            if (session('browse_sensor_readings-daily averages') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['dailySensorReadings'] = [
                                                     'label' => 'Average Daily Readings',
                                                     'click' => 'SwitchToDailyReadings',
                                                 ];
                                             }
 
-                                            if (session('browse_sensor_readings-hourly averages')) {
+                                            if (session('browse_sensor_readings-hourly averages') or session()->get("IsSuperAdmin") == true) {
                                                 $tabs['hourlySensorReadings'] = [
                                                     'label' => 'Average Hourly Readings',
                                                     'click' => 'SwitchToHourlyReadings',
