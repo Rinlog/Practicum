@@ -65,6 +65,10 @@ class UserRoleAssociation extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("user_role_association");
+        Cache::rememberForever("user_role_association", fn() => DB::table("user_role_association")->get());
+    }
     public function setComponent($componentID){
         try{
            foreach($this->Components as $component){
@@ -337,8 +341,7 @@ class UserRoleAssociation extends Component
                 }
             }
         }
-        Cache::forget("user_role_association");
-        Cache::rememberForever("user_role_association", fn() => DB::table("user_role_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

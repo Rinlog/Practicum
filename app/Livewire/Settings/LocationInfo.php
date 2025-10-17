@@ -27,6 +27,12 @@ class LocationInfo extends Component
     public $Organizations = [];
     public $OrgInfo;
     public $DisplayTableInfo = "";
+    public function RegenPageCache(){
+        Cache::forget("location");
+        Cache::rememberForever("location", fn() => DB::table("location")
+        ->select(DB::raw(DB::raw("location_id, organization_id, location_name, location_civic_address, ST_X(location_geo::geometry) as latitude, ST_Y(location_geo::geometry) as longitude, ST_Z(location_geo::geometry) as altitude, location_desc"))
+        )->get());
+    }
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -210,10 +216,7 @@ class LocationInfo extends Component
                 }
             }
         }
-        Cache::forget("location");
-        Cache::rememberForever("location", fn() => DB::table("location")
-        ->select(DB::raw(DB::raw("location_id, organization_id, location_name, location_civic_address, ST_X(location_geo::geometry) as latitude, ST_Y(location_geo::geometry) as longitude, ST_Z(location_geo::geometry) as altitude, location_desc"))
-        )->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

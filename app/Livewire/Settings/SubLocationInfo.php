@@ -55,6 +55,12 @@ class SubLocationInfo extends Component
             }
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("sub_location");
+        Cache::rememberForever("sub_location", fn() => DB::table("sub_location")
+        ->select(DB::raw(DB::raw("sub_location_id, location_id, sub_location_name, sub_location_civic_address, sub_location_floor, ST_X(sub_location_geo::geometry) as latitude, ST_Y(sub_location_geo::geometry) as longitude, ST_Z(sub_location_geo::geometry) as altitude, sub_location_desc"))
+        )->get());
+    }
     public function LoadOrganizations(){
         try{
             $this->Organizations = Cache::get('organization', collect())->toArray();
@@ -260,10 +266,7 @@ class SubLocationInfo extends Component
                 }
             }
         }
-        Cache::forget("sub_location");
-        Cache::rememberForever("sub_location", fn() => DB::table("sub_location")
-        ->select(DB::raw(DB::raw("sub_location_id, location_id, sub_location_name, sub_location_civic_address, sub_location_floor, ST_X(sub_location_geo::geometry) as latitude, ST_Y(sub_location_geo::geometry) as longitude, ST_Z(sub_location_geo::geometry) as altitude, sub_location_desc"))
-        )->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

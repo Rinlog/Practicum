@@ -31,6 +31,10 @@ class UserInfo extends Component
     public $OrgInfo;
     public $DisplayTableInfo = "";
     public $user;
+    public function RegenPageCache(){
+        Cache::forget("users");
+        Cache::rememberForever("users", fn() => DB::table("users")->get());
+    }
     public function LoadUsersOrganization(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -272,8 +276,7 @@ class UserInfo extends Component
                 }
             }
         }
-        Cache::forget("users");
-        Cache::rememberForever("users", fn() => DB::table("users")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

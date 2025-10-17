@@ -22,6 +22,10 @@ class OrganizationInfo extends Component
         "DESCRIPTION"
     ];
     public $DisplayOrgs = "";
+    public function RegenPageCache(){
+        Cache::forget("organization");
+        Cache::rememberForever("organization", fn() => DB::table("organization")->get());
+    }
     public function LoadOrgInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -149,8 +153,7 @@ class OrganizationInfo extends Component
                 }
             }
         }
-        Cache::forget("organization");
-        Cache::rememberForever("organization", fn() => DB::table("organization")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

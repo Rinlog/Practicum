@@ -59,6 +59,14 @@ class Resources extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("permission");
+        Cache::forget("role_permission_association");
+        Cache::forget("resource");
+        Cache::rememberForever("resource", fn() => DB::table("resource")->get());
+        Cache::rememberForever("permission", fn() => DB::table("permission")->get());
+        Cache::rememberForever("role_permission_association", fn() => DB::table("role_permission_association")->get());
+    }
     public function setComponent($componentID){
         try{
            foreach($this->Components as $component){
@@ -235,12 +243,7 @@ class Resources extends Component
                 }
             }
         }
-        Cache::forget("permission");
-        Cache::forget("role_permission_association");
-        Cache::forget("resource");
-        Cache::rememberForever("resource", fn() => DB::table("resource")->get());
-        Cache::rememberForever("permission", fn() => DB::table("permission")->get());
-        Cache::rememberForever("role_permission_association", fn() => DB::table("role_permission_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

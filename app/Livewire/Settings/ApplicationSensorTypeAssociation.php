@@ -39,7 +39,10 @@ class ApplicationSensorTypeAssociation extends Component
             }
         }
     }
-
+    public function RegenPageCache(){
+        Cache::forget("application_sensor_type_association");
+        Cache::rememberForever("application_sensor_type_association", fn() => DB::table("application_sensor_type_association")->get());
+    }
     public function LoadApplications(){
         try{
             if (session()->get("IsSuperAdmin") == true){
@@ -262,8 +265,7 @@ class ApplicationSensorTypeAssociation extends Component
                 }
             }
         }
-        Cache::forget("application_sensor_type_association");
-        Cache::rememberForever("application_sensor_type_association", fn() => DB::table("application_sensor_type_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
 

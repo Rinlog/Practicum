@@ -92,6 +92,15 @@ class Deviceinfo extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("device");
+        Cache::rememberForever("device", fn() => DB::table("device")->get());
+        Cache::forget("device_deployment");
+        Cache::rememberForever("device_deployment", fn() => DB::table("device_deployment")
+                    ->select(DB::raw("deploy_id, device.device_eui, deploy_time, location_id, sub_location_id, deploy_ip_address,  ST_X(deploy_geo::geometry) as latitude, ST_Y(deploy_geo::geometry) as longitude, ST_Z(deploy_geo::geometry) as altitude, deploy_deployed_by, deploy_is_latest, deploy_device_data, deploy_data_port, deploy_desc"))
+                    ->join("device","device.device_eui","=","device_deployment.device_eui")
+                    ->get());
+    }
     public function GetDeviceTypeFromName($name){
         try{
             foreach ($this->deviceTypeInfo as $deviceType){
@@ -263,13 +272,7 @@ class Deviceinfo extends Component
                 }
             }
         }
-        Cache::forget("device");
-        Cache::rememberForever("device", fn() => DB::table("device")->get());
-        Cache::forget("device_deployment");
-        Cache::rememberForever("device_deployment", fn() => DB::table("device_deployment")
-                    ->select(DB::raw("deploy_id, device.device_eui, deploy_time, location_id, sub_location_id, deploy_ip_address,  ST_X(deploy_geo::geometry) as latitude, ST_Y(deploy_geo::geometry) as longitude, ST_Z(deploy_geo::geometry) as altitude, deploy_deployed_by, deploy_is_latest, deploy_device_data, deploy_data_port, deploy_desc"))
-                    ->join("device","device.device_eui","=","device_deployment.device_eui")
-                    ->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

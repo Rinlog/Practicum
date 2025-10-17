@@ -516,7 +516,11 @@
                 $("#DeleteModalMain").addClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
                 $("#DeleteModalMain").removeClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
             }
-            $js("refresh",refresh)
+            $js("refresh",function(){
+                ShowLoading();
+                $wire.call("RegenPageCache");
+                refresh();
+            });
             async function refresh(){
                 ShowLoading()
                 //reset actions done

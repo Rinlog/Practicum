@@ -67,6 +67,10 @@ class ApplicationLocationAssociation extends Component
 
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("application_location_association");
+        Cache::rememberForever("application_location_association", fn() => DB::table("application_location_association")->get());
+    }
     public function LoadApplications(){
         try{
             if (session()->get("IsSuperAdmin") == true){
@@ -300,8 +304,7 @@ class ApplicationLocationAssociation extends Component
                 }
             }
         }
-        Cache::forget("application_location_association");
-        Cache::rememberForever("application_location_association", fn() => DB::table("application_location_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

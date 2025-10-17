@@ -93,6 +93,10 @@ class PermissionInfo extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("permission");
+        Cache::rememberForever("permission", fn() => DB::table("permission")->get());
+    }
     public function setComponent($componentID){
         try{
            foreach($this->Components as $component){
@@ -260,8 +264,7 @@ class PermissionInfo extends Component
                 }
             }
         }
-        Cache::forget("permission");
-        Cache::rememberForever("permission", fn() => DB::table("permission")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

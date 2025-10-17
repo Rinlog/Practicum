@@ -18,6 +18,10 @@ class SensorTypeInfo extends Component
         "DESCRIPTION"
     ];
     public $SensorTypes = "";
+    public function RegenPageCache(){
+        Cache::forget("sensor_type");
+        Cache::rememberForever("sensor_type", fn() => DB::table("sensor_type")->get());
+    }
     public function LoadSensorTypeInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -133,8 +137,7 @@ class SensorTypeInfo extends Component
                 }
             }
         }
-        Cache::forget("sensor_type");
-        Cache::rememberForever("sensor_type", fn() => DB::table("sensor_type")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

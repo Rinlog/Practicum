@@ -97,7 +97,7 @@ class ApiAccessToken extends Component
             }
             else{
                 $userRoles = Cache::get("user_role_association", collect())
-                    ->where("user_id", $this->user->user_id);
+                    ->where("user_id", session("User")->user_id);
 
                 $ApplicationsArray = $userRoles->pluck("application_id")->all();
                 if (count($ApplicationsArray) > 0){
@@ -202,6 +202,10 @@ class ApiAccessToken extends Component
         catch(Exception $e){
 
         }
+    }
+    public function RegenPageCache(){
+        Cache::forget("user_role_association");
+        Cache::rememberForever("user_role_association", fn() => DB::table("user_role_association")->get());
     }
     public function LoadInfo(){
         try{
@@ -310,8 +314,7 @@ class ApiAccessToken extends Component
                 }
             }
         }
-        Cache::forget("user_role_association");
-        Cache::rememberForever("user_role_association", fn() => DB::table("user_role_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

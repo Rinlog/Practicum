@@ -20,6 +20,10 @@ class SoftwareComponentInfo extends Component
     ];
     public $DisplayTableInfo = "";
 
+    public function RegenPageCache(){
+        Cache::forget("software_component");
+        Cache::rememberForever("software_component", fn() => DB::table("software_component")->get());
+    }
     public function LoadInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -142,8 +146,7 @@ class SoftwareComponentInfo extends Component
                 }
             }
         }
-        Cache::forget("software_component");
-        Cache::rememberForever("software_component", fn() => DB::table("software_component")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

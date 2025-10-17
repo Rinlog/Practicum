@@ -343,15 +343,17 @@
                 $("#InfoTable").children().each(function(index){
                     if ($(this).children()[3] !== undefined){
                         let id = $(this).children()[3].textContent;
-                        if (id.toString() == IDAsName.toString()){
+                        if (id.toString() == ID.toString()){
                         IDDupeCount+=1
                         }
                     }
                 });
                 $("#InfoTable").children().each(function(index){
-                    let name = $(this).children()[4].textContent;
-                    if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
-                        NameDupeCount+=1
+                    if ($(this).children()[4] !== undefined){
+                        let name = $(this).children()[4].textContent;
+                        if (SpaceToUnderScore(name).toString() == SpaceToUnderScore(IDName).toString()){
+                            NameDupeCount+=1
+                        }
                     }
                 });
                 if (Mode == "add"){
@@ -582,7 +584,11 @@
                 $("#DeleteModalMain").addClass("opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 ease-in duration-200");
                 $("#DeleteModalMain").removeClass("opacity-100 translate-y-0 sm:translate-y-0 sm:scale-95");
             }
-            $js("refresh",refresh)
+            $js("refresh",function(){
+                ShowLoading();
+                $wire.call("RegenPageCache");
+                refresh();
+            });
             async function refresh(){
                 ShowLoading();
                 //reset actions done

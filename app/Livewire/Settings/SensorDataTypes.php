@@ -20,6 +20,10 @@ class SensorDataTypes extends Component
     public $DisplayTableInfo = "";
 
     public $ComboBoxOptions = [];
+    public function RegenPageCache(){
+        Cache::forget("sensor_data_types");
+        Cache::rememberForever("sensor_data_types", fn() => DB::table("sensor_data_types")->get());
+    }
     public function LoadInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -134,8 +138,7 @@ class SensorDataTypes extends Component
                 }
             }
         }
-        Cache::forget("sensor_data_types");
-        Cache::rememberForever("sensor_data_types", fn() => DB::table("sensor_data_types")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

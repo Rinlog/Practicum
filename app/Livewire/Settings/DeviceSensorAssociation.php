@@ -163,6 +163,10 @@ class DeviceSensorAssociation extends Component
 
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("device_sensor_association");
+        Cache::rememberForever("device_sensor_association", fn() => DB::table("device_sensor_association")->get());
+    }
     public function LoadInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -285,8 +289,7 @@ class DeviceSensorAssociation extends Component
                 }
             }
         }
-        Cache::forget("device_sensor_association");
-        Cache::rememberForever("device_sensor_association", fn() => DB::table("device_sensor_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

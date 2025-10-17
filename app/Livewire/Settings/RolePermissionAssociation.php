@@ -129,6 +129,10 @@ class RolePermissionAssociation extends Component
         
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("role_permission_association");
+        Cache::rememberForever("role_permission_association", fn() => DB::table("role_permission_association")->get());
+    }
     public function SearchForPermissionByName($PermissionName){
         try{
             foreach( $this->Permissions as $Permission ){
@@ -262,8 +266,7 @@ class RolePermissionAssociation extends Component
                 }
             }
         }
-        Cache::forget("role_permission_association");
-        Cache::rememberForever("role_permission_association", fn() => DB::table("role_permission_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

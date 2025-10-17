@@ -18,6 +18,10 @@ class DeviceTypeInfo extends Component
         "DESCRIPTION"
     ];
     public $DeviceTypes = "";
+    public function RegenPageCache(){
+        Cache::forget("device_type");
+        Cache::rememberForever("device_type", fn() => DB::table("device_type")->get());
+    }
     public function LoadDeviceTypeInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -134,8 +138,7 @@ class DeviceTypeInfo extends Component
                 }
             }
         }
-        Cache::forget("device_type");
-        Cache::rememberForever("device_type", fn() => DB::table("device_type")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

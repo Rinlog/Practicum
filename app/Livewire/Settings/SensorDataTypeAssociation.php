@@ -61,6 +61,10 @@ class SensorDataTypeAssociation extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("sensor_data_types_association");
+        Cache::rememberForever("sensor_data_types_association", fn() => DB::table("sensor_data_types_association")->get());
+    }
     public function setSensor($SensorID){
         try{
            foreach($this->Sensors as $sensor){
@@ -243,8 +247,7 @@ class SensorDataTypeAssociation extends Component
                 }
             }
         }
-        Cache::forget("sensor_data_types_association");
-        Cache::rememberForever("sensor_data_types_association", fn() => DB::table("sensor_data_types_association")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

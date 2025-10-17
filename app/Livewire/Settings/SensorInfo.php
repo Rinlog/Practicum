@@ -56,6 +56,10 @@ class SensorInfo extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("sensor");
+        Cache::rememberForever("sensor", fn() => DB::table("sensor")->get());
+    }
     public function LoadSensorInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -177,8 +181,7 @@ class SensorInfo extends Component
                 }
             }
         }
-        Cache::forget("sensor");
-        Cache::rememberForever("sensor", fn() => DB::table("sensor")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

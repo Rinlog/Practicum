@@ -72,6 +72,10 @@ class ApplicationInfo extends Component
         $this->OrgInfo = $NewOrg;
         $this->organization = $NewOrg->organization_name;
     }
+    public function RegenPageCache(){
+        Cache::forget("application");
+        Cache::rememberForever("application", fn() => DB::table("application")->get());
+    }
     public function LoadApplicationInfo(){
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -217,8 +221,7 @@ class ApplicationInfo extends Component
                 }
             }
         }
-        Cache::forget("application");
-        Cache::rememberForever("application", fn() => DB::table("application")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){

@@ -40,6 +40,10 @@ class RoleInfo extends Component
             Log::channel("customlog")->error($e->getMessage());
         }
     }
+    public function RegenPageCache(){
+        Cache::forget("role");
+        Cache::rememberForever("role", fn() => DB::table("role")->get());
+    }
     public function setComponent($componentID){
         try{
            foreach($this->Components as $component){
@@ -176,8 +180,7 @@ class RoleInfo extends Component
                 }
             }
         }
-        Cache::forget("role");
-        Cache::rememberForever("role", fn() => DB::table("role")->get());
+        $this->RegenPageCache();
         return $Results;
     }
     public function LogExport(){
