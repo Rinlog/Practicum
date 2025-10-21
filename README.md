@@ -23,13 +23,22 @@
 </table>
 
 ## Getting Started
-<p>The first step is to make sure that the data base is set up appropriately and to make sure you have run through 
-  <a href="https://laravel.com/docs/12.x/installation">laravels installation guide</a>. I set up the project using Laravel herd so i recommend doing it the same way.
+<p>The first step is to make sure that you have installed
+  <a href="https://herd.laravel.com/windows">laravel herd</a>.
 </p>
-<p>Once you have done that just run the commands below to install any needed dependencys and than start up the application</p>
+<p>Once you have done that, navigate to where you will be creating the laravel project. For example with herd your project should be placed somewhere similar to </p>
 
 ```markdown
-npm install
-
-npm run dev
+C:\Users\[YOUR USER NAME]\Herd\
 ```
+
+<p>once you are there run the following command to set up a laravel application.</p>
+
+```markdown
+laravel new [NAME OF APPLICATION]
+```
+
+<p>The command will ask you about setup questions, choose the following</p>
+<ul>
+  <li>starter kit: Livewire</li>
+</ul>
