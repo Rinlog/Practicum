@@ -103,7 +103,6 @@ class Login extends Component
             return false;
         }
         catch(Exception $e){
-            dd($e);
             return false;
         }
     }
@@ -220,7 +219,9 @@ class Login extends Component
             $this->usrErrMsg = "User does not exist";
         }
         catch(Exception $e){
-            dd($e);
+            $this->usrCustomStyle = $this->errStyle;
+            $this->usrShowErr = "show";
+            $this->usrErrMsg = "Error, Please try again";
          }
     }
 

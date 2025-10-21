@@ -72,7 +72,7 @@
             <tbody id="InfoTable" class="bg-white rounded-lg">
                     {!! $DisplayTableInfo !!}
                     <td id="LoadingIcon" class="relative align-center h-[220px] hide" colspan="999" wire:loading.class.remove="hide">
-                        <span class="absolute top-[35%] left-[36%]" wire:loading>
+                        <span class="absolute top-[35%] left-[30%]" wire:loading>
                             <img src="/images/Loading_2.gif">
                         </span>
                     </td>
@@ -183,6 +183,9 @@
                     <livewire:components.underline-input id="phone" placeholder="Phone" type="text"></livewire:components.underline-input>
                     <livewire:components.underline-input id="email" placeholder="Email" type="text"></livewire:components.underline-input>
                     <livewire:components.form-chkbox id="isDisabled" text="Is Disabled"></livewire:components.form-chkbox>
+                    @if ($superAdmin == true)
+                        <livewire:components.form-chkbox id="isSuperAdmin" text="Is Super Admin"></livewire:components.form-chkbox>
+                    @endif
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -217,6 +220,9 @@
                     <livewire:components.underline-input id="email" placeholder="Email" type="text"></livewire:components.underline-input>
                     <livewire:components.form-chkbox id="isDisabled" text="Is Disabled"></livewire:components.form-chkbox>
                     <livewire:components.form-chkbox id="resetPass" text="Reset Password?"></livewire:components.form-chkbox>
+                    @if ($superAdmin == true)
+                        <livewire:components.form-chkbox id="isSuperAdmin" text="Is Super Admin"></livewire:components.form-chkbox>
+                    @endif
             </div>
             {{-- Confirm Section --}}
             <div class="absolute z-2 text-white left-0 top-160 w-[382px] bg-[#00719d] p-4 h-[116px] rounded-b-lg">
@@ -241,6 +247,7 @@
             let user = $wire.user;
             let ActionsDone = [];
             let TableObjects = [];
+            let SuperAdmin = false;
             function EnableDisableEditDelete(){
                 console.log(ItemsSelected);
                 if (ItemsSelected.length == 1){
@@ -398,26 +405,49 @@
                 tr.appendChild(PlaceholderID);
                 FormVals.forEach(function(value,index){
                     if (index == 4){
-                        //super admin field set to default false
-                        let td = document.createElement("td");
-                        td.textContent = 'false';
-                        tr.appendChild(td)
+                        //super admin field set to default false, but otherwise we set to whatever user chose
+                        if (SuperAdmin == true){
+                            let td = document.createElement("td");
+                            td.textContent = value.toString().trim();
+                            tr.appendChild(td)
+                        }
+                        else{
+                            let td = document.createElement("td");
+                            td.textContent = 'false';
+                            tr.appendChild(td)
+                            let td2 = document.createElement("td");
+                            td2.textContent = value.toString().trim();
+                            tr.appendChild(td2)
+                            //creation time
+                            let td3 = document.createElement("td");
+                            td3.textContent = CurrentDateTimeAsString();
+                            tr.appendChild(td3)
+                            //created by
+                            let td4 = document.createElement("td");
+                            td4.textContent = user["user_username"];
+                            tr.appendChild(td4)
+                            let PlaceholderID2 = document.createElement("td");
+                            PlaceholderID2.textContent = "Will generate automatically";
+                            tr.appendChild(PlaceholderID2);
+                        }
                     }
-                    let td = document.createElement("td");
-                    td.textContent = value.toString().trim();
-                    tr.appendChild(td)
-                    if (index == 4){
-                        //creation time
+                    if (index != 4){
                         let td = document.createElement("td");
-                        td.textContent = CurrentDateTimeAsString();
+                        td.textContent = value.toString().trim();
                         tr.appendChild(td)
-                        //created by
-                        let td2 = document.createElement("td");
-                        td2.textContent = user["user_username"];
-                        tr.appendChild(td2)
-                        let PlaceholderID2 = document.createElement("td");
-                        PlaceholderID2.textContent = "Will generate automatically";
-                        tr.appendChild(PlaceholderID2);
+                        if (index == 5){
+                            //creation time
+                            let td3 = document.createElement("td");
+                            td3.textContent = CurrentDateTimeAsString();
+                            tr.appendChild(td3)
+                            //created by
+                            let td4 = document.createElement("td");
+                            td4.textContent = user["user_username"];
+                            tr.appendChild(td4)
+                            let PlaceholderID2 = document.createElement("td");
+                            PlaceholderID2.textContent = "Will generate automatically";
+                            tr.appendChild(PlaceholderID2);
+                        }
                     }
                 })
 
@@ -452,6 +482,9 @@
                 FormVals.push($(`#${EditAdd} #name`).val());
                 FormVals.push($(`#${EditAdd} #phone`).val());
                 FormVals.push($(`#${EditAdd} #email`).val());
+                if (SuperAdmin == true){
+                    FormVals.push($(`#${EditAdd} #isSuperAdmin`).prop("checked"));
+                }
                 FormVals.push($(`#${EditAdd} #isDisabled`).prop("checked"));
                 return FormVals;
             }
@@ -466,9 +499,21 @@
                 $("#"+SpaceToUnderScore(EditItem)).children().each(function(index){
                     //we exclude the checkbox, sequence num, exclude org name, 
                     if (index >=4){
-                        if (index == 8){return;}
+                        if (index == 8){
+                            if (SuperAdmin == true){
+                                $(this).text(FormVals[index-4]);
+                            }
+                            else{
+                                return;
+                            }
+                        }
                         else if (index > 8){
-                            $(this).text(FormVals[index-5]);
+                            if (SuperAdmin == true){
+                                $(this).text(FormVals[index-4]);
+                            }
+                            else{
+                                $(this).text(FormVals[index-5]);
+                            }
                         }
                         else{
                             $(this).text(FormVals[index-4]);
@@ -540,13 +585,24 @@
                     $("#EditUser #name").val(Obj["NAME"]);
                     $("#EditUser #phone").val(Obj["PHONE NUMBER"]);
                     $("#EditUser #email").val(Obj["EMAIL"]);
-                    $("#EditUser #isDisabled").val(Obj["IS DISABLED"]);
+                    $("#EditUser #isDisabled").prop("checked",StringToBool(Obj["IS DISABLED"]));
+                    if (SuperAdmin == true){
+                        $("#EditUser #isSuperAdmin").prop("checked",StringToBool(Obj["IS SUPER ADMIN"]));
+                    }
                     
                 }
                 else{
                     closeEditMenu();
                 }
             });
+            function StringToBool(str){
+                if (str.toLowerCase() == "true"){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
             $js("OpenDeleteModal",async function(){
                 if (EditMenuStatus == true || AddMenuStatus == true){
                     return;
@@ -682,7 +738,7 @@
             function ShowLoading(){
                 let LoadingTD = $("#InfoTable #LoadingIcon");
                 LoadingTD.html(
-                    "<span class=\"absolute top-[35%] left-[36%]\" wire:loading colspan=\"999\"><img src=\"/images/Loading_2.gif\"></span>"
+                    "<span class=\"absolute top-[35%] left-[30%]\" wire:loading colspan=\"999\"><img src=\"/images/Loading_2.gif\"></span>"
                 )
                 $("#InfoTable").text(""); //clearing current Info
                 $("#InfoTable").append(LoadingTD);
@@ -745,6 +801,7 @@
                 await $wire.call("LoadUsersOrganization");
                 await $wire.call("LoadOrganizations");
                 organization = $wire.organization;
+                SuperAdmin = $wire.superAdmin;
                 await refresh();
                 EnableDisableEditDelete();
             })

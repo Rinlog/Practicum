@@ -31,6 +31,8 @@ class UserInfo extends Component
     public $OrgInfo;
     public $DisplayTableInfo = "";
     public $user;
+    public $superAdmin = false;
+
     public function RegenPageCache(){
         Cache::forget("users");
         Cache::rememberForever("users", fn() => DB::table("users")->get());
@@ -302,6 +304,7 @@ class UserInfo extends Component
         try{
             $PermsDetailed = session()->get("settings-user info");
             if (session()->get("IsSuperAdmin") == true){
+                $this->superAdmin = true;
                 $this->Perms['create'] = true;
                 $this->Perms['delete'] = true;
                 $this->Perms["read"] = true;
