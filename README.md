@@ -38,6 +38,7 @@ C:\Users\[YOUR USER NAME]\Herd\
 composer install
 copy .env.example .env
 npm install
+php artisan generate:key
 npm audit fix (if needed)
 ```
 
