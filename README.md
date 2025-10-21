@@ -47,4 +47,9 @@ npm audit fix (if needed)
 ```markdown
 npm run dev
 ```
+<p>Before deploying the project make sure to run</p>
+
+```markdown
+npm run build
+```
 
