@@ -26,19 +26,24 @@
 <p>The first step is to make sure that you have installed
   <a href="https://herd.laravel.com/windows">laravel herd</a>.
 </p>
-<p>Once you have done that, navigate to where you will be creating the laravel project. For example with herd your project should be placed somewhere similar to </p>
+<p>Once you have done that download the repositorys zip and navigate to where you will be creating the laravel project. For example with herd your project should be placed somewhere similar to </p>
 
 ```markdown
 C:\Users\[YOUR USER NAME]\Herd\
 ```
 
-<p>once you are there run the following command to set up a laravel application.</p>
+<p>once you are there run the following commands in CMD or powershell to set up a laravel application. Make sure before running the commands you are in the projects directory so \Herd\[NAME OF PROJECT]</p>
 
 ```markdown
-laravel new [NAME OF APPLICATION]
+composer install
+copy .env.example .env
+npm install
+npm audit fix (if needed)
 ```
 
-<p>The command will ask you about setup questions, choose the following</p>
-<ul>
-  <li>starter kit: Livewire</li>
-</ul>
+<p>now before launching the application verify all the information in the .env file is correct. mainly the database connection information. Once that is done feel free to run the project by using</p>
+
+```markdown
+npm run dev
+```
+
